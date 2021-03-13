@@ -144,6 +144,32 @@ gen.flvl.perms <- function(NfL, nsubs, ntrials, neut=FALSE){
   idx
 }
 
+calc.flvl.nways <- function(a, b, x, y) {
+  accuracy <- (x + (b - y)) / (a + b)
+  nways <- choose(a, x) * choose(b, y)
+  list(accuracy, nways)
+}
+
+calc.flvl.perms <- function(answers_a, answers_b, responses_a) {
+  n_answers <- answers_a + answers_b
+  responses_b <- n_answers - responses_a
+  if (responses_a <= answers_a) {
+    a_min <- max(responses_a - answers_b, 0)
+    ratio_counts <- lapply(a_min:responses_a, function (x) calc.flvl.nways(answers_a, answers_b, x, responses_a-x))
+  } else {
+    b_min <- max(responses_b - answers_a, 0)
+    ratio_counts <- lapply(0:responses_b, function (x) calc.flvl.nways(answers_b, answers_a, x, responses_b-x))
+  }
+  rows <- do.call(rbind, ratio_counts)
+  data.frame(acc=do.call(rbind, rows[,1]), counts=do.call(rbind, rows[,2]))
+}
+
+calc.flvl.perms.n <- function(answers_a, answers_b, responses_a, n_samples) {
+  ratio_counts <- calc.flvl.perms(answers_a, answers_b, responses_a)
+  ratio_counts$p <- ratio_counts$counts / sum(ratio_counts$counts)
+  sample(ratio_counts$acc, n_samples, prob=ratio_counts$p, replace=TRUE)
+}
+
 gen.samps <- function(k, nsubs){
   data <- data.frame(shuffle=rep(2:k, nsubs),
                      sub=rep(1:nsubs, each=k-1),
@@ -160,10 +186,18 @@ get.perm.mins <- function(slvl.idx, flvl.idx, flvl.neut, samp.data){
     select(min.acc)
 }
 
-get.flvl.perms <- function(data, NfL){
-  nsubs = max(data$sub)
-  data.frame(acc=unlist(lapply(unique(data$sub), 
-                               function(x, y=NfL-1) replicate(y, with(data[data$sub == x, ], mean(sample(Target.Order, replace=FALSE) == Response))))),
+# get.flvl.perms <- function(data, NfL, nsubs){
+#   data.frame(acc=unlist(lapply(unique(data$sub), 
+#                                function(x, y=NfL-1) replicate(y, with(data[data$sub == x, ], mean(sample(Target.Order, replace=FALSE) == Response))))),
+#              sub=rep(1:nsubs, each=NfL-1),
+#              p = rep(2:NfL, times=nsubs))
+# }
+
+get.flvl.perms <- function(data, NfL, nsubs){
+  responses <- data %>% group_by(sub) %>% count(Response) %>% spread(Response, n)
+  answers <- data %>% group_by(sub) %>% count(Target.Order) %>% spread(Target.Order, n)
+  sar <- inner_join(answers, responses, by="sub", suffix=c(".ans", ".resp"))
+  data.frame(acc=mapply(calc.flvl.perms.n, sar$Novel.ans, sar$Repeat.ans, sar$Novel.resp, NfL-1),
              sub=rep(1:nsubs, each=NfL-1),
              p = rep(2:NfL, times=nsubs))
 }
@@ -177,13 +211,13 @@ prev.test <- function(samp.data, alpha, k, NfL){
   # first, run first level permutations on input dataset
   # assign a unique subject number to each data entry and
   # get the data from the first level perms
-  nsubs <- length(samp.data$Trial.No)/max(samp.data$Trial.No)
-  samp.data$sub <- rep(1:nsubs, each=max(samp.data$Trial.No))
+  ntrials = max(samp.data$Trial.No)
+  nsubs <- length(samp.data$Trial.No)/ntrials
+  samp.data$sub <- rep(1:nsubs, each=ntrials)
   names(samp.data)[names(samp.data) == "Trial.No"] = "trial"
 #  flvl.perms <- run.mont.frst.lvl.over.subs(samp.data, NfL) #P1 in 10.1016/j.neuroimage.2016.07.040 (label shuffle)
   # compute flvl idx
-  ntrials = max(samp.data$trial)
-  flvl.perms <- get.flvl.perms(samp.data, NfL)
+  flvl.perms <- get.flvl.perms(samp.data, NfL, nsubs)
   # Now generate a neutral idx as long and as appropriate as flvl.idx, for a subsequent cbind, prior to 
   # summarising and joining to slvl idx, summarising and then taking minimum stat.
   # Now the data is prepared generate indexing for minimum stat

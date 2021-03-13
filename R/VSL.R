@@ -27,7 +27,7 @@ set.seed(42) # testing diff seeds on output
 # load data and wrangle into tidy form (see https://r4ds.had.co.nz/tidy-data.html), plus relabel to make
 # labels a little simpler
 # ----------------------------------------------------------------------------------------------------
-dat = read.csv("../data/total_of_313_subs_VSL_task_trial_level_data.csv", header=TRUE)
+dat = read.csv("../total_of_313_subs_VSL_task_trial_level_data.csv", header=TRUE)
 
 # ----------------------------------------------------------------------------------------------------
 # Create dataframe for analysis
@@ -51,10 +51,10 @@ prev.dat <- prev.dat %>% mutate(Response = recode(Response,
 
 sub.Ns = round(exp(seq(log(13), log(313), length.out = 20)))
 sub.Ns = 13
-n.perms =1000# for each sample size, we will repeat our experiment n.perms times
+n.perms =1# for each sample size, we will repeat our experiment n.perms times
 k = 1000 #for Monte Carlo simulations for prevalence stats (applies to both first level and second level perms)
-Np = 1000
-cores = 30
+Np = 1
+cores = 8
 
 # ----------------------------------------------------------------------------------------------------
 # run simulations for t-test model, getting p values from t.tests, and cohen's d values, and save results to a list
