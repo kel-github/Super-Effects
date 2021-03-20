@@ -35,11 +35,12 @@ cores = 30
 datpath = "../data/"
 rxvnme = "supfxrdat.zip"
 task = "AB"
+savekey = "AB_int_1"
 
 # ----------------------------------------------------------------------------------------------------
 # attain densities for each subject N, across all outer samples
 # ----------------------------------------------------------------------------------------------------
-#dens.across.N(fstem="AB_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=-800, max=0, spacer=1000, dv="p", savekey="AB")
-dens.across.N(fstem="_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=0, max=10, spacer=500, dv="d", savekey=task, datpath=datpath, rxvnme=rxvnme)
-#dens.across.N(fstem="AB_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=0, max=0.75, spacer=1000, dv="esub", savekey="AB")
-#dens.across.N(fstem="AB_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=0, max=0.75, spacer=1000, dv="eRes", savekey="AB")
+dens.across.N(fstem="_N-%d_parent-%d.RData", Ns=sub.Ns, j=1, min=-800, max=0, spacer=1000, dv="p", savekey=savekey, task=task, datpath=datpath, rxvnme=rxvnme)
+dens.across.N(fstem="_N-%d_parent-%d.RData", Ns=sub.Ns, j=1, min=0, max=10, spacer=500, dv="d", savekey=savekey, task=task, datpath=datpath, rxvnme=rxvnme)
+dens.across.N(fstem="_N-%d_parent-%d.RData", Ns=sub.Ns, j=1, min=0, max=0.75, spacer=1000, dv="esub", savekey=savekey, task=task, datpath=datpath, rxvnme=rxvnme)
+dens.across.N(fstem="_N-%d_parent-%d.RData", Ns=sub.Ns, j=1, min=0, max=0.75, spacer=1000, dv="eRes", savekey=savekey, task=task, datpath=datpath, rxvnme=rxvnme)

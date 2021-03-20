@@ -604,7 +604,7 @@ run.models <- function(in.data, subs, N, ffx.f, rfx.f, samp){
 # Density generating functions for plotting, and for computing 95 % CI for the FFX/RFX ratio measure
 # ----------------------------------------------------------------------------------------------------
 
-dens.across.N <- function(fstem, Ns, j, min, max, spacer, dv, savekey, datpath, rxvnme){
+dens.across.N <- function(fstem, Ns, j, min, max, spacer, dv, savekey, task, datpath, rxvnme){
   # grab density functions for dv of choice, across all N sizes
   # save to a binary file output
   # INPUTS
@@ -620,7 +620,7 @@ dens.across.N <- function(fstem, Ns, j, min, max, spacer, dv, savekey, datpath, 
   # -- rxvnme: name of rxv
   tmp = lapply(Ns, add.dens, fstem=fstem, j=j, min=min, max=max, 
                dv=dv, spacer=spacer, datpath=datpath, rxvnme=rxvnme,
-               task=savekey)
+               task=task)
   d = do.call(rbind, tmp)
   fname = paste(savekey, dv, "d.RData", sep="_")
   save(d, file=paste(datpath, fname, sep=""))
@@ -722,6 +722,26 @@ plot.d <- function(d, m, yl, sc){
     xlab('d') + ylab('N') + theme_cowplot() + xlim(yl) +
     guides(fill = FALSE, colour = FALSE) +
     ggtitle(eval(m)) +
+    theme(axis.title.x = element_text(face = "italic"))
+}
+
+
+plot.d.by.samp <- function(d, yl, sc){
+  # this function is to plot the distributions
+  # attained from a select few N, by sampling strategy
+  # inputs:
+  #--d: data
+  #--yl: ylim - c(0,3) - for example
+  #--sc: how much to scale
+  total_p <- d %>% group_by(samp, mod, Nsz) %>% summarise(sum=sum(d)) 
+  d %>% inner_join(total_p, by=c("mod", "Nsz", "samp")) %>% mutate(dp = d) %>% # amend if want to make a normalised distribution
+    filter(mod == eval(m)) %>% 
+    ggplot(aes(x=x, y=as.factor(Nsz), height=dp, group=as.factor(Nsz), fill=as.factor(samp))) +
+    geom_density_ridges(stat="identity", scale=sc, rel_min_height=.0001, fill=wes_palette("IsleofDogs1")[1], color=wes_palette("IsleofDogs1")[5]) +
+    theme_ridges() + facet_wrap(~as.factor(samp)) +
+    xlab('d') + ylab('N') + theme_cowplot() + xlim(c(0,5)) +
+    scale_color_manual(values="white") +
+    scale_fill_manual(values=wes_palette("IsleofDogs1")[6]) +
     theme(axis.title.x = element_text(face = "italic"))
 }
 
