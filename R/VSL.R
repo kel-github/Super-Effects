@@ -50,67 +50,27 @@ prev.dat <- prev.dat %>% mutate(Response = recode(Response,
 # ----------------------------------------------------------------------------------------------------
 
 sub.Ns = round(exp(seq(log(13), log(313), length.out = 20)))
-sub.Ns = 13
-n.perms =1000# for each sample size, we will repeat our experiment n.perms times
-k = 1000 #for Monte Carlo simulations for prevalence stats (applies to both first level and second level perms)
+sub.Ns = 313
+n.perms = 1000# for each sample size, we will repeat our experiment n.perms times
+k = 2 #outer loop
 Np = 1000
-cores = 30
-
+cores = 2
+# 13, 10, 10, 10 = 4.384 mins
+# 13, 15, 15, 15 = 10.075 
+# 13, 20, 20, 20 = 14.606 
+# 313, 10, 10, 10 = 1.227 hrs
+# 313, 1000, 1, 1000 = 
+# to run 
 # ----------------------------------------------------------------------------------------------------
 # run simulations for t-test model, getting p values from t.tests, and cohen's d values, and save results to a list
 # ----------------------------------------------------------------------------------------------------
 
 subs  <- unique(prev.dat$Subj.No)
 start  <-  Sys.time()
-# do I want to change the below to mclapply also?
-lapply(sub.Ns, function(x) run.outer(in.data=prev.dat, subs=subs, N=x, k=n.perms, j=1, cores=cores, ffx.f=run.os.t.test.sim, rfx.f=run.prev.test, fstem="VSL_N-%d_parent-%d.RData"))
+
+lapply(sub.Ns, function(x) run.outer(in.data=prev.dat, subs=subs, N=x, k=n.perms, j=k, cores=cores, ffx.f=run.os.t.test.sim, rfx.f=run.prev.test, fstem="VSL_N-%d_parent-%d.RData"))
 end <-  Sys.time()
 end - start
-# ----------------------------------------------------------------------------------------------------
-# minimum statistic approach
-# ----------------------------------------------------------------------------------------------------
-
-# first get the data from the first level perms
-flvl.perms <- run.mont.frst.lvl.over.subs(prev.dat, k) #P1 in 10.1016/j.neuroimage.2016.07.040 (label shuffle)
-# now, over 100 experiments at each sample size, select the data, and then run the min stat procedure
-prev.res <- replicate(n.perms, lapply(sub.Ns, function(x) run.prev.test(data=flvl.perms, 
-                                                                            subs=subs,
-                                                                            alpha=.05,
-                                                                            N=x,
-                                                                            k=k,
-                                                                            Np=Np)), simplify = FALSE)
-prev.res <- do.call(rbind, do.call(rbind, prev.res))
-# pivot longer and rename as p and d, and then add x-label to the plot below
-prev.out <- prev.res %>% 
-            pivot_longer(c('gamma', 'p'), names_to = "measure", values_to="value") %>%
-            mutate(measure=recode(measure,
-                                  'gamma' = 'd',
-                                  'p' = 'p'))
-prev.out$model = "Prevalence"
-prev.out$n <- as.factor(prev.out$n)
-# ----------------------------------------------------------------------------------------------------
-# plot the outputs separately - then make 4 panels, top row = effect size, bottom row = p, left column = ffx, 
-# right column = rfx
-# ----------------------------------------------------------------------------------------------------
-
-# first for d values
-ylims = c(0, 2)
-sims.dat$model <- "Null=.5"
-sims.dat$fx <-  "t"
-ffx.d.p <- plt.fx.sz(sims.dat, ylims)
-ylims = c(0, 1)
-prev.out$fx <- "min"
-prev.d.p <- plt.fx.sz(prev.out, ylims) + xlab(expression(gamma))
-
-# now for p-values
-xlims=c(0,1)
-ffx.p.p <- plt.ps(sims.dat, xlims)
-prev.p.p <- plt.ps(prev.out, c(0,1))
-
-# use cowplot to make a grid
-p = plot_grid(ffx.d.p, prev.d.p, ffx.p.p, prev.p.p, labels=c('A', 'B', 'C', 'D'), label_size = 12, align="v")
-# p # print out the plot so you can see it
-p = p + ggsave(plot.fname, width = width, height = height, units="in")
 
 # ----------------------------------------------------------------------------------------------------
 # save the data of import to an RData file

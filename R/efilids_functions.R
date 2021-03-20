@@ -197,7 +197,7 @@ get.flvl.perms <- function(data, NfL, nsubs){
   responses <- data %>% group_by(sub) %>% count(Response) %>% spread(Response, n)
   answers <- data %>% group_by(sub) %>% count(Target.Order) %>% spread(Target.Order, n)
   sar <- inner_join(answers, responses, by="sub", suffix=c(".ans", ".resp"))
-  data.frame(acc=mapply(calc.flvl.perms.n, sar$Novel.ans, sar$Repeat.ans, sar$Novel.resp, NfL-1),
+  data.frame(acc=as.vector(mapply(calc.flvl.perms.n, sar$Novel.ans, sar$Repeat.ans, sar$Novel.resp, NfL-1)),
              sub=rep(1:nsubs, each=NfL-1),
              p = rep(2:NfL, times=nsubs))
 }
@@ -231,6 +231,9 @@ prev.test <- function(samp.data, alpha, k, NfL){
   # now compute the probability of the minimum value (equation 24 of 10.1016/j.neuroimage.2016.07.040)
  # perm_mins <- t(do.call(rbind, lapply(c(1:max(data$k)), function(x) min(data$acc[data$k == x]))))
   # THE BELOW ONLY WORKS BECAUSE THE DATA ARE IN PROPORTION CORRECT. WOULD NOT WORK FOR PERCENTAGES!
+  if (any(sum(flvl.perms$acc > 1))) flvl.perms$acc = flvl.perms$acc/100 # convert percent to proportion if necessary
+  
+  ########
   puGN <- sum(unlist(lapply(unique(slvl.idx$shuffle), function(x) min(inner_join(slvl.idx[slvl.idx$shuffle==x, ], flvl.perms, by=c("sub", "p"))))) >= neut_m)/NfL
   # probability uncorrected of global null (puGN)
   #puGN <- sum(perm.mins$min.acc >= neut_m)/NfL # this is the uncorrected p value for the global null hypothesis that a == a0
@@ -503,7 +506,7 @@ run.outer <- function(in.data, subs, N, k, j, cores, fstem,  ffx.f, rfx.f){
   # --subs = the list of all subject numbers
   # --N = the number to sample from subs
   # --k = the total number of inner permutations
-  # --j = which outer permutation are we on?
+  # --j = howmany outer loops?
   # --cores = how many cores do you want to use?
   # -- fstem = what do you want the output files from the inner loop to be called?
   # -- ffx.f & rfx.f: are the references to the functions you want to run for this task
