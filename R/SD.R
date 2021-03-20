@@ -69,23 +69,28 @@ ffx.dat <- rfx.dat %>% ungroup(task.stim) %>% select(-c('task.stim'))
 sub.Ns = round(exp(seq(log(13), log(313), length.out = 20)))
 n.perms =1000# for each sample size, we will repeat our experiment n.perms times
 cores = 20
-
-# ----------------------------------------------------------------------------------------------------
-# run simulations, getting p values from linear models, and cohen's d values, and save results to a list
-# ----------------------------------------------------------------------------------------------------
-
 subs  <- unique(ffx.dat$Subj.No)
-lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=n.perms, j=n.perms, cores=cores, ffx.f=get.ps.SD, rfx.f=run.lme.4.SD, fstem="SD_N-%d_parent-%d.RData"))
 
 # ----------------------------------------------------------------------------------------------------
-# attain densities for each subject N, across all outer samples
+# run simulations, getting p values from linear models, and cohen's d values, and save results to a list, using immediate sampling
 # ----------------------------------------------------------------------------------------------------
-dens.across.N(fstem="SD_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=-800, max=0, spacer=1000, dv="p", savekey="SD")
-dens.across.N(fstem="SD_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=0, max=3, spacer=1000, dv="d", savekey="SD")
-dens.across.N(fstem="SD_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=0, max=400, spacer=1000, dv="esub", savekey="SD")
-dens.across.N(fstem="SD_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=0, max=400, spacer=1000, dv="eRes", savekey="SD")
+lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1, j=n.perms, cores=cores, ffx.f=get.ps.SD, rfx.f=run.lme.4.SD, fstem="SD_N-%d_parent-%d.RData", samp="imm"))
+
 
 # ----------------------------------------------------------------------------------------------------
+# run simulations, getting p values from linear models, and cohen's d values, and save results to a list, using intermediate sampling
+# ----------------------------------------------------------------------------------------------------
+# lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=n.perms, j=n.perms, cores=cores, ffx.f=get.ps.SD, rfx.f=run.lme.4.SD, fstem="SD_N-%d_parent-%d.RData", samp="int"))
+# 
+# # ----------------------------------------------------------------------------------------------------
+# # attain densities for each subject N, across all outer samples
+# # ----------------------------------------------------------------------------------------------------
+# dens.across.N(fstem="SD_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=-800, max=0, spacer=1000, dv="p", savekey="SD")
+# dens.across.N(fstem="SD_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=0, max=3, spacer=1000, dv="d", savekey="SD")
+# dens.across.N(fstem="SD_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=0, max=400, spacer=1000, dv="esub", savekey="SD")
+# dens.across.N(fstem="SD_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=0, max=400, spacer=1000, dv="eRes", savekey="SD")
+# 
+# # ----------------------------------------------------------------------------------------------------
 # get outta here
 # ----------------------------------------------------------------------------------------------------
 quit()

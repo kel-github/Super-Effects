@@ -486,34 +486,43 @@ run.lme.4.AB <- function(data, dv="T2gT1"){
 # ----------------------------------------------------------------------------------------------------
 ###### functions to run sims ACROSS ALL TASKS
 #### -------------------------------------------------------------------------------------------------
-run.outer <- function(in.data, subs, N, k, j, cores, fstem,  ffx.f, rfx.f){
+run.outer <- function(in.data, subs, N, k, j, cores, fstem,  ffx.f, rfx.f, samp){
   # this function runs the outer permutation loop
   # for 1:j permutations, for a given N
   # arguments:
-  # --in.data = dataframe (see notes of get.ps.aov.AB)
-  # --subs = the list of all subject numbers
-  # --N = the number to sample from subs
-  # --k = the total number of inner permutations
-  # --j = howmany outer loops?
-  # --cores = how many cores do you want to use?
+  # -- in.data = dataframe (see notes of get.ps.aov.AB)
+  # -- subs = the list of all subject numbers
+  # -- N = the number to sample from subs
+  # -- k = the total number of inner permutations, 1 if using immediate sampling
+  # -- j = how many outer loops? 1000 if using immediate sampling
+  # -- cores = how many cores do you want to use?
   # -- fstem = what do you want the output files from the inner loop to be called?
   # -- ffx.f & rfx.f: are the references to the functions you want to run for this task
-  sub.idx = lapply(1:j, function(x) sample.N(subs, N, x, replace=FALSE))
+  # -- samp: sampling type: 'int' for intermediate or 'imm' for immediate
+  
+  # settings for the sampling technique 
+  if (samp == "int"){
+    replace=FALSE
+  } else if (samp == "imm"){
+    replace=TRUE
+  }
+  sub.idx = lapply(1:j, function(x) sample.N(subs, N, x, replace=replace))
   sub.idx = do.call(rbind, sub.idx)
-  # here I mclapply over each 'parent sample' to pass into run.aov.inner
-  # using filter is fine, because parents are sampled without replacement
-  mclapply(1:j, function(x) run.inner(in.data=filter(in.data, Subj.No %in% sub.idx$sub[sub.idx$perm==x]),
+  # here I mclapply over each 'parent sample' to pass into run.inner
+  names(in.data)[names(in.data)=="Subj.No"] = "sub"
+  mclapply(1:j, function(x) run.inner(in.data=inner_join(sub.idx, in.data, by="sub"),
                                        parent.subs=sub.idx$sub[sub.idx$perm==x],
                                        N=N,
                                        k=k,
                                        j=x,
                                        fstem=fstem,
                                        ffx.f=ffx.f,
-                                       rfx.f=rfx.f),
+                                       rfx.f=rfx.f,
+                                       samp=samp),
            mc.cores=cores)
 }
 
-run.inner <- function(in.data, parent.subs, N, k, j, fstem, ffx.f, rfx.f){
+run.inner <- function(in.data, parent.subs, N, k, j, fstem, ffx.f, rfx.f, samp){
   # this function runs the inner permutation loop
   # for 1:k permutations, run.AB.models is run, and the output
   # collated. The results are saved in a binary file in the
@@ -523,34 +532,45 @@ run.inner <- function(in.data, parent.subs, N, k, j, fstem, ffx.f, rfx.f){
   # --subs = the list of all subject numbers
   # --N = the number to sample from subs
   # --perm = which permutation we're on
-  # --k = the total number of inner permutations
+  # --k = the total number of inner permutations, 1 if using immediate sampling
   # --j = which outer permutation are we on?
   # -- fstem: see run.outer
+  # -- samp: sampling type: 'int' for intermediate or 'imm' for immediate
   
-  out = replicate(k, run.models(in.data=in.data, subs=parent.subs, N=N, ffx.f=ffx.f, rfx.f=rfx.f), simplify=FALSE)
+  out = replicate(k, run.models(in.data=in.data, subs=parent.subs, N=N, ffx.f=ffx.f, rfx.f=rfx.f, samp=samp), simplify=FALSE)
   out = do.call(rbind, out)
   out$k = rep(1:k, each=2)
   
   # now save the output
-  fname=sprintf(fstem, N, j)
+  if (samp == "int"){
+    fname=sprintf(fstem, N, j)
+  } else if (samp == "imm"){
+    fname=sprintf(fstem, N, j)
+    fname = paste(samp, fname, sep="_")
+  }
   save(out, file=fname)
 }
 
-run.models <- function(in.data, subs, N, ffx.f, rfx.f){
+run.models <- function(in.data, subs, N, ffx.f, rfx.f, samp){
   # this function runs 1 simulation 
   # this function will sample the requested N with replacement
   # and then apply the ffx and rfx analysis and output to a dataframe
   # in.data = dataframe 
   # subs = the list of all subject numbers
   # N = the number to sample from subs
-
-  idx = sample.N(subs=subs, N=N, k=1, replace=TRUE) # get the samples for this one permutation
-  names(in.data)[names(in.data)=="Subj.No"] = "sub"
+  # samp: sampling type: 'int' for intermediate or 'imm' for immediate
   
   ffx.f <- eval(ffx.f)
-  tmp.fx = unlist(ffx.f(inner_join(idx, in.data, by="sub")))
   rfx.f <- eval(rfx.f)
-  tmp.rfx = unlist(rfx.f(inner_join(idx, in.data, by="sub")))
+  if (samp == "int"){
+    idx = sample.N(subs=subs, N=N, k=1, replace=TRUE) # get the samples for this one permutation
+    names(in.data)[names(in.data)=="Subj.No"] = "sub"
+    tmp.fx = unlist(ffx.f(inner_join(idx, in.data, by="sub")))
+    tmp.rfx = unlist(rfx.f(inner_join(idx, in.data, by="sub")))
+  } else if (samp == "imm"){
+    tmp.fx = unlist(ffx.f(in.data))
+    tmp.rfx = unlist(rfx.f(in.data))
+  }
 
   if (length(names(tmp.rfx)) > 2) {
     out = data.frame( n    = c(N, N),
