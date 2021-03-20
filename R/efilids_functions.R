@@ -164,10 +164,10 @@ calc.flvl.perms <- function(answers_a, answers_b, responses_a) {
   data.frame(acc=do.call(rbind, rows[,1]), counts=do.call(rbind, rows[,2]))
 }
 
-calc.flvl.perms.n <- function(answers_a, answers_b, responses_a, n_samples) {
+calc.flvl.dist <- function(answers_a, answers_b, responses_a) {
   ratio_counts <- calc.flvl.perms(answers_a, answers_b, responses_a)
   ratio_counts$p <- ratio_counts$counts / sum(ratio_counts$counts)
-  sample(ratio_counts$acc, n_samples, prob=ratio_counts$p, replace=TRUE)
+  ratio_counts
 }
 
 gen.samps <- function(k, nsubs){
@@ -186,20 +186,15 @@ get.perm.mins <- function(slvl.idx, flvl.idx, flvl.neut, samp.data){
     select(min.acc)
 }
 
-# get.flvl.perms <- function(data, NfL, nsubs){
-#   data.frame(acc=unlist(lapply(unique(data$sub), 
-#                                function(x, y=NfL-1) replicate(y, with(data[data$sub == x, ], mean(sample(Target.Order, replace=FALSE) == Response))))),
-#              sub=rep(1:nsubs, each=NfL-1),
-#              p = rep(2:NfL, times=nsubs))
-# }
-
-get.flvl.perms <- function(data, NfL, nsubs){
+get.flvl.sub.dists <- function(data, nsubs){
   responses <- data %>% group_by(sub) %>% count(Response) %>% spread(Response, n)
   answers <- data %>% group_by(sub) %>% count(Target.Order) %>% spread(Target.Order, n)
   sar <- inner_join(answers, responses, by="sub", suffix=c(".ans", ".resp"))
-  data.frame(acc=as.vector(mapply(calc.flvl.perms.n, sar$Novel.ans, sar$Repeat.ans, sar$Novel.resp, NfL-1)),
-             sub=rep(1:nsubs, each=NfL-1),
-             p = rep(2:NfL, times=nsubs))
+  mapply(calc.flvl.dist, sar$Novel.ans, sar$Repeat.ans, sar$Novel.resp, SIMPLIFY=FALSE)
+}
+
+gen.slvl <- function(flvldists){
+  unlist(lapply(flvldists, function(x) sample(x$acc, 1, prob=x$p, replace=TRUE)))
 }
 
 prev.test <- function(samp.data, alpha, k, NfL){
@@ -215,13 +210,12 @@ prev.test <- function(samp.data, alpha, k, NfL){
   nsubs <- length(samp.data$Trial.No)/ntrials
   samp.data$sub <- rep(1:nsubs, each=ntrials)
   names(samp.data)[names(samp.data) == "Trial.No"] = "trial"
-#  flvl.perms <- run.mont.frst.lvl.over.subs(samp.data, NfL) #P1 in 10.1016/j.neuroimage.2016.07.040 (label shuffle)
   # compute flvl idx
-  flvl.perms <- get.flvl.perms(samp.data, NfL, nsubs)
+  flvldists <- get.flvl.sub.dists(samp.data, nsubs)
   # Now generate a neutral idx as long and as appropriate as flvl.idx, for a subsequent cbind, prior to 
   # summarising and joining to slvl idx, summarising and then taking minimum stat.
   # Now the data is prepared generate indexing for minimum stat
-  slvl.idx = rbind(gen.samps(k, nsubs)) %>% arrange(shuffle, sub)
+  # slvl.idx = rbind(gen.samps(k, nsubs)) %>% arrange(shuffle, sub)
   # computes prevalence statistic, given a set of second level permutations (and original scores)
   # Based on: https://github.com/allefeld/prevalence-permutation/blob/master/prevalenceCore.m - lines 160-168, also
   # k = the number second level permutation you want to extract from the data
@@ -229,14 +223,8 @@ prev.test <- function(samp.data, alpha, k, NfL){
   # sort out this one 
   neut_m <- min(unlist(lapply(unique(samp.data$sub), function(x) with(samp.data[samp.data$sub == x, ], mean(Response==Target.Order)))))
   # now compute the probability of the minimum value (equation 24 of 10.1016/j.neuroimage.2016.07.040)
- # perm_mins <- t(do.call(rbind, lapply(c(1:max(data$k)), function(x) min(data$acc[data$k == x]))))
-  # THE BELOW ONLY WORKS BECAUSE THE DATA ARE IN PROPORTION CORRECT. WOULD NOT WORK FOR PERCENTAGES!
-  if (any(sum(flvl.perms$acc > 1))) flvl.perms$acc = flvl.perms$acc/100 # convert percent to proportion if necessary
-  
-  ########
-  puGN <- sum(unlist(lapply(unique(slvl.idx$shuffle), function(x) min(inner_join(slvl.idx[slvl.idx$shuffle==x, ], flvl.perms, by=c("sub", "p"))))) >= neut_m)/NfL
+  puGN <- sum(unlist(replicate(k, min(gen.slvl(flvldists)))) >= neut_m)/k
   # probability uncorrected of global null (puGN)
-  #puGN <- sum(perm.mins$min.acc >= neut_m)/NfL # this is the uncorrected p value for the global null hypothesis that a == a0
   # the above gives the statement of existance, next step is to evaluate against the prevalence null
   # if this is below alpha, then we would say its significant
 
