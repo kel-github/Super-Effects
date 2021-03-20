@@ -52,23 +52,30 @@ ffx.dat <- dat %>% group_by(Subj.No, Trial.Type.Name) %>%
 # define levels for simulations
 # ----------------------------------------------------------------------------------------------------
 sub.Ns = round(exp(seq(log(13), log(313), length.out = 20)))
-n.perms =1000# for each sample size, we will repeat our experiment n.perms^2 times 
-cores = 30
+n.perms = 1000# for each sample size, we will repeat our experiment n.perms^2 times 
+cores = 20
+subs  <- unique(ffx.dat$Subj.No)
 
 # ----------------------------------------------------------------------------------------------------
-# run simulations for ffx & rfx models, getting p values and partial eta squares, and save results to a list
+# run simulations for ffx & rfx models, getting p values and partial eta squares, and save results to a list, 
+# using immediate sampling approach
 # ----------------------------------------------------------------------------------------------------
-subs  <- unique(ffx.dat$Subj.No)
-lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=n.perms, j=n.perms, cores=cores, ffx.f=get.ps.aov.AB, rfx.f=run.lme.4.AB, fstem="AB_N-%d_parent-%d.RData"))
+lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1, j=n.perms, cores=cores, ffx.f=get.ps.aov.AB, rfx.f=run.lme.4.AB, fstem="AB_N-%d_parent-%d.RData", samp="imm"))
+
+
+# ----------------------------------------------------------------------------------------------------
+# run simulations for ffx & rfx models, getting p values and partial eta squares, and save results to a list, 
+# using intermediate sampling approach
+# ----------------------------------------------------------------------------------------------------
+#lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=n.perms, j=n.perms, cores=cores, ffx.f=get.ps.aov.AB, rfx.f=run.lme.4.AB, fstem="AB_N-%d_parent-%d.RData", samp="int"))
 
 # ----------------------------------------------------------------------------------------------------
 # attain densities for each subject N, across all outer samples
 # ----------------------------------------------------------------------------------------------------
-dens.across.N(fstem="AB_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=-800, max=0, spacer=1000, dv="p", savekey="AB")
-dens.across.N(fstem="AB_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=0, max=3, spacer=1000, dv="d", savekey="AB")
-dens.across.N(fstem="AB_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=0, max=0.75, spacer=1000, dv="esub", savekey="AB")
-dens.across.N(fstem="AB_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=0, max=0.75, spacer=1000, dv="eRes", savekey="AB")
-
+# dens.across.N(fstem="AB_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=-800, max=0, spacer=1000, dv="p", savekey="AB")
+# dens.across.N(fstem="AB_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=0, max=3, spacer=1000, dv="d", savekey="AB")
+# dens.across.N(fstem="AB_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=0, max=0.75, spacer=1000, dv="esub", savekey="AB")
+# dens.across.N(fstem="AB_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=0, max=0.75, spacer=1000, dv="eRes", savekey="AB")
 
 # ----------------------------------------------------------------------------------------------------
 # plot the outputs separately - then make 4 panels, top row = effect size, bottom row = p, left column = ffx, 
