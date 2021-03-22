@@ -20,7 +20,7 @@ library(ggridges)
 library(parallel)
 library(tidyverse) # for data wrangling
 source("efilids_functions.R") # custom functions written for this project
-source("R_rainclouds.R") # functions for plotting
+#source("R_rainclouds.R") # functions for plotting
 
 set.seed(42) # testing diff seeds on output
 # ----------------------------------------------------------------------------------------------------
@@ -50,11 +50,10 @@ prev.dat <- prev.dat %>% mutate(Response = recode(Response,
 # ----------------------------------------------------------------------------------------------------
 
 sub.Ns = round(exp(seq(log(13), log(313), length.out = 20)))
-sub.Ns = 313
 n.perms = 1000# for each sample size, we will repeat our experiment n.perms times
-k = 2 #outer loop
+k = 1000 #outer loop
 Np = 1000
-cores = 2
+cores = 20
 # 13, 10, 10, 10 = 4.384 mins
 # 13, 15, 15, 15 = 10.075 
 # 13, 20, 20, 20 = 14.606 
@@ -67,12 +66,7 @@ cores = 2
 
 subs  <- unique(prev.dat$Subj.No)
 start  <-  Sys.time()
-
-lapply(sub.Ns, function(x) run.outer(in.data=prev.dat, subs=subs, N=x, k=n.perms, j=k, cores=cores, ffx.f=run.os.t.test.sim, rfx.f=run.prev.test, fstem="VSL_N-%d_parent-%d.RData"))
+lapply(sub.Ns, function(x) run.outer(in.data=prev.dat, subs=subs, N=x, k=n.perms, j=k, cores=cores, ffx.f=run.os.t.test.sim, rfx.f=run.prev.test, fstem="VSL_N-%d_parent-%d.RData", samp="int"))
 end <-  Sys.time()
 end - start
 
-# ----------------------------------------------------------------------------------------------------
-# save the data of import to an RData file
-# ----------------------------------------------------------------------------------------------------
-save(sims.dat, prev.res, file="VS_sim_data.RData")

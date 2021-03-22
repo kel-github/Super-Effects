@@ -30,17 +30,17 @@ source("R_rainclouds.R") # functions for plotting
 # define ref variables
 # ----------------------------------------------------------------------------------------------------
 sub.Ns = round(exp(seq(log(13), log(313), length.out = 20)))
-n.perms =1000# for each sample size, we will repeat our experiment n.perms^2 times 
-cores = 30
+n.perms = 1000# for each sample size, we will repeat our experiment n.perms^2 times 
+cores = 20
 datpath = "../data/"
-rxvnme = "supfxrdat.zip"
-task = "AB"
-savekey = "AB_int_1"
+rxvnme = "immdatrxv.zip"
+task = "imm_AB"
+savekey = "AB_imm"
 
 # ----------------------------------------------------------------------------------------------------
 # attain densities for each subject N, across all outer samples
 # ----------------------------------------------------------------------------------------------------
-dens.across.N(fstem="_N-%d_parent-%d.RData", Ns=sub.Ns, j=1, min=-800, max=0, spacer=1000, dv="p", savekey=savekey, task=task, datpath=datpath, rxvnme=rxvnme)
-dens.across.N(fstem="_N-%d_parent-%d.RData", Ns=sub.Ns, j=1, min=0, max=10, spacer=500, dv="d", savekey=savekey, task=task, datpath=datpath, rxvnme=rxvnme)
-dens.across.N(fstem="_N-%d_parent-%d.RData", Ns=sub.Ns, j=1, min=0, max=0.75, spacer=1000, dv="esub", savekey=savekey, task=task, datpath=datpath, rxvnme=rxvnme)
-dens.across.N(fstem="_N-%d_parent-%d.RData", Ns=sub.Ns, j=1, min=0, max=0.75, spacer=1000, dv="eRes", savekey=savekey, task=task, datpath=datpath, rxvnme=rxvnme)
+dens.across.N(fstem="_N-%d_parent-%d.RData", Ns=sub.Ns, j=1000, min=-800, max=0, spacer=10000, dv="p", savekey=savekey, task=task, datpath=datpath, rxvnme=rxvnme)
+dens.across.N(fstem="_N-%d_parent-%d.RData", Ns=sub.Ns, j=1000, min=0, max=10, spacer=1000, dv="d", savekey=savekey, task=task, datpath=datpath, rxvnme=rxvnme)
+dens.across.N(fstem="_N-%d_parent-%d.RData", Ns=sub.Ns, j=1000, min=0, max=0.75, spacer=1000, dv="esub", savekey=savekey, task=task, datpath=datpath, rxvnme=rxvnme)
+dens.across.N(fstem="_N-%d_parent-%d.RData", Ns=sub.Ns, j=1000, min=0, max=0.75, spacer=1000, dv="eRes", savekey=savekey, task=task, datpath=datpath, rxvnme=rxvnme)

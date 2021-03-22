@@ -606,12 +606,13 @@ dens.across.N <- function(fstem, Ns, j, min, max, spacer, dv, savekey, task, dat
   # -- savekey: usually the initials of the paradigm, for saving output
   # -- datpath: filepath to data rxv
   # -- rxvnme: name of rxv
-  tmp = lapply(Ns, add.dens, fstem=fstem, j=j, min=min, max=max, 
-               dv=dv, spacer=spacer, datpath=datpath, rxvnme=rxvnme,
-               task=task)
+  tmp = mclapply(Ns, add.dens, fstem=fstem, j=j, min=min, max=max, 
+                 dv=dv, spacer=spacer, datpath=datpath, rxvnme=rxvnme,
+                 task=task, mc.cores=2)
   d = do.call(rbind, tmp)
   fname = paste(savekey, dv, "d.RData", sep="_")
   save(d, file=paste(datpath, fname, sep=""))
+  unlink(paste(datpath, "/Rdat", sep=""), recursive=TRUE)
 }
 
 
@@ -638,7 +639,7 @@ add.dens <- function(fstem, N, j, min, max, spacer, dv, datpath, rxvnme, task){
                     d = c(ds["ffx",], ds["rfx",]),
                     x = seq(min, max, by=abs(max-min)/spacer))
   # remove data files
-  unlink(paste(datpath, "/Rdat", sep=""), recursive=TRUE)
+#  unlink(paste(datpath, "/Rdat", sep=""), recursive=TRUE)
   out
 }
 
@@ -660,8 +661,14 @@ get.dens <- function(fstem, N, j, min, max, dv, spacer){
   ffx = out[out$mod=="ffx",]
   rfx = out[out$mod=="rfx",]
   if (dv == "p"){
-    ffx.d <- gen.dens(min, max, spacer=spacer, log(ffx[,eval(dv)]))
-    rfx.d <- gen.dens(min, max, spacer=spacer, log(rfx[,eval(dv)]))
+    # if (dens_dtype == "probit"){
+    #   # see https://www.rdocumentation.org/packages/gtools/versions/3.5.0/topics/logit
+    #   ffx.d <- gen.dens(min, max, spacer=spacer, log( ffx[,eval(dv)] / (1- ffx[,eval(dv)] )))
+    #   rfx.d <- gen.dens(min, max, spacer=spacer, log( rfx[,eval(dv)] / (1- rfx[,eval(dv)] )))
+    # } else {
+      ffx.d <- gen.dens(min, max, spacer=spacer, log(ffx[,eval(dv)]))
+      rfx.d <- gen.dens(min, max, spacer=spacer, log(rfx[,eval(dv)]))
+    # }
   } else if (dv == "d") {
     ffx.d <- gen.dens(min, max, spacer=spacer, ffx[,eval(dv)])
     rfx.d <- gen.dens(min, max, spacer=spacer, rfx[,eval(dv)])
@@ -694,27 +701,35 @@ gen.dens <- function(min, max, spacer = 10000, data){
 # Plotting
 # ----------------------------------------------------------------------------------------------------
 
-plot.d <- function(d, m, yl, sc){
+plot.d <- function(d, m, yl, sc, med){
   # this function is for the mega sample
   # inputs:
   #--d: data
   #--m: model - ffx or rfx
   #--yl: ylim - c(0,3) - for example
   #--sc: how much to scale
+  #--med: median sample size
+  
   total_p <- d %>% group_by(mod, Nsz) %>% summarise(sum=sum(d)) 
-  d %>% inner_join(total_p, by=c("mod", "Nsz")) %>% mutate(dp = d) %>% 
+  d %>% inner_join(total_p, by=c("mod", "Nsz")) %>% mutate(dp = d/sum) %>% 
     filter(mod == eval(m)) %>% 
     ggplot(aes(x=x, y=Nsz, height=dp, group=Nsz)) +
     geom_density_ridges(stat="identity", scale=sc, rel_min_height=.01, fill=wes_palette("IsleofDogs1")[1], color=wes_palette("IsleofDogs1")[5]) +
     theme_ridges() +
+    geom_hline(yintercept=which(abs(as.numeric(levels(d$Nsz))-med) == min(abs(as.numeric(levels(d$Nsz))-med)))[1],
+               linetype="dashed", color=wes_palette("IsleofDogs1")[3]) +
     xlab('d') + ylab('N') + theme_cowplot() + xlim(yl) +
     guides(fill = FALSE, colour = FALSE) +
     ggtitle(eval(m)) +
     theme(axis.title.x = element_text(face = "italic"))
 }
 
+calc.crit.d <- function(df, N){
+  max(qt(c(.025, .975), df))/sqrt(N)
+}
 
-plot.d.by.samp <- function(d, yl, sc){
+
+plot.d.by.samp <- function(d, yl, sc, m){
   # this function is to plot the distributions
   # attained from a select few N, by sampling strategy
   # inputs:
@@ -733,18 +748,20 @@ plot.d.by.samp <- function(d, yl, sc){
     theme(axis.title.x = element_text(face = "italic"))
 }
 
-plot.p <- function(d, m, yl, sc){
+plot.p <- function(d, m, yl, sc, med){
   # inputs:
   #--d: data
   #--m: model - ffx or rfx
   #--yl: ylim - c(0,3) - for example
   #--sc: how much to scale
   total_p <- d %>% group_by(mod, Nsz) %>% summarise(sum=sum(d)) 
-  d %>% inner_join(total_p, by=c("mod", "Nsz")) %>% mutate(dp = d) %>% 
+  d %>% inner_join(total_p, by=c("mod", "Nsz")) %>% mutate(dp = d/sum) %>% 
     filter(mod == eval(m)) %>% 
     ggplot(aes(x=x, y=Nsz, height=dp, group=Nsz)) +
     geom_density_ridges(stat="identity", scale=sc, rel_min_height=.01, fill=wes_palette("IsleofDogs1")[1], color=wes_palette("IsleofDogs1")[5]) +
-    theme_ridges() +
+    theme_ridges()  +
+    geom_hline(yintercept=which(abs(as.numeric(levels(d$Nsz))-med) == min(abs(as.numeric(levels(d$Nsz))-med)))[1],
+               linetype="dashed", color=wes_palette("IsleofDogs1")[3]) +
     xlab('p') + ylab('N') + theme_cowplot() + xlim(yl) +
     guides(fill = FALSE, colour = FALSE) +
     ggtitle(eval(m)) +

@@ -24,17 +24,29 @@ source("R_rainclouds.R") # functions for plotting
 # define session variables
 # ----------------------------------------------------------------------------------------------------
 
-task = "AB"
+task = "SRT"
+med = 39
 d_scale_ffx = 2
-d_scale_rfx = 4
+d_scale_rfx = 2
 p_scale_ffx = 2
 p_scale_rfx = 2
 px_rng_d = c(0,3)
-px_rng_p_ffx = c(-800,0)
-px_rng_p_rfx = c(-800,0)
+px_rng_p_ffx = c(-400,0)
+px_rng_p_rfx = c(-400,0)
 width = 8
 height = 8
 
+# ----------------------------------------------------------------------------------------------------
+# LIST OF SETTINGS
+# ----------------------------------------------------------------------------------------------------
+# AB
+# med=24, d_scale_ffx = 2, d_scale_rfx = 2, p_scale_ffx = 2, p_scale_rfx = 2, p_rng_d = c(0,5), px_rng_p_ffx = c(-800,0), px_rng_p_rfx = c(-800,0)
+
+# CC 
+# med = 23, d_scale_ffx = 2, d_scale_rfx = 2, p_scale_ffx = 2, p_scale_rfx = 2, p_rng_d = c(0,1), px_rng_p_ffx = c(-50,0), px_rng_p_rfx = c(-50,0)
+
+# SRT
+# med = 39, d_scale_ffx = 2, d_scale_rfx = 2, p_scale_ffx = 2, p_scale_rfx = 2, p_rng_d = c(0,3), px_rng_p_ffx = c(-400,0), px_rng_p_rfx = c(-400,0)
 
 # ----------------------------------------------------------------------------------------------------
 # define datas and load ds
@@ -51,8 +63,8 @@ d$Nsz <- as.factor(d$Nsz)
 d$mod <- as.factor(d$mod)
 
 
-ffx.d <- plot.d(d, "ffx", px_rng_d, d_scale_ffx)
-rfx.d <- plot.d(d, "rfx", px_rng_d, d_scale_rfx)
+ffx.d <- plot.d(d, "ffx", px_rng_d, d_scale_ffx, med)
+rfx.d <- plot.d(d, "rfx", px_rng_d, d_scale_rfx, med)
 
 # ----------------------------------------------------------------------------------------------------
 # load p, define factors and plot
@@ -64,9 +76,8 @@ load(fnames[2])
 d$Nsz <- as.factor(d$Nsz)
 d$mod <- as.factor(d$mod)
 
-
-ffx.p <- plot.p(d, "ffx", px_rng_p_ffx, p_scale_ffx)
-rfx.p <- plot.p(d, "rfx", px_rng_p_rfx, p_scale_rfx)
+ffx.p <- plot.p(d, "ffx", px_rng_p_ffx, p_scale_ffx, med)
+rfx.p <- plot.p(d, "rfx", px_rng_p_rfx, p_scale_rfx, med)
 
 p = plot_grid(ffx.d, rfx.d, ffx.p, rfx.p, labels=c('A', 'B', 'C', 'D'), label_size = 12, align="v")
 # #p # print out the plot so you can see it

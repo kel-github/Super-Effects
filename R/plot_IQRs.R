@@ -1,16 +1,12 @@
 ### written by K. Garner, March 2021
 ### for the project 'On the detectability of effects in executive function and implicit learning tasks'
 ### Garner, KG*, Nydam, A*, Nott, Z., & Dux, PE 
-
+###
+### code plots densities across sampling methods, per task
+### NOTES: check file naming conventions below
 # ----------------------------------------------------------------------------------------------------
 rm(list=ls())
 # ----------------------------------------------------------------------------------------------------
-### ATTAIN DENSITIES FOR ANY TASK GIVEN RANGE INPUTS
-# ----------------------------------------------------------------------------------------------------
-# load packages and source function files
-# ----------------------------------------------------------------------------------------------------
-
-rm(list=ls())
 
 # ----------------------------------------------------------------------------------------------------
 # load packages and source function files
@@ -44,7 +40,8 @@ height = 8
 # define datas and load d's
 # ----------------------------------------------------------------------------------------------------
 
-fnames = list(paste("../data/", task, "_d", "_d.RData", sep=""), paste("../data/", task, "_int_1_d", "_d.RData", sep=""))
+fnames = list(paste("../data/", task, "_d", "_d.RData", sep=""), paste("../data/", task, "_int_1_d", "_d.RData", sep=""), 
+              paste("../data/", task, "_imm_d", "_d.RData", sep=""))
 
 get.dat <- function(fname){
   load(fname)
@@ -65,7 +62,7 @@ relabel <- function(dat, samps, x){
   data
 }
 
-samps <- c("A", "B")
+samps <- c("A", "B", "C")
 dat <- lapply(c(1:length(samps)), relabel, dat=dat, samps=samps)
 dat <- do.call(rbind, dat)
 dat <- dat %>% filter(Nsz %in% subs.2.plt)
@@ -74,4 +71,5 @@ dat <- dat %>% filter(Nsz %in% subs.2.plt)
 # now plot
 # ----------------------------------------------------------------------------------------------------
 
+plot.d.by.samp(dat, c(0,5), 1, "ffx")
 
