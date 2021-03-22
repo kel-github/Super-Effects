@@ -24,15 +24,15 @@ source("R_rainclouds.R") # functions for plotting
 # define session variables
 # ----------------------------------------------------------------------------------------------------
 
-task = "SRT"
-med = 39
+task = "SD"
+med = 24
 d_scale_ffx = 2
 d_scale_rfx = 2
 p_scale_ffx = 2
 p_scale_rfx = 2
 px_rng_d = c(0,3)
-px_rng_p_ffx = c(-400,0)
-px_rng_p_rfx = c(-400,0)
+px_rng_p_ffx = c(-1000,0)
+px_rng_p_rfx = c(-1000,0)
 width = 8
 height = 8
 
@@ -47,6 +47,9 @@ height = 8
 
 # SRT
 # med = 39, d_scale_ffx = 2, d_scale_rfx = 2, p_scale_ffx = 2, p_scale_rfx = 2, p_rng_d = c(0,3), px_rng_p_ffx = c(-400,0), px_rng_p_rfx = c(-400,0)
+
+# SD
+# med = 24, d_scale_ffx = 2, d_scale_rfx = 2, p_scale_ffx = 2, p_scale_rfx = 2, p_rng_d = c(0,3), px_rng_p_ffx = c(-1000,0), px_rng_p_rfx = c(-1000,0)
 
 # ----------------------------------------------------------------------------------------------------
 # define datas and load ds
@@ -76,9 +79,11 @@ load(fnames[2])
 d$Nsz <- as.factor(d$Nsz)
 d$mod <- as.factor(d$mod)
 
+if (task == "SD") d <- d %>% filter(as.numeric(Nsz) < 17) # remove sample sizes saturated at 0
+
 ffx.p <- plot.p(d, "ffx", px_rng_p_ffx, p_scale_ffx, med)
 rfx.p <- plot.p(d, "rfx", px_rng_p_rfx, p_scale_rfx, med)
 
 p = plot_grid(ffx.d, rfx.d, ffx.p, rfx.p, labels=c('A', 'B', 'C', 'D'), label_size = 12, align="v")
 # #p # print out the plot so you can see it
-p = p + ggsave(paste("../images/", task, ".png"), width = width, height = height, units="in")
+p = p + ggsave(paste("../images/", task, ".png", sep=""), width = width, height = height, units="in")
