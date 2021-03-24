@@ -537,8 +537,13 @@ run.inner <- function(in.data, parent.subs, N, k, j, fstem, ffx.f, rfx.f, samp){
   # -- fstem: see run.outer
   # -- samp: sampling type: 'int' for intermediate or 'imm' for immediate
   
-  out = replicate(k, run.models(in.data=in.data, subs=parent.subs, N=N, ffx.f=ffx.f, rfx.f=rfx.f, samp=samp), simplify=FALSE)
-  out = do.call(rbind, out)
+  if (samp == "imm"){
+    out = run.models(in.data=in.data %>% filter(perm == j), subs=parent.subs, N=N, ffx.f=ffx.f, rfx.f=rfx.f, samp=samp)
+  } else {
+    out = replicate(k, run.models(in.data=in.data, subs=parent.subs, N=N, ffx.f=ffx.f, rfx.f=rfx.f, samp=samp), simplify=FALSE)
+    out = do.call(rbind, out)
+  }
+
   out$k = rep(1:k, each=2)
   
   # now save the output
@@ -568,6 +573,7 @@ run.models <- function(in.data, subs, N, ffx.f, rfx.f, samp){
     tmp.fx = unlist(ffx.f(inner_join(idx, in.data, by="sub")))
     tmp.rfx = unlist(rfx.f(inner_join(idx, in.data, by="sub")))
   } else if (samp == "imm"){
+    
     tmp.fx = unlist(ffx.f(in.data))
     tmp.rfx = unlist(rfx.f(in.data))
   }
@@ -592,7 +598,7 @@ run.models <- function(in.data, subs, N, ffx.f, rfx.f, samp){
 # Density generating functions for plotting, and for computing 95 % CI for the FFX/RFX ratio measure
 # ----------------------------------------------------------------------------------------------------
 
-dens.across.N <- function(fstem, Ns, j, min, max, spacer, dv, savekey, task, datpath, rxvnme){
+dens.across.N <- function(fstem, Ns, j, min, max, spacer, dv, savekey, task, datpath, rxvnme, cores){
   # grab density functions for dv of choice, across all N sizes
   # save to a binary file output
   # INPUTS
@@ -608,7 +614,7 @@ dens.across.N <- function(fstem, Ns, j, min, max, spacer, dv, savekey, task, dat
   # -- rxvnme: name of rxv
   tmp = mclapply(Ns, add.dens, fstem=fstem, j=j, min=min, max=max, 
                  dv=dv, spacer=spacer, datpath=datpath, rxvnme=rxvnme,
-                 task=task, mc.cores=2)
+                 task=task, mc.cores=cores)
   d = do.call(rbind, tmp)
   fname = paste(savekey, dv, "d.RData", sep="_")
   save(d, file=paste(datpath, fname, sep=""))

@@ -62,7 +62,6 @@ subs  <- unique(ffx.dat$Subj.No)
 # ----------------------------------------------------------------------------------------------------
 lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1, j=n.perms, cores=cores, ffx.f=get.ps.aov.AB, rfx.f=run.lme.4.AB, fstem="AB_N-%d_parent-%d.RData", samp="imm"))
 
-
 # ----------------------------------------------------------------------------------------------------
 # run simulations for ffx & rfx models, getting p values and partial eta squares, and save results to a list, 
 # using intermediate sampling approach
