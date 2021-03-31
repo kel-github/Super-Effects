@@ -25,12 +25,13 @@ source("R_rainclouds.R")
 # define session variables
 # ----------------------------------------------------------------------------------------------------
 
-task = "AB"
+task = "SRT"
+mod = "rfx"
 d_scale_ffx = 2
 d_scale_rfx = 4
 p_scale_ffx = 2
 p_scale_rfx = 2
-px_rng_d = c(0,3)
+px_rng_d = c(0,10)
 px_rng_p_ffx = c(-800,0)
 px_rng_p_rfx = c(-800,0)
 width = 8
@@ -71,5 +72,7 @@ dat <- dat %>% filter(Nsz %in% subs.2.plt)
 # now plot
 # ----------------------------------------------------------------------------------------------------
 
-plot.d.by.samp(dat, c(0,5), 1, "ffx")
+plot.d.by.samp(dat, px_rng_d, 1, mod) 
 
+fname = paste("../images/", task, "_", mod, "_sampling.png", sep="")
+ggsave(filename=fname, plot=last_plot(), units = "cm", width = 17, height = 10, dpi = 300)
