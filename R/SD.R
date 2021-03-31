@@ -20,6 +20,7 @@ library(lme4) # for mixed effects modelling
 library(ggridges)
 library(car)
 library(parallel)
+library(rstatix)
 source("efilids_functions.R") # custom functions written for this project
 source("R_rainclouds.R") # functions for plotting
 
@@ -54,13 +55,11 @@ rfx.dat$task.stim[rfx.dat$trialtype == "single"] = rfx.dat$Task.1.Response[rfx.d
 rfx.dat$task.stim[rfx.dat$trialtype == "dual" & rfx.dat$task == "vis"] = rfx.dat$Task.1.Response[rfx.dat$trialtype == "dual" & rfx.dat$task == "vis"]
 rfx.dat$task.stim[rfx.dat$trialtype == "dual" & rfx.dat$task == "sound"] = rfx.dat$Task.2.Response[rfx.dat$trialtype == "dual" & rfx.dat$task == "sound"]
 
-rfx.dat <- rfx.dat %>% select(-c("Trial.Type.Name", "Task.1.Response", "Task.2.Response")) %>%
-                       group_by(Subj.No, task, trialtype, task.stim) %>%
-                       filter(RT > min.RT) %>%
-                       filter(RT < (mean(RT)+sd.crit*sd(RT))) %>%
-                       summarise(RT = mean(RT))
-
-ffx.dat <- rfx.dat %>% ungroup(task.stim) %>% select(-c('task.stim'))
+ffx.dat <- rfx.dat %>% select(-c("Trial.Type.Name", "Task.1.Response", "Task.2.Response")) %>%
+                        group_by(Subj.No, task, trialtype) %>%
+                        filter(RT > min.RT) %>%
+                        filter(RT < (mean(RT)+sd.crit*sd(RT))) %>%
+                        summarise(RT = mean(RT))
 
 # ----------------------------------------------------------------------------------------------------
 # define levels for simulations
@@ -80,7 +79,7 @@ lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1, j=n.p
 # ----------------------------------------------------------------------------------------------------
 # run simulations, getting p values from linear models, and cohen's d values, and save results to a list, using intermediate sampling
 # ----------------------------------------------------------------------------------------------------
-# lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=n.perms, j=n.perms, cores=cores, ffx.f=get.ps.SD, rfx.f=run.lme.4.SD, fstem="SD_N-%d_parent-%d.RData", samp="int"))
+lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=n.perms, j=n.perms, cores=cores, ffx.f=get.ps.SD, rfx.f=run.lme.4.SD, fstem="SD_N-%d_parent-%d.RData", samp="int"))
 # 
 # # ----------------------------------------------------------------------------------------------------
 # # attain densities for each subject N, across all outer samples

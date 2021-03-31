@@ -10,7 +10,6 @@ rm(list=ls())
 # ----------------------------------------------------------------------------------------------------
 # load packages and source function files
 # ----------------------------------------------------------------------------------------------------
-
 #setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) # set working directory to the location of this file
 # uncomment the below and run if you need to install the packages
 # install.packages("tidyverse")
@@ -23,25 +22,26 @@ library(lme4) # for mixed effects modelling
 library(ggridges)
 library(car)
 library(parallel)
+library(rstatix)
 source("efilids_functions.R") # custom functions written for this project
 source("R_rainclouds.R") # functions for plotting
-
-#$ load a previous state if you have it
-# load("AB_sim_data.RData")
 
 # ----------------------------------------------------------------------------------------------------
 # load data and wrangle into tidy form (see https://r4ds.had.co.nz/tidy-data.html), plus relabel to make
 # labels a little simpler
 # ----------------------------------------------------------------------------------------------------
 dat = read.csv("../data/total_of_313_subs_AB_task_trial_level_data.csv", header=TRUE)
-dat$Task.Order <- as.factor(dat$Task.Order)
-dat$Experimenter <- as.factor(dat$Experimenter)
-dat$T1.Stimulus.Type <- as.factor(dat$T1.Stimulus.Type)
-dat$T2.Stimulus.Type <- as.factor(dat$T2.Stimulus.Type)
+# dat$Task.Order <- as.factor(dat$Task.Order)
+# dat$Experimenter <- as.factor(dat$Experimenter)
+# dat$T1.Stimulus.Type <- as.factor(dat$T1.Stimulus.Type)
+# dat$T2.Stimulus.Type <- as.factor(dat$T2.Stimulus.Type)
 
 # ----------------------------------------------------------------------------------------------------
 # Create dataframes 
 # ----------------------------------------------------------------------------------------------------
+# rfx.dat <- dat %>% group_by(Subj.No, Trial.Type.Name, T2.Stimulus.Type) %>%
+#                    summarise(T2gT1=mean(T2T1.Accuracy))
+
 
 # Create a summary of the data for fixed fx modelling
 ffx.dat <- dat %>% group_by(Subj.No, Trial.Type.Name) %>%
@@ -52,7 +52,9 @@ ffx.dat <- dat %>% group_by(Subj.No, Trial.Type.Name) %>%
 # define levels for simulations
 # ----------------------------------------------------------------------------------------------------
 sub.Ns = round(exp(seq(log(13), log(313), length.out = 20)))
-n.perms = 1000# for each sample size, we will repeat our experiment n.perms^2 times 
+
+n.perms = 1000
+#n.perms = 1000# for each sample size, we will repeat our experiment n.perms^2 times 
 cores = 20
 subs  <- unique(ffx.dat$Subj.No)
 
@@ -66,7 +68,8 @@ lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1, j=n.p
 # run simulations for ffx & rfx models, getting p values and partial eta squares, and save results to a list, 
 # using intermediate sampling approach
 # ----------------------------------------------------------------------------------------------------
-#lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=n.perms, j=n.perms, cores=cores, ffx.f=get.ps.aov.AB, rfx.f=run.lme.4.AB, fstem="AB_N-%d_parent-%d.RData", samp="int"))
+
+lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=n.perms, j=n.perms, cores=cores, ffx.f=get.ps.aov.AB, rfx.f=run.lme.4.AB, fstem="AB_N-%d_parent-%d.RData", samp="int"))
 
 # ----------------------------------------------------------------------------------------------------
 # attain densities for each subject N, across all outer samples

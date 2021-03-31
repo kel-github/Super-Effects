@@ -19,6 +19,7 @@ library(lme4) # for mixed effects modelling
 library(ggridges)
 library(car)
 library(parallel)
+library(rstatix)
 source("efilids_functions.R") # custom functions written for this project
 source("R_rainclouds.R") # functions for plotting
 
@@ -61,7 +62,7 @@ lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1, j=n.p
 # ----------------------------------------------------------------------------------------------------
 # run simulations, getting p values from linear models, and cohen's d values, and save results to a list, using intermediate sampling
 # ----------------------------------------------------------------------------------------------------
-#lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=n.perms, j=n.perms, cores=cores, ffx.f=run.t.test.sim, rfx.f=run.lme.4.srt, fstem="SRT_N-%d_parent-%d.RData", samp="int"))
+lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=n.perms, j=n.perms, cores=cores, ffx.f=run.t.test.sim, rfx.f=run.lme.4.srt, fstem="SRT_N-%d_parent-%d.RData", samp="int"))
 
 # ----------------------------------------------------------------------------------------------------
 # attain densities for each subject N, across all outer samples

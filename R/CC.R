@@ -20,6 +20,7 @@ library(lme4) # for mixed effects modelling
 library(ggridges)
 library(car)
 library(parallel)
+library(rstatix)
 source("efilids_functions.R") # custom functions written for this project
 source("R_rainclouds.R") # functions for plotting
 
@@ -37,13 +38,19 @@ dat = read.csv("../data/total_of_313_subs_CC_task_trial_level_data.csv", header=
 min.RT <- 200 # in msec
 sd.crit <- 2.5
 
-# really should just be 'dat', but I'm too committed to change it now
 ffx.dat <- dat %>% mutate(Block.No = rep(c(1:12), each = 24, length(unique(dat$Subj.No)))) %>%
             group_by(Subj.No, Block.No, Trial.Type.Name) %>%
             filter(Accuracy == 1) %>%
             filter(RT.ms > min.RT) %>%
             filter(RT.ms < (mean(RT.ms) + sd.crit*sd(RT.ms))) %>%
             summarise(RT=mean(RT.ms))
+
+rfx.dat <- dat %>% mutate(Block.No = rep(c(1:12), each = 24, length(unique(dat$Subj.No)))) %>%
+              group_by(Subj.No, Block.No, Trial.Type.Name, Target.Orientation) %>%
+              filter(Accuracy == 1) %>%
+              filter(RT.ms > min.RT) %>%
+              filter(RT.ms < (mean(RT.ms) + sd.crit*sd(RT.ms))) %>%
+              summarise(RT=mean(RT.ms))
 
 # ----------------------------------------------------------------------------------------------------
 # define levels for simulations
@@ -63,7 +70,7 @@ lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1, j=n.p
 # # ----------------------------------------------------------------------------------------------------
 # # run simulations, getting p values from t.tests, and cohen's d values, and save results to a list, using intermediate sampling
 # # ----------------------------------------------------------------------------------------------------
-# lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=n.perms, j=n.perms, cores=cores, ffx.f=get.ps.CC, rfx.f=run.lme.4.cc, fstem="CC_N-%d_parent-%d.RData", samp="int"))
+lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=n.perms, j=n.perms, cores=cores, ffx.f=get.ps.CC, rfx.f=run.lme.4.cc, fstem="CC_N-%d_parent-%d.RData", samp="int"))
 # 
 # # ----------------------------------------------------------------------------------------------------
 # # attain densities for each subject N, across all outer samples
