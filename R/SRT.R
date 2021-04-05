@@ -51,18 +51,22 @@ ffx.dat <- dat %>% filter(Block.No > 2) %>%
 
 sub.Ns = round(exp(seq(log(13), log(313), length.out = 20)))
 n.perms =1000# for each sample size, we will repeat our experiment n.perms times
-cores = 20
+cores = 2
 subs  <- unique(ffx.dat$Subj.No)
 
 # ----------------------------------------------------------------------------------------------------
 # run simulations, getting p values from linear models, and cohen's d values, and save results to a list, using intermediate sampling
 # ----------------------------------------------------------------------------------------------------
-lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1, j=n.perms, cores=cores, ffx.f=run.t.test.sim, rfx.f=run.lme.4.srt, fstem="SRT_N-%d_parent-%d.RData", samp="imm"))
+lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, 
+                                     k=1, j=n.perms, cores=cores, 
+                                     f=get.ps.srt, fstem="SRT_N-%d_parent-%d.RData", samp="imm"))
 
 # ----------------------------------------------------------------------------------------------------
 # run simulations, getting p values from linear models, and cohen's d values, and save results to a list, using intermediate sampling
 # ----------------------------------------------------------------------------------------------------
-lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=n.perms, j=n.perms, cores=cores, ffx.f=run.t.test.sim, rfx.f=run.lme.4.srt, fstem="SRT_N-%d_parent-%d.RData", samp="int"))
+lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, 
+                                     k=n.perms, j=n.perms, cores=cores, 
+                                     f=get.ps.srt, fstem="SRT_N-%d_parent-%d.RData", samp="int"))
 
 # ----------------------------------------------------------------------------------------------------
 # attain densities for each subject N, across all outer samples

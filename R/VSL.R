@@ -33,7 +33,7 @@ if (length(args) == 3) {
   Nind <- as.integer(args[3])
 }
 
-set.seed(42) # testing diff seeds on output
+set.seed(42) 
 # -----------------------------------------------------------------------------
 # load data and wrangle into tidy form
 # (see https://r4ds.had.co.nz/tidy-data.html), plus relabel to make
@@ -81,8 +81,7 @@ subs  <- unique(prev.dat$Subj.No)
 start  <-  Sys.time()
 lapply(sub.Ns, function(x) run.outer(in.data=prev.dat, subs=subs, N=x,
                                      k=n.perms, j=k, cores=cores,
-                                     ffx.f=run.os.t.test.sim,
-                                     rfx.f=run.prev.test,
+                                     f=get.ps.vsl,
                                      fstem=fstem,
                                      samp="int"))
 end <-  Sys.time()

@@ -45,13 +45,6 @@ ffx.dat <- dat %>% mutate(Block.No = rep(c(1:12), each = 24, length(unique(dat$S
             filter(RT.ms < (mean(RT.ms) + sd.crit*sd(RT.ms))) %>%
             summarise(RT=mean(RT.ms))
 
-rfx.dat <- dat %>% mutate(Block.No = rep(c(1:12), each = 24, length(unique(dat$Subj.No)))) %>%
-              group_by(Subj.No, Block.No, Trial.Type.Name, Target.Orientation) %>%
-              filter(Accuracy == 1) %>%
-              filter(RT.ms > min.RT) %>%
-              filter(RT.ms < (mean(RT.ms) + sd.crit*sd(RT.ms))) %>%
-              summarise(RT=mean(RT.ms))
-
 # ----------------------------------------------------------------------------------------------------
 # define levels for simulations
 # ----------------------------------------------------------------------------------------------------
@@ -64,21 +57,16 @@ subs  <- unique(ffx.dat$Subj.No)
 # ----------------------------------------------------------------------------------------------------
 # run simulations, getting p values from t.tests, and cohen's d values, and save results to a list, using immediate sampling
 # ----------------------------------------------------------------------------------------------------
-lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1, j=n.perms, cores=cores, ffx.f=get.ps.CC, rfx.f=run.lme.4.cc, fstem="CC_N-%d_parent-%d.RData", samp="imm"))
+lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, 
+                                     k=1, j=n.perms, cores=cores, f=get.ps.CC, 
+                                     fstem="CC_N-%d_parent-%d.RData", samp="imm"))
 
 
 # # ----------------------------------------------------------------------------------------------------
 # # run simulations, getting p values from t.tests, and cohen's d values, and save results to a list, using intermediate sampling
 # # ----------------------------------------------------------------------------------------------------
-lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=n.perms, j=n.perms, cores=cores, ffx.f=get.ps.CC, rfx.f=run.lme.4.cc, fstem="CC_N-%d_parent-%d.RData", samp="int"))
-# 
-# # ----------------------------------------------------------------------------------------------------
-# # attain densities for each subject N, across all outer samples
-# # ----------------------------------------------------------------------------------------------------
-# dens.across.N(fstem="CC_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=-50, max=0, spacer=1000, dv="p", savekey="CC")
-# dens.across.N(fstem="CC_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=0, max=0.5, spacer=1000, dv="d", savekey="CC")
-# dens.across.N(fstem="CC_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=0, max=400, spacer=1000, dv="esub", savekey="CC")
-# dens.across.N(fstem="CC_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=0, max=400, spacer=1000, dv="eRes", savekey="CC")
+lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, 
+                                     k=n.perms, j=n.perms, cores=cores, 
+                                     f=get.ps.CC, fstem="CC_N-%d_parent-%d.RData", samp="int"))
 
-quit()
 

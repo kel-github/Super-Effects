@@ -48,7 +48,7 @@ get.cohens.d <- function(data, iv, dv, x){
   d
 }
 
-run.t.test.sim <- function(data, iv="Block.No.Names", dv="RT", x="Random Block", subs){
+run.t.test.sim <- function(data, iv="trialtype", dv="RT", x="Random Block", subs){
   
   out = data.frame( p    = get.ps.t.test(data, iv, dv, x),
                     d    = get.cohens.d(data, iv, dv, x))
@@ -261,33 +261,74 @@ run.prev.test <- function(data, alpha=.05, k=1000, Np=1000){
   results
 }
 
+get.ps.vsl <- function(data){
+  # run t-test and prevalence test for VSL data
+  
+  t <- run.os.t.test.sim(data)
+  prev <- run.prev.test(data)
+  
+  # COLLATE OUTPUT VARIABLES
+  # -----------------------------------------------------------------------------
+  out <- list()
+  
+  # p 
+  p <- c(t$p, prev$p)
+  out$p <- p
+  
+  # get ef szs
+  efs <- c(t$d, prev$d) 
+  out$esz <- efs
+  
+  # get residuals from lme model
+  out$esub = c(NA, NA)
+  out$eRes = c(NA, NA)
+  out
+}
+
 # ----------------------------------------------------------------------------------------------------
 ###### LME and sim functions for SRT data
 #### -------------------------------------------------------------------------------------------------
-run.lme.4.srt <- function(data, dv = "RT"){
-  # run a linear mixed effects analysis
-  # going to take the interaction of block x sequence/random as the effect from 
-  # which to calculate the recommended d value, 
-  # for comparison with the ffx analysis: see https://www.journalofcognition.org/articles/10.5334/joc.10/
-  # and https://psycnet-apa-org.ezproxy.library.uq.edu.au/fulltext/2014-32656-001.html
+get.ps.srt <- function(data){
+  # run t-test and linear mixed effects model on SRT data
+  
+  options(contrasts = c("contr.sum", "contr.poly")) # set options   
   
   names(data) <- c("sub", "Nsz", "perm", "trialtype", "RT")  
   
-  # FOR THE SRT TASK, ALSO FOUND THAT A BOUNDARY (SINGULAR) FIT WHEN INCLUDING RFX OF EXPERIMENTOR AND TASK ORDER
-  mod <- lmer(eval(parse(text=dv)) ~ trialtype + (1|sub),
-              data=data, REML=FALSE)
-  null <- lmer(eval(parse(text=dv)) ~ (1|sub),
-               data=data, REML=FALSE)
-  d <- abs(summary(mod)$coefficients["trialtypeSequence Block","Estimate"])/sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
-  p <-anova(mod, null)$`Pr(>Chisq)`[2]
-  out = list()
-  out$p = p
-  out$d = d
+  # number subjects
+  data$trialtype <- as.factor(data$trialtype)
+  nsubs = length(data$sub)/length(levels(data$trialtype))
+  data$sub <- rep(1:nsubs, each = length(levels(data$trialtype)))
+  
+  # RUN t-test
+  # -----------------------------------------------------------------------------
+  t <- run.t.test.sim(data, subs = unique(data$sub))
+  
+  # RUN LME VERSION
+  # -----------------------------------------------------------------------------
+  mod <- lmer(RT ~ trialtype + (1|sub), data=data)
+  lme.an <- Anova(mod)
+  
+  # get effect size for random effects
+  lme.peta <- summary(mod)$coefficients["trialtype1", "Estimate"]/
+              sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
+  
+  # COLLATE OUTPUT VARIABLES
+  # -----------------------------------------------------------------------------
+  out <- list()
+  
+  # p 
+  p <- c(t$p, lme.an['trialtype','Pr(>Chisq)'])
+  out$p <- p
+  
+  # get ef szs
+  efs <- c(t$d, lme.peta) 
+  out$esz <- efs
+  
+  # get residuals from lme model
   df = as.data.frame(VarCorr(mod))
-  out$esub = df$sdcor[df$grp=="sub"]^2
-#  out$eexp = df$sdcor[df$grp=="exp"]^2
-#  out$etask = df$sdcor[df$grp=="task.order"]^2  
-  out$eRes = df$sdcor[df$grp=="Residual"]^2  
+  out$esub = c(NA, df$sdcor[df$grp=="sub"])
+  out$eRes = c(NA, df$sdcor[df$grp=="Residual"])
   out
 }
 
@@ -295,61 +336,50 @@ run.lme.4.srt <- function(data, dv = "RT"){
 ###### aov and LME functions for CC data
 #### -------------------------------------------------------------------------------------------------
 
-get.ps.CC <- function(data, dv = "RT"){
+get.ps.CC <- function(data){
   # run aov on the contextual cueing data
-  # return the p value, and the conversion of peta to d
+  # return the p value, and the conversion of peta to d for both RM Anova and LME
   # data = dataframe for testing
   # dv = name of dv (typically RT)
   
-  # NOTE: This also works for SRT data
+  options(contrasts = c("contr.sum", "contr.poly")) # set options  
   
   names(data) <- c("sub", "Nsz", "perm", "block", "trialtype", "RT")
-  
+
   # number subjects
   data$block <- as.factor(data$block)
   data$trialtype <- as.factor(data$trialtype)
   nsubs <- length(data$sub)/(length(levels(data$block)) * length(levels(data$trialtype)))
   data$sub <- as.factor(rep(1:nsubs, each=length(levels(data$block)) * length(levels(data$trialtype))))
   
+  # RUN RM ANOVA (see anova function notes for choice)
+  # -----------------------------------------------------------------------------
   an <- get_anova_table(anova_test(data=data%>%ungroup(), dv=RT, wid=sub, within=c(block,trialtype), effect.size="pes"))
-  #an <- aov(eval(parse(text=dv)) ~ (block*trialtype)+Error(sub/(block*trialtype)), data = data) # not worried about using type 1 sum of squares because the data are balanced, see https://mcfromnz.wordpress.com/2011/03/02/anova-type-iiiiii-ss-explained/
-  # comparisons between ours and ss3 outputs revealed the above comment to not be true, therefore using Anova from car package
-  p <- an[an$Effect == "block:trialtype", "p"]
-  out = list()
-  out$p <- p
-  # compute partial eta squared: https://www.frontiersin.org/articles/10.3389/fpsyg.2013.00863/full equation 12
-  # and convert to d (see https://www.journalofcognition.org/articles/10.5334/joc.10/)
-  # peta <- c(summary(an$`Within`)[[1]]["Sum Sq"][2,1]/sum(summary(an$`Within`)[[1]]["Sum Sq"]),
-  #           summary(an$`Within`)[[1]]["Sum Sq"][3,1]/sum(summary(an$`Within`)[[1]]["Sum Sq"]))
-  peta <-  an[an$Effect == "block:trialtype", "pes"]
-  out$d <- sqrt((4*peta)/(1-peta))
-  out
-}
 
-
-run.lme.4.cc <- function(data, dv = "RT", fx="int"){
-  # run a linear mixed effects analysis
-  # going to take the interaction of block x repeat/novel as the effect from 
-  # which to calculate the recommended d value, 
-  # for comparison with the ffx analysis: see https://www.journalofcognition.org/articles/10.5334/joc.10/
-  # and https://psycnet-apa-org.ezproxy.library.uq.edu.au/fulltext/2014-32656-001.html
-  # fx = do you want to test for the interaction (int), or the main effect (me)?
+  # RUN LME VERSION
+  # -----------------------------------------------------------------------------
+  mod <- lmer( RT ~ block*trialtype + (1|sub), data=data )
+  lme.an <- Anova(mod)
   
-  # names(data) <- c("sub", "Nsz", "perm", "block", "trialtype", "target", "RT")  
-  # 
-  # mod <- lmer(RT~block*trialtype+(1+block|sub)+(1|target), data=data, REML=FALSE)
-  # null <- lmer(RT~block+trialtype+(1+block|sub)+(1|target), data=data, REML=FALSE) 
-  # 
-  # d <- (summary(mod)$coefficients["block:trialtypeRepeated","Estimate"])/sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
-  # p <- anova(mod, null)$`Pr(>Chisq)`[2]
-  out = list()
-#  df = as.data.frame(VarCorr(mod))
-  out$esub = NA #sum(df$sdcor[df$grp=="sub"]^2)
-  # out$eexp = df$sdcor[df$grp=="exp"]^2
-  # out$etask = df$sdcor[df$grp=="task.order"]^2  
-  out$eRes = NA #df$sdcor[df$grp=="Residual"]^2  
-  out$p = NA #p
-  out$d = NA #d
+  # get effect size for random effects
+  lme.peta <- (summary(mod)$coefficients["block11:trialtype1", "Estimate"]-summary(mod)$coefficients["block1:trialtype1", "Estimate"])/
+              sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
+  
+  # COLLATE OUTPUT VARIABLES
+  # -----------------------------------------------------------------------------
+  out <- list()
+  
+  # p 
+  p <- c(an$p[an$Effect == 'block:trialtype'], lme.an['block:trialtype','Pr(>Chisq)'])
+  out$p <- p
+  
+  peta <- c(an$pes[an$Effect == 'block:trialtype'], lme.peta) 
+  out$esz <- peta
+  
+  # get residuals from lme model
+  df = as.data.frame(VarCorr(mod))
+  out$esub = c(NA, df$sdcor[df$grp=="sub"])
+  out$eRes = c(NA, df$sdcor[df$grp=="Residual"])
   out
 }
 
@@ -357,13 +387,12 @@ run.lme.4.cc <- function(data, dv = "RT", fx="int"){
 # ----------------------------------------------------------------------------------------------------
 ###### aov and LME functions for SD data
 #### -------------------------------------------------------------------------------------------------
-get.ps.SD <- function(data, dv){
+get.ps.SD <- function(data){
   # run aov on the contextual cueing data
   # return the p value, and the conversion of peta to d
   # data = dataframe for testing
-  # dv = name of dv (typically RT)
-  
-  # NOTE: This also works for SRT data
+
+  options(contrasts = c("contr.sum", "contr.poly")) # set options  
   
   names(data) <- c("sub", "Nsz", "perm", "task", "trialtype", "RT")
   
@@ -373,62 +402,34 @@ get.ps.SD <- function(data, dv){
   nsubs <- length(data$sub)/(length(levels(data$task)) * length(levels(data$trialtype)))
   data$sub <- as.factor(rep(1:nsubs, each=length(levels(data$task)) * length(levels(data$trialtype))))
   
+  # RUN RM ANOVA
+  # -----------------------------------------------------------------------------
   an <- get_anova_table(anova_test(data=data%>%ungroup(), dv=RT, wid=sub, within=c(task,trialtype), effect.size="pes"))
-  #an <- aov(eval(parse(text=dv)) ~ (task*trialtype)+Error(sub/(task*trialtype)), data = data) # not worried about using type 1 sum of squares because the data are balanced, see https://mcfromnz.wordpress.com/2011/03/02/anova-type-iiiiii-ss-explained/
-  # happy with the defaults
 
-  p <- an[an$Effect == "task:trialtype", "p"]
-  out = list()
-  out$p <- p
-  # compute partial eta squared and convert to d (see https://www.journalofcognition.org/articles/10.5334/joc.10/)
-  peta <- an[an$Effect == "task:trialtype", "pes"]
-  out$d <- sqrt((4*peta)/(1-peta))
-  out
-}
-
-run.lme.4.SD <- function(data, dv = "RT", efx = "sub"){
-  # run a linear mixed effects analysis
-  # for comparison with the ffx analysis: see https://www.journalofcognition.org/articles/10.5334/joc.10/
-  # and https://psycnet-apa-org.ezproxy.library.uq.edu.au/fulltext/2014-32656-001.html
-#  names(data) <- c("sub", "Nsz", "perm", "task", "trialtype", "RT")
-  # NOTE: when I had the following RFX structure (1|sub) + (1|task.order) + (1|exp) the fit was singular, suggesting
-  # the RFX structure is too complex for the data - https://stats.stackexchange.com/questions/378939/dealing-with-singular-fit-in-mixed-models
-  # therefore am testing the removal of each element of the rfx structure, starting with task.order.
-  # Dropping task.order (with N=23) was far superior to dropping experimenter:
-  # Formula: eval(parse(text = dv)) ~ trialtype * task + (1 | sub) + (1 |      exp)
-  # Data: tmp
-  # AIC        BIC     logLik   deviance   df.resid 
-  # -1675.0323 -1639.1048   844.5161 -1689.0323       1245 
+  # RUN LME VERSION
+  # -----------------------------------------------------------------------------
+  mod <- lmer( RT ~ task*trialtype + (1|sub), data=data )
+  lme.an <- Anova(mod)
   
-  # Formula: eval(parse(text = dv)) ~ trialtype * task + (1 | sub) + (1 |      task.order)
-  # Data: data
-  # AIC       BIC    logLik  deviance  df.resid 
-  # -132.5054 -114.8529   73.2527 -146.5054        85 
-  # FITS still singular with exp, so dropping that also. The remaining model only has a singular fit a small number of times
-  # if (efx == "sub"){
-  #   mod <- lmer(eval(parse(text=dv)) ~ trialtype*task + (1|sub),
-  #               data=data, REML=FALSE)
-  #   null <- lmer(eval(parse(text=dv)) ~ task + (1|sub),
-  #                data=data, REML=FALSE)
-  #  
-  # } else if (efx == "stim"){
-  #   mod <- lmer(eval(parse(text=dv)) ~ trialtype*task + (1|sub) + (1|stim),
-  #               data=data, REML=FALSE)
-  #   null <- lmer(eval(parse(text=dv)) ~ task + (1|sub) + (1|stim),
-  #                data=data, REML=FALSE)
-  # }
-  # 
-  # d <- abs(summary(mod)$coefficients["trialtypesingle","Estimate"])/sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
-  # p <- anova(mod, null)$`Pr(>Chisq)`[2]
-  out = list()
-  out$p = NA #p
-  out$d = NA #d
-  # below is hard coded and clunky - beware! largely done this way because of past decisions!
-#  df = as.data.frame(VarCorr(mod))
-  out$esub = NA #df$sdcor[df$grp=="sub"]^2
-  out$eRes = NA #df$sdcor[df$grp=="Residual"]^2
-#  if (efx == "stim") out$estim = df$sdcor[df$grp=="stim"]^2
-  #list(out, as.data.frame(VarCorr(mod)))
+  # get effect size for random effects
+  lme.peta <- summary(mod)$coefficients["trialtype1", "Estimate"]/sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
+  
+  # COLLATE OUTPUT VARIABLES
+  # -----------------------------------------------------------------------------
+  out <- list()
+  
+  # p 
+  p <- c(an$p[an$Effect == "trialtype"], lme.an['trialtype','Pr(>Chisq)'])
+  out$p <- p
+  
+  # compute partial eta squared
+  peta <- c(an$pes[an$Effect == "trialtype"], lme.peta) 
+  out$esz <- peta
+  
+  # get residuals from lme model
+  df = as.data.frame(VarCorr(mod))
+  out$esub = c(NA, df$sdcor[df$grp=="sub"])
+  out$eRes = c(NA, df$sdcor[df$grp=="Residual"])
   out
 }
 
@@ -436,81 +437,67 @@ run.lme.4.SD <- function(data, dv = "RT", efx = "sub"){
 ###### aov and LME functions for AB data
 #### -------------------------------------------------------------------------------------------------
 
-get.ps.aov.AB <- function(data, dv="T2gT1"){
-  # run aov on the dv with lag as the iv 
+get.ps.aov.AB <- function(data){
+  # run lme and aov on the dv with lag as the iv
   # return the p value
   # data = dataframe for testing - has 4 columns - sub, lag, T1, T2gT1
   # dv = name of dv (T1 or T2gT1)
+
+  options(contrasts = c("contr.sum", "contr.poly")) # set options
   names(data) <- c("sub", "Nsz", "perm", "lag", "T1", "T2gT1")
   # number subjects
   data$lag <- as.factor(data$lag)
   nsubs <- length(data$sub)/length(levels(data$lag))
   data$sub <- as.factor(rep(1:nsubs, each=length(levels(data$lag))))
-  
+
+  # RUN RM ANOVA
+  # -----------------------------------------------------------------------------
+  # aov doesn't do sum of squares 3, ezANOVA = ~500 ms slower than get_anova_table
   an <- get_anova_table(anova_test(data=data%>%ungroup(), dv=T2gT1, wid=sub, within=lag, effect.size="pes"))
-  p <- an$p
-  peta <- an$pes
-  out = list()
+
+  # RUN LME VERSION
+  # -----------------------------------------------------------------------------
+  mod <- lmer( T2gT1 ~ lag + (1|sub), data=data )
+  lme.an <- Anova(mod)
+
+  # get effect size for random effects
+  lme.peta <- summary(mod)$coefficients["lag1", "Estimate"]/sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
+
+  # COLLATE OUTPUT VARIABLES
+  # -----------------------------------------------------------------------------
+  out <- list()
+  
+  # p 
+  p <- c(an$p, lme.an$`Pr(>Chisq)`)
+  peta <- c(an$pes, lme.peta) 
   out$p <- p
-  # compute partial eta squared and convert to d (see https://www.journalofcognition.org/articles/10.5334/joc.10/)
-  # is actually eta squared in this case
-  out$d <- sqrt((4*peta)/(1-peta))
+  
+  # compute partial eta squared
+  out$esz <- peta
+  
+  # get residuals from lme model
+  df = as.data.frame(VarCorr(mod))
+  out$esub = c(NA, df$sdcor[df$grp=="sub"])
+  out$eRes = c(NA, df$sdcor[df$grp=="Residual"])
   out
 }
 
-run.lme.4.AB <- function(data, dv="T2gT1", N){
-  # run a linear mixed effects analysis
-  # # going to take the difference between lag 2 and lag 7 as the effect from 
-  # # which to calculate the recommended d value, 
-  # # for comparison with the ffx analysis: see https://www.journalofcognition.org/articles/10.5334/joc.10/
-  # # and https://psycnet-apa-org.ezproxy.library.uq.edu.au/fulltext/2014-32656-001.html
-  # names(data) <- c("sub", "Nsz", "perm", "lag", "T2", "T2gT1") 
-  # 
-  # # number subjects
-  # idx = which(data$lag[1:(length(data$lag)-1)] != data$lag[2:length(data$lag)])
-  # idx.subs = idx[seq(length(levels(as.factor(data$lag))), length(idx), length(levels(as.factor(data$lag))))]
-  # idx.subs = c(0, idx.subs, length(data$lag))
-  # trials.per.p = diff(idx.subs)
-  # nsubs = length(trials.per.p)
-  # data$sub = as.factor(unlist(mapply(function(x,y) rep(x, times=y), x=1:nsubs, y=trials.per.p)))
-  # # mod <- lmer(eval(parse(text=dv)) ~ lag + (1|sub),
-  # #             data=data, REML=FALSE)
-  # mod <- lmer(T2gT1~lag+(lag|T2)+(lag|sub), data=data, REML=FALSE)
-  # null <- lmer(T2gT1~(1|T2)+(1|sub), data=data, REML=FALSE)
-  # 
-  # # null <- lmer(eval(parse(text=dv)) ~ (1|sub),
-  # #              data=data, REML=FALSE)
-  # d <- summary(mod)$coefficients["laglag_7","Estimate"]/sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
-  # p <- anova(mod, null)$`Pr(>Chisq)`[2]
-  out = list()
-  
-#  df = as.data.frame(VarCorr(mod))
-  #out$esub = df$sdcor[df$grp=="sub" & df$var1 == "(Intercept)"]^2
-  out$esub = NA #sum(df$sdcor[df$grp=="sub" & df$var1 == "(Intercept)"]^2)
-  # out$eexp = df$sdcor[df$grp=="exp"]^2
-  # out$etask = df$sdcor[df$grp=="task.order"]^2  
-  out$eRes = NA #df$sdcor[df$grp=="Residual"]^2  
-  out$p = NA #p
-  out$d = NA #d
-  
-  out
-}
 
 # ----------------------------------------------------------------------------------------------------
 ###### functions to run sims ACROSS ALL TASKS
 #### -------------------------------------------------------------------------------------------------
-run.outer <- function(in.data, subs, N, k, j, cores, fstem,  ffx.f, rfx.f, samp){
+run.outer <- function(in.data, subs, N, k, j, cores, fstem,  f, samp){
   # this function runs the outer permutation loop
   # for 1:j permutations, for a given N
   # arguments:
-  # -- in.data .ffx and .rfx = dataframe for relevant analysis
+  # -- in.data = dataframe for relevant analysis
   # -- subs = the list of all subject numbers
   # -- N = the number to sample from subs
   # -- k = the total number of inner permutations, 1 if using immediate sampling
-  # -- j = how many outer loops? 1000 if using immediate sampling
+  # -- j = how many outer loops? 1000 for both types of sampling
   # -- cores = how many cores do you want to use?
   # -- fstem = what do you want the output files from the inner loop to be called?
-  # -- ffx.f & rfx.f: are the references to the functions you want to run for this task
+  # -- f: is the reference to the function you want to run for this task
   # -- samp: sampling type: 'int' for intermediate or 'imm' for immediate
   
   # settings for the sampling technique 
@@ -519,93 +506,81 @@ run.outer <- function(in.data, subs, N, k, j, cores, fstem,  ffx.f, rfx.f, samp)
   } else if (samp == "imm"){
     replace=TRUE
   }
-  sub.idx = lapply(1:j, function(x) sample.N(subs, N, x, replace=replace))
-  sub.idx = do.call(rbind, sub.idx)
+  sub.idx = lapply(1:j, function(x) sample.N(subs, N, x, replace=replace)) # select an idx of N unique if int, or with replacement if imm
+  sub.idx = do.call(rbind, sub.idx) # index for all the outerloops
   # here I mclapply over each 'parent sample' to pass into run.inner
   names(in.data)[names(in.data)=="Subj.No"] = "sub"
-
-  mclapply(1:j, function(x) run.inner(in.data=inner_join(sub.idx, in.data, by="sub"),
-                                      parent.subs=sub.idx$sub[sub.idx$perm==x],
+  
+  # so pass in all the data that will be used only on this outer loop
+  mclapply(1:j, function(x) run.inner(in.data=inner_join(sub.idx, in.data, by="sub") %>% filter(perm == x) %>% select(-c("Nsz", "perm")),
+                                      parent.subs=sub.idx$sub[sub.idx$perm == x],
                                       N=N,
                                       k=k,
                                       j=x,
                                       fstem=fstem,
-                                      ffx.f=ffx.f,
-                                      rfx.f=rfx.f,
+                                      f=f,
                                       samp=samp),
            mc.cores=cores)
 }
 
-run.inner <- function(in.data, parent.subs, N, k, j, fstem, ffx.f, rfx.f, samp){
+run.inner <- function(in.data, parent.subs, N, k, j, fstem, f, samp){
   # this function runs the inner permutation loop
   # for 1:k permutations, run.AB.models is run, and the output
   # collated. The results are saved in a binary file in the
   # local directory
   # arguments:
   # --in.data = dataframe (see notes of get.ps.aov.AB)
-  # --subs = the list of all subject numbers
-  # --N = the number to sample from subs
-  # --perm = which permutation we're on
+  # --parent.subs = the list of subject numbers for this parent sample
+  # --N = the number to sample from parent.subs
   # --k = the total number of inner permutations, 1 if using immediate sampling
   # --j = which outer permutation are we on?
+  # -- f: the function to be run
   # -- fstem: see run.outer
   # -- samp: sampling type: 'int' for intermediate or 'imm' for immediate
   
-  if (samp == "imm"){
-    out = run.models(in.data=in.data %>% filter(perm == j), 
-                     subs=parent.subs, N=N, ffx.f=ffx.f, rfx.f=rfx.f, samp=samp)
-  } else {
-    out = replicate(k, run.models(in.data=in.data, subs=parent.subs, N=N, ffx.f=ffx.f, rfx.f=rfx.f, samp=samp), simplify=FALSE)
-    out = do.call(rbind, out)
-  }
-
+  out = replicate(k, run.models(in.data=in.data, subs=parent.subs, N=N, f=f, samp=samp), simplify=FALSE)
+  out = do.call(rbind, out)
   out$k = rep(1:k, each=2)
   
   # now save the output
   if (samp == "int"){
-    fname=sprintf(fstem, N, j)
+    fname = sprintf(fstem, N, j)
   } else if (samp == "imm"){
-    fname=sprintf(fstem, N, j)
+    fname = sprintf(fstem, N, j)
     fname = paste(samp, fname, sep="_")
   }
   save(out, file=fname)
 }
 
-run.models <- function(in.data, subs, N, ffx.f, rfx.f, samp){
+run.models <- function(in.data, subs, N, f, samp){
   # this function runs 1 simulation 
-  # this function will sample the requested N with replacement
-  # and then apply the ffx and rfx analysis and output to a dataframe
+  # this function will sample the requested N with the replacement mode set by samp
+  # and then apply the analysis and output to a dataframe
   # in.data = dataframe 
-  # subs = the list of all subject numbers
+  # subs = the list of subject numbers to be sampled from
   # N = the number to sample from subs
+  # -- f: the analysis function to be run 
   # samp: sampling type: 'int' for intermediate or 'imm' for immediate
   
-  ffx.f <- eval(ffx.f)
-  rfx.f <- eval(rfx.f)
+  # settings for the sampling technique 
   if (samp == "int"){
-    idx = sample.N(subs=subs, N=N, k=1, replace=TRUE) # get the samples for this one permutation
-#    names(in.data)[names(in.data)=="Subj.No"] = "sub"
-    tmp.fx = unlist(ffx.f(inner_join(idx, in.data %>% select(-c("Nsz", "perm")), by="sub")))
-    tmp.rfx = unlist(rfx.f(inner_join(idx, in.data %>% select(-c("Nsz", "perm")), by="sub")))
+    replace=TRUE
   } else if (samp == "imm"){
-    
-    tmp.fx = unlist(ffx.f(in.data))
-    tmp.rfx = unlist(rfx.f(in.data))
+    replace=FALSE
   }
+  
+  idx = sample.N(subs=subs, N=N, k=1, replace=replace) # get the samples for this one permutation
 
-  if (length(names(tmp.rfx)) > 2) {
-    out = data.frame( n    = c(N, N),
-                      p    = c(tmp.fx["p"], tmp.rfx["p"]),
-                      d    = c(tmp.fx["d"], tmp.rfx["d"]),
-                      esub = c(NA, tmp.rfx["esub"]),
-                      eRes = c(NA, tmp.rfx["eRes"]),
-                      mod = c("ffx", "rfx") )
-  } else {
-    out = data.frame( n    = c(N, N),
-                      p    = c(tmp.fx["p"], tmp.rfx["p"]),
-                      d    = c(tmp.fx["d"], tmp.rfx["d"]),
-                      mod = c("ffx", "rfx") )    
-  }
+  f <- eval(f) # get the function
+  tmp.fx = f(inner_join(idx, in.data, by="sub"))
+
+  out = data.frame( n    = c(N, N),
+                    p    = tmp.fx$p,
+                    esz  = tmp.fx$esz,
+                    esub = tmp.fx$esub,
+                    eRes = tmp.fx$eRes,
+                    mod = c("RM-AN", "LME") )
+
   out
 }
 

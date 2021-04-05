@@ -53,12 +53,12 @@ ffx.dat <- dat %>% group_by(Subj.No, Trial.Type.Name) %>%
 # define levels for simulations
 # ----------------------------------------------------------------------------------------------------
 sub.Ns = round(exp(seq(log(13), log(313), length.out = 20)))
-
+sub.Ns = 313
 n.perms = 1000
-#n.perms = 1000# for each sample size, we will repeat our experiment n.perms^2 times 
-cores = 10
+cores = 20
 subs  <- unique(ffx.dat$Subj.No)
 
+start = proc.time()
 # ----------------------------------------------------------------------------------------------------
 # run simulations for ffx & rfx models, getting p values and partial
 # eta squares, and save results to a list, using immediate sampling
@@ -66,8 +66,7 @@ subs  <- unique(ffx.dat$Subj.No)
 # ----------------------------------------------------------------------------------------------------
 lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1,
                                      j=n.perms, cores=cores,
-                                     ffx.f=get.ps.aov.AB,
-                                     rfx.f=run.lme.4.AB,
+                                     f=get.ps.aov.AB,
                                      fstem="AB_N-%d_parent-%d.RData",
                                      samp="imm"))
 
@@ -76,14 +75,15 @@ lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1,
 # eta squares, and save results to a list, using intermediate sampling
 # approach
 # ----------------------------------------------------------------------------------------------------
-
 lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x,
                                      k=n.perms, j=n.perms, cores=cores,
-                                     ffx.f=get.ps.aov.AB,
-                                     rfx.f=run.lme.4.AB,
+                                     f=get.ps.aov.AB,
                                      fstem="AB_N-%d_parent-%d.RData",
                                      samp="int"))
+end = proc.time()
 
+
+end - start
 # ----------------------------------------------------------------------------------------------------
 # attain densities for each subject N, across all outer samples
 # ----------------------------------------------------------------------------------------------------
