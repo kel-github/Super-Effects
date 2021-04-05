@@ -46,7 +46,7 @@ set.seed(42)
 # load data and wrangle into tidy form (see https://r4ds.had.co.nz/tidy-data.html), plus relabel to make
 # labels a little simpler
 # ----------------------------------------------------------------------------------------------------
-dat <- read.csv(args[1],
+dat <- read.csv(fname,
                 header=TRUE)
 
 # ----------------------------------------------------------------------------------------------------
@@ -95,7 +95,7 @@ subs  <- unique(ffx.dat$Subj.No)
 # ----------------------------------------------------------------------------------------------------
 # run simulations, getting p values from linear models, and cohen's d values, and save results to a list, using immediate sampling
 # ----------------------------------------------------------------------------------------------------
-fstem <- paste(args[2], "/SD_N-%d_parent-%d.RData", sep="")
+fstem <- paste(outpath, "/imm_SD_N-%d_parent-%d.RData", sep="")
 lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, 
                                      k=1, j=n.perms, cores=cores, f=get.ps.SD, 
                                      fstem=fstem, samp="imm"))
@@ -104,6 +104,7 @@ lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x,
 # ----------------------------------------------------------------------------------------------------
 # run simulations, getting p values from linear models, and cohen's d values, and save results to a list, using intermediate sampling
 # ----------------------------------------------------------------------------------------------------
+fstem <- paste(outpath, "/SD_N-%d_parent-%d.RData", sep="")
 lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, 
                                      k=n.perms, j=n.perms, cores=cores, 
                                      f=get.ps.SD, 

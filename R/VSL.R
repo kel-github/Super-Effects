@@ -39,7 +39,7 @@ set.seed(42)
 # (see https://r4ds.had.co.nz/tidy-data.html), plus relabel to make
 # labels a little simpler
 # -----------------------------------------------------------------------------
-dat <- read.csv(args[1],
+dat <- read.csv(fname,
                 header=TRUE)
 
 # -----------------------------------------------------------------------------
@@ -76,7 +76,7 @@ cores <- 1
 # cohen's d values, and save results to a list
 # -----------------------------------------------------------------------------
 
-fstem <- paste(args[2], "/VSL_N-%d_parent-%d.RData", sep="")
+fstem <- paste(outpath, "/VSL_N-%d_parent-%d.RData", sep="")
 subs  <- unique(prev.dat$Subj.No)
 start  <-  Sys.time()
 lapply(sub.Ns, function(x) run.outer(in.data=prev.dat, subs=subs, N=x,

@@ -543,12 +543,7 @@ run.inner <- function(in.data, parent.subs, N, k, j, fstem, f, samp){
   out$k = rep(1:k, each=2)
   
   # now save the output
-  if (samp == "int"){
-    fname = sprintf(fstem, N, j)
-  } else if (samp == "imm"){
-    fname = sprintf(fstem, N, j)
-    fname = paste(samp, fname, sep="_")
-  }
+  fname = sprintf(fstem, N, j)
   save(out, file=fname)
 }
 

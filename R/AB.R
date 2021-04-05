@@ -48,7 +48,7 @@ set.seed(42)
 # https://r4ds.had.co.nz/tidy-data.html), plus relabel to make labels
 # a little simpler
 # ----------------------------------------------------------------------------------------------------
-dat <- read.csv(args[1],
+dat <- read.csv(fname,
                 header=TRUE)
 # ----------------------------------------------------------------------------------------------------
 # Create dataframes 
@@ -70,13 +70,12 @@ n.perms = 1000
 cores = 20
 
 subs  <- unique(ffx.dat$Subj.No)
-
 # ----------------------------------------------------------------------------------------------------
 # run simulations for ffx & rfx models, getting p values and partial
 # eta squares, and save results to a list, using immediate sampling
 # approach
 # ----------------------------------------------------------------------------------------------------
-fstem <- paste(args[2], "/AB_N-%d_parent-%d.RData", sep="")
+fstem <- paste(outpath, "/imm_AB_N-%d_parent-%d.RData", sep="")
 lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1,
                                      j=n.perms, cores=cores,
                                      f=get.ps.aov.AB,
@@ -88,6 +87,7 @@ lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1,
 # eta squares, and save results to a list, using intermediate sampling
 # approach
 # ----------------------------------------------------------------------------------------------------
+fstem <- paste(outpath, "/AB_N-%d_parent-%d.RData", sep="")
 lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x,
                                      k=n.perms, j=n.perms, cores=cores,
                                      f=get.ps.aov.AB,
