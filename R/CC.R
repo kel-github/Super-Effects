@@ -24,11 +24,29 @@ library(rstatix)
 source("efilids_functions.R") # custom functions written for this project
 source("R_rainclouds.R") # functions for plotting
 
+args <- commandArgs(trailingOnly=TRUE)
+Nind <- NA
+if (length(args) == 0) {
+  fname <- "../data/total_of_313_subs_CC_task_trial_level_data.csv"
+  outpath <- "$HOME/tmp"
+} else if (length(args) == 1) {
+  fname <- args[1]
+  outpath <- "$HOME/tmp"
+} else if (length(args) >= 2) {
+  fname <- args[1]
+  outpath <- args[2]
+}
+if (length(args) == 3) {
+  Nind <- as.integer(args[3])
+}
+
+set.seed(42) 
 
 # ----------------------------------------------------------------------------------------------------
 # load data and wrangle into tidy form (see https://r4ds.had.co.nz/tidy-data.html), plus relabel to make
 # labels a little simpler
-dat = read.csv("../data/total_of_313_subs_CC_task_trial_level_data.csv", header=TRUE)
+dat <- read.csv(args[1],
+                header=TRUE)
 
 # ----------------------------------------------------------------------------------------------------
 # Create dataframes 
@@ -49,7 +67,10 @@ ffx.dat <- dat %>% mutate(Block.No = rep(c(1:12), each = 24, length(unique(dat$S
 # define levels for simulations
 # ----------------------------------------------------------------------------------------------------
 
-sub.Ns = round(exp(seq(log(13), log(313), length.out = 20)))
+sub.Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
+if (!is.na(Nind)) {
+  sub.Ns <- sub.Ns[Nind]
+}
 n.perms =1000# for each sample size, we will repeat our experiment n.perms times
 cores = 20
 subs  <- unique(ffx.dat$Subj.No)
@@ -57,9 +78,10 @@ subs  <- unique(ffx.dat$Subj.No)
 # ----------------------------------------------------------------------------------------------------
 # run simulations, getting p values from t.tests, and cohen's d values, and save results to a list, using immediate sampling
 # ----------------------------------------------------------------------------------------------------
+fstem <- paste(args[2], "/CC_N-%d_parent-%d.RData", sep="")
 lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, 
                                      k=1, j=n.perms, cores=cores, f=get.ps.CC, 
-                                     fstem="CC_N-%d_parent-%d.RData", samp="imm"))
+                                     fstem=fstem, samp="imm"))
 
 
 # # ----------------------------------------------------------------------------------------------------
@@ -67,6 +89,6 @@ lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x,
 # # ----------------------------------------------------------------------------------------------------
 lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, 
                                      k=n.perms, j=n.perms, cores=cores, 
-                                     f=get.ps.CC, fstem="CC_N-%d_parent-%d.RData", samp="int"))
+                                     f=get.ps.CC, fstem=fstem, samp="int"))
 
 

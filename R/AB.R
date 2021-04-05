@@ -26,23 +26,33 @@ library(rstatix)
 source("efilids_functions.R") # custom functions written for this project
 source("R_rainclouds.R") # functions for plotting
 
+args <- commandArgs(trailingOnly=TRUE)
+Nind <- NA
+if (length(args) == 0) {
+  fname <- "../data/total_of_313_subs_AB_task_trial_level_data.csv"
+  outpath <- "$HOME/tmp"
+} else if (length(args) == 1) {
+  fname <- args[1]
+  outpath <- "$HOME/tmp"
+} else if (length(args) >= 2) {
+  fname <- args[1]
+  outpath <- args[2]
+}
+if (length(args) == 3) {
+  Nind <- as.integer(args[3])
+}
+
+set.seed(42) 
 # ----------------------------------------------------------------------------------------------------
 # load data and wrangle into tidy form (see
 # https://r4ds.had.co.nz/tidy-data.html), plus relabel to make labels
 # a little simpler
 # ----------------------------------------------------------------------------------------------------
-dat = read.csv("../data/total_of_313_subs_AB_task_trial_level_data.csv", header=TRUE)
-# dat$Task.Order <- as.factor(dat$Task.Order)
-# dat$Experimenter <- as.factor(dat$Experimenter)
-# dat$T1.Stimulus.Type <- as.factor(dat$T1.Stimulus.Type)
-# dat$T2.Stimulus.Type <- as.factor(dat$T2.Stimulus.Type)
-
+dat <- read.csv(args[1],
+                header=TRUE)
 # ----------------------------------------------------------------------------------------------------
 # Create dataframes 
 # ----------------------------------------------------------------------------------------------------
-# rfx.dat <- dat %>% group_by(Subj.No, Trial.Type.Name, T2.Stimulus.Type) %>%
-#                    summarise(T2gT1=mean(T2T1.Accuracy))
-
 
 # Create a summary of the data for fixed fx modelling
 ffx.dat <- dat %>% group_by(Subj.No, Trial.Type.Name) %>%
@@ -53,21 +63,24 @@ ffx.dat <- dat %>% group_by(Subj.No, Trial.Type.Name) %>%
 # define levels for simulations
 # ----------------------------------------------------------------------------------------------------
 sub.Ns = round(exp(seq(log(13), log(313), length.out = 20)))
-sub.Ns = 313
+if (!is.na(Nind)) {
+  sub.Ns <- sub.Ns[Nind]
+}
 n.perms = 1000
 cores = 20
+
 subs  <- unique(ffx.dat$Subj.No)
 
-start = proc.time()
 # ----------------------------------------------------------------------------------------------------
 # run simulations for ffx & rfx models, getting p values and partial
 # eta squares, and save results to a list, using immediate sampling
 # approach
 # ----------------------------------------------------------------------------------------------------
+fstem <- paste(args[2], "/AB_N-%d_parent-%d.RData", sep="")
 lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1,
                                      j=n.perms, cores=cores,
                                      f=get.ps.aov.AB,
-                                     fstem="AB_N-%d_parent-%d.RData",
+                                     fstem=fstem,
                                      samp="imm"))
 
 # ----------------------------------------------------------------------------------------------------
@@ -78,53 +91,5 @@ lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1,
 lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x,
                                      k=n.perms, j=n.perms, cores=cores,
                                      f=get.ps.aov.AB,
-                                     fstem="AB_N-%d_parent-%d.RData",
+                                     fstem=fstem,
                                      samp="int"))
-end = proc.time()
-
-
-end - start
-# ----------------------------------------------------------------------------------------------------
-# attain densities for each subject N, across all outer samples
-# ----------------------------------------------------------------------------------------------------
-# dens.across.N(fstem="AB_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=-800, max=0, spacer=1000, dv="p", savekey="AB")
-# dens.across.N(fstem="AB_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=0, max=3, spacer=1000, dv="d", savekey="AB")
-# dens.across.N(fstem="AB_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=0, max=0.75, spacer=1000, dv="esub", savekey="AB")
-# dens.across.N(fstem="AB_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=0, max=0.75, spacer=1000, dv="eRes", savekey="AB")
-
-# ----------------------------------------------------------------------------------------------------
-# plot the outputs separately - then make 4 panels, top row = effect
-# size, bottom row = p, left column = ffx, right column = rfx
-# ----------------------------------------------------------------------------------------------------
-
-# first for d values
-# ylims = c(0,3)
-# ffx.d.p <- plt.fx.sz(sims.dat[sims.dat$model == "FFX", ], c(0,2))
-# names(sims.dat)[names(sims.dat)=="rfx"] = "fx"
-# rfx.sub.d.p <- plt.fx.sz(sims.dat[sims.dat$model == "RFX" & sims.dat$fx == "sub", ], c(1,3))
-# rfx.stim.d.p <- plt.fx.sz(sims.dat[sims.dat$model == "RFX" & sims.dat$fx == "stim", ], c(0,2))
-# # now for p-values
-# xlims=c(0,0.4)
-# ffx.p.p <- plt.ps(sims.dat[sims.dat$model=="FFX",], xlims)
-# rfxsub.p.p <- plt.ps(sims.dat[sims.dat$model=="RFX" & sims.dat$fx == "sub",], c(0, .4)) + geom_density_ridges()
-# rfxstim.p.p <- plt.ps(sims.dat[sims.dat$model=="RFX" & sims.dat$fx == "stim",], c(0, .4))
-# 
-# # use cowplot to make a grid
-# 
-# p = plot_grid(ffx.d.p, rfx.sub.d.p, rfx.stim.d.p, ffx.p.p, rfxsub.p.p, rfxstim.p.p, labels=c('A', 'B', 'C', 'D', 'E', 'F'), label_size = 12, align="v")
-# #p # print out the plot so you can see it
-# p = p + ggsave(plot.fname, width = width, height = height, units="in")
-# 
-# # ----------------------------------------------------------------------------------------------------
-# # now a raincloud plot of the sources of randomness in the model
-# # ----------------------------------------------------------------------------------------------------
-# 
-# rfx$model <- NULL
-# names(rfx)[names(rfx) == "rfx"] = "model"
-# rfx.p <- plt.rfx(rfx, c(0, 0.2)) + facet_wrap(~model*rfx, ncol=2)
-# rfx.p = rfx.p + ggsave(rfx.plot.fname, width = width/2, height = height/2, units="in")
-# 
-# # ----------------------------------------------------------------------------------------------------
-# # save the data of import to an RData file
-# # ----------------------------------------------------------------------------------------------------
-# save(sims.dat, rfx, file="AB_sim_data.RData")
