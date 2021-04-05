@@ -27,8 +27,9 @@ source("efilids_functions.R") # custom functions written for this project
 source("R_rainclouds.R") # functions for plotting
 
 # ----------------------------------------------------------------------------------------------------
-# load data and wrangle into tidy form (see https://r4ds.had.co.nz/tidy-data.html), plus relabel to make
-# labels a little simpler
+# load data and wrangle into tidy form (see
+# https://r4ds.had.co.nz/tidy-data.html), plus relabel to make labels
+# a little simpler
 # ----------------------------------------------------------------------------------------------------
 dat = read.csv("../data/total_of_313_subs_AB_task_trial_level_data.csv", header=TRUE)
 # dat$Task.Order <- as.factor(dat$Task.Order)
@@ -55,21 +56,33 @@ sub.Ns = round(exp(seq(log(13), log(313), length.out = 20)))
 
 n.perms = 1000
 #n.perms = 1000# for each sample size, we will repeat our experiment n.perms^2 times 
-cores = 20
+cores = 10
 subs  <- unique(ffx.dat$Subj.No)
 
 # ----------------------------------------------------------------------------------------------------
-# run simulations for ffx & rfx models, getting p values and partial eta squares, and save results to a list, 
-# using immediate sampling approach
+# run simulations for ffx & rfx models, getting p values and partial
+# eta squares, and save results to a list, using immediate sampling
+# approach
 # ----------------------------------------------------------------------------------------------------
-lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1, j=n.perms, cores=cores, ffx.f=get.ps.aov.AB, rfx.f=run.lme.4.AB, fstem="AB_N-%d_parent-%d.RData", samp="imm"))
+lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1,
+                                     j=n.perms, cores=cores,
+                                     ffx.f=get.ps.aov.AB,
+                                     rfx.f=run.lme.4.AB,
+                                     fstem="AB_N-%d_parent-%d.RData",
+                                     samp="imm"))
 
 # ----------------------------------------------------------------------------------------------------
-# run simulations for ffx & rfx models, getting p values and partial eta squares, and save results to a list, 
-# using intermediate sampling approach
+# run simulations for ffx & rfx models, getting p values and partial
+# eta squares, and save results to a list, using intermediate sampling
+# approach
 # ----------------------------------------------------------------------------------------------------
 
-lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=n.perms, j=n.perms, cores=cores, ffx.f=get.ps.aov.AB, rfx.f=run.lme.4.AB, fstem="AB_N-%d_parent-%d.RData", samp="int"))
+lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x,
+                                     k=n.perms, j=n.perms, cores=cores,
+                                     ffx.f=get.ps.aov.AB,
+                                     rfx.f=run.lme.4.AB,
+                                     fstem="AB_N-%d_parent-%d.RData",
+                                     samp="int"))
 
 # ----------------------------------------------------------------------------------------------------
 # attain densities for each subject N, across all outer samples
@@ -80,8 +93,8 @@ lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=n.perms,
 # dens.across.N(fstem="AB_N-%d_parent-%d.RData", Ns=sub.Ns, j=n.perms, min=0, max=0.75, spacer=1000, dv="eRes", savekey="AB")
 
 # ----------------------------------------------------------------------------------------------------
-# plot the outputs separately - then make 4 panels, top row = effect size, bottom row = p, left column = ffx, 
-# right column = rfx
+# plot the outputs separately - then make 4 panels, top row = effect
+# size, bottom row = p, left column = ffx, right column = rfx
 # ----------------------------------------------------------------------------------------------------
 
 # first for d values

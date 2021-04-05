@@ -1,0 +1,13 @@
+Bootstrap: docker
+From: r-base
+
+%post
+    apt-get -y update
+    apt-get -y install git libcurl4-openssl-dev libxml2-dev libssl-dev 
+    R -e "install.packages(c('tidyverse', 'wesanderson', 'cowplot', 'lme4', 'ggridges', 'car', 'rstatix'))"
+
+%environment
+
+%runscript
+    cd /rundir
+    Rscript "$@"
