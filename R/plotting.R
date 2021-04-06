@@ -24,15 +24,16 @@ source("R_rainclouds.R") # functions for plotting
 # define session variables
 # ----------------------------------------------------------------------------------------------------
 
-task = "SD"
-med = 24
+task = "imm_AB"
+subfol = "AB"
+med = 23
 d_scale_ffx = 2
 d_scale_rfx = 2
 p_scale_ffx = 2
 p_scale_rfx = 2
-px_rng_d = c(0,3)
-px_rng_p_ffx = c(-1000,0)
-px_rng_p_rfx = c(-1000,0)
+px_rng_d = c(-2.5,1)
+px_rng_p_ffx = c(-800,0)
+px_rng_p_rfx = c(-800,0)
 width = 8
 height = 8
 
@@ -40,7 +41,7 @@ height = 8
 # LIST OF SETTINGS
 # ----------------------------------------------------------------------------------------------------
 # AB
-# med=24, d_scale_ffx = 2, d_scale_rfx = 2, p_scale_ffx = 2, p_scale_rfx = 2, p_rng_d = c(0,5), px_rng_p_ffx = c(-800,0), px_rng_p_rfx = c(-800,0)
+# med=24, d_scale_ffx = 2, d_scale_rfx = 2, p_scale_ffx = 2, p_scale_rfx = 2, p_rng_d = c(-1,1), px_rng_p_ffx = c(-800,0), px_rng_p_rfx = c(-800,0)
 
 # CC 
 # med = 23, d_scale_ffx = 2, d_scale_rfx = 2, p_scale_ffx = 2, p_scale_rfx = 2, p_rng_d = c(0,1), px_rng_p_ffx = c(-50,0), px_rng_p_rfx = c(-50,0)
@@ -55,7 +56,7 @@ height = 8
 # define datas and load ds
 # ----------------------------------------------------------------------------------------------------
 
-fnames = c(paste("../data/", task, "_d", "_d.RData", sep=""), paste("../data/", task, "_p", "_d.RData", sep=""))
+fnames = c(paste("../data/", subfol, "/", task, "_esz", "_d.RData", sep=""), paste("../data/", subfol, "/", task, "_p", "_d.RData", sep=""))
 load(fnames[1])
 
 # ----------------------------------------------------------------------------------------------------
@@ -79,6 +80,7 @@ load(fnames[2])
 d$Nsz <- as.factor(d$Nsz)
 d$mod <- as.factor(d$mod)
 
+if (task == "imm_AB") d <- d %>% filter(as.numeric(Nsz) < 17)
 if (task == "SD") d <- d %>% filter(as.numeric(Nsz) < 17) # remove sample sizes saturated at 0
 
 ffx.p <- plot.p(d, "ffx", px_rng_p_ffx, p_scale_ffx, med)

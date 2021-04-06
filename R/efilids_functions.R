@@ -67,8 +67,8 @@ get.os.t.test <- function(sum.data, dv){
   # dv = name of dv
   # x = iv
   t.dat = sum.data[eval(dv)]
-#  t.idx = data[eval(iv)] == x
-#  t = t.test(t.dat[t.idx == TRUE], alt = "greater", mu = 0.5)
+  #  t.idx = data[eval(iv)] == x
+  #  t = t.test(t.dat[t.idx == TRUE], alt = "greater", mu = 0.5)
   t = t.test(t.dat, alt = "greater", mu = 0.5)
   t$p.value
 }
@@ -77,7 +77,7 @@ get.os.cohens.d <- function(sum.data, dv){
   # get Cohen's d measure for one sample t test
   # sum.data = dataframe for testing
   # dv = dv of interest
-
+  
   d.dat = sum.data[eval(dv)]
   meanH0 = 0.5
   sd = sd( d.dat$acc )
@@ -88,7 +88,7 @@ get.os.cohens.d <- function(sum.data, dv){
 run.os.t.test.sim <- function(data, dv = "acc"){
   
   sum.data = data %>% group_by(sub) %>%
-                      summarise(acc=mean(Response==Target.Order))
+    summarise(acc=mean(Response==Target.Order))
   out = data.frame( p    = get.os.t.test(sum.data, dv),
                     d    = get.os.cohens.d(sum.data, dv))
   out
@@ -124,10 +124,10 @@ run.mont.frst.lvl.over.subs <- function(data,NfL){
   names(data)[names(data) == "Trial.No"] = "trial"
   
   perms <- rbind(data %>% group_by(sub) %>%
-                          summarise(acc=mean(Response==Target.Order)) %>%
-                          mutate(p=1),
+                   summarise(acc=mean(Response==Target.Order)) %>%
+                   mutate(p=1),
                  inner_join(idx, data, by=c("sub", "trial")) %>% group_by(sub, p) %>%
-                          summarise(acc=mean(Response==Target.Order)))
+                   summarise(acc=mean(Response==Target.Order)))
   perms %>% arrange(sub)
 }
 
@@ -227,7 +227,7 @@ prev.test <- function(samp.data, alpha, k, NfL){
   # probability uncorrected of global null (puGN)
   # the above gives the statement of existance, next step is to evaluate against the prevalence null
   # if this is below alpha, then we would say its significant
-
+  
   ####### attain upper bound on the gamma null that can be rejected (see equation 20 of 10.1016/j.neuroimage.2016.07.040)
   gamma_zero = (alpha^(1/nsubs) - puGN^(1/nsubs)) / (1 - puGN^(1/nsubs))
   if (puGN > alpha) gamma_zero = 0 # not significant so not defined with a prevalence value
@@ -311,7 +311,7 @@ get.ps.srt <- function(data){
   
   # get effect size for random effects
   lme.peta <- summary(mod)$coefficients["trialtype1", "Estimate"]/
-              sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
+    sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
   
   # COLLATE OUTPUT VARIABLES
   # -----------------------------------------------------------------------------
@@ -345,7 +345,7 @@ get.ps.CC <- function(data){
   options(contrasts = c("contr.sum", "contr.poly")) # set options  
   
   names(data) <- c("sub", "Nsz", "perm", "block", "trialtype", "RT")
-
+  
   # number subjects
   data$block <- as.factor(data$block)
   data$trialtype <- as.factor(data$trialtype)
@@ -355,7 +355,7 @@ get.ps.CC <- function(data){
   # RUN RM ANOVA (see anova function notes for choice)
   # -----------------------------------------------------------------------------
   an <- get_anova_table(anova_test(data=data%>%ungroup(), dv=RT, wid=sub, within=c(block,trialtype), effect.size="pes"))
-
+  
   # RUN LME VERSION
   # -----------------------------------------------------------------------------
   mod <- lmer( RT ~ block*trialtype + (1|sub), data=data )
@@ -363,7 +363,7 @@ get.ps.CC <- function(data){
   
   # get effect size for random effects
   lme.peta <- (summary(mod)$coefficients["block11:trialtype1", "Estimate"]-summary(mod)$coefficients["block1:trialtype1", "Estimate"])/
-              sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
+    sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
   
   # COLLATE OUTPUT VARIABLES
   # -----------------------------------------------------------------------------
@@ -391,7 +391,7 @@ get.ps.SD <- function(data){
   # run aov on the contextual cueing data
   # return the p value, and the conversion of peta to d
   # data = dataframe for testing
-
+  
   options(contrasts = c("contr.sum", "contr.poly")) # set options  
   
   names(data) <- c("sub", "Nsz", "perm", "task", "trialtype", "RT")
@@ -405,7 +405,7 @@ get.ps.SD <- function(data){
   # RUN RM ANOVA
   # -----------------------------------------------------------------------------
   an <- get_anova_table(anova_test(data=data%>%ungroup(), dv=RT, wid=sub, within=c(task,trialtype), effect.size="pes"))
-
+  
   # RUN LME VERSION
   # -----------------------------------------------------------------------------
   mod <- lmer( RT ~ task*trialtype + (1|sub), data=data )
@@ -442,27 +442,27 @@ get.ps.aov.AB <- function(data){
   # return the p value
   # data = dataframe for testing - has 4 columns - sub, lag, T1, T2gT1
   # dv = name of dv (T1 or T2gT1)
-
+  
   options(contrasts = c("contr.sum", "contr.poly")) # set options
   names(data) <- c("sub", "Nsz", "perm", "lag", "T1", "T2gT1")
   # number subjects
   data$lag <- as.factor(data$lag)
   nsubs <- length(data$sub)/length(levels(data$lag))
   data$sub <- as.factor(rep(1:nsubs, each=length(levels(data$lag))))
-
+  
   # RUN RM ANOVA
   # -----------------------------------------------------------------------------
   # aov doesn't do sum of squares 3, ezANOVA = ~500 ms slower than get_anova_table
   an <- get_anova_table(anova_test(data=data%>%ungroup(), dv=T2gT1, wid=sub, within=lag, effect.size="pes"))
-
+  
   # RUN LME VERSION
   # -----------------------------------------------------------------------------
   mod <- lmer( T2gT1 ~ lag + (1|sub), data=data )
   lme.an <- Anova(mod)
-
+  
   # get effect size for random effects
   lme.peta <- summary(mod)$coefficients["lag1", "Estimate"]/sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
-
+  
   # COLLATE OUTPUT VARIABLES
   # -----------------------------------------------------------------------------
   out <- list()
@@ -565,17 +565,17 @@ run.models <- function(in.data, subs, N, f, samp){
   }
   
   idx = sample.N(subs=subs, N=N, k=1, replace=replace) # get the samples for this one permutation
-
+  
   f <- eval(f) # get the function
   tmp.fx = f(inner_join(idx, in.data, by="sub"))
-
+  
   out = data.frame( n    = c(N, N),
                     p    = tmp.fx$p,
                     esz  = tmp.fx$esz,
                     esub = tmp.fx$esub,
                     eRes = tmp.fx$eRes,
                     mod = c("RM-AN", "LME") )
-
+  
   out
 }
 
@@ -583,7 +583,7 @@ run.models <- function(in.data, subs, N, f, samp){
 # Density generating functions for plotting, and for computing 95 % CI for the FFX/RFX ratio measure
 # ----------------------------------------------------------------------------------------------------
 
-dens.across.N <- function(fstem, Ns, j, min, max, spacer, dv, savekey, task, datpath, rxvnme, cores){
+dens.across.N <- function(fstem, Ns, j, min, max, spacer, dv, savekey, task, datpath, rxvnme, rxvsub, cores){
   # grab density functions for dv of choice, across all N sizes
   # save to a binary file output
   # INPUTS
@@ -597,17 +597,18 @@ dens.across.N <- function(fstem, Ns, j, min, max, spacer, dv, savekey, task, dat
   # -- savekey: usually the initials of the paradigm, for saving output
   # -- datpath: filepath to data rxv
   # -- rxvnme: name of rxv
+  # -- rxvsub: name of the sub folder in rxv
   tmp = mclapply(Ns, add.dens, fstem=fstem, j=j, min=min, max=max, 
                  dv=dv, spacer=spacer, datpath=datpath, rxvnme=rxvnme,
-                 task=task, mc.cores=cores)
+                 rxvsub=rxvsub, task=task, mc.cores=cores)
   d = do.call(rbind, tmp)
   fname = paste(savekey, dv, "d.RData", sep="_")
   save(d, file=paste(datpath, fname, sep=""))
-  unlink(paste(datpath, "/Rdat", sep=""), recursive=TRUE)
+  unlink(paste(datpath, "/", rxvsub, sep=""), recursive=TRUE)
 }
 
 
-add.dens <- function(fstem, N, j, min, max, spacer, dv, datpath, rxvnme, task){
+add.dens <- function(fstem, N, j, min, max, spacer, dv, datpath, rxvnme, rxvsub, task){
   # add density functions for the ffx or rfx based values
   # for a given N, across all outer loops. 
   # output is two density functions.
@@ -621,8 +622,8 @@ add.dens <- function(fstem, N, j, min, max, spacer, dv, datpath, rxvnme, task){
   # -- dv: which dv do you want to know about?
   
   # first get data extracted for that N
-  unzp(datpath, rxvnme, task, j, N)
-  ds <- lapply(1:j, get.dens, fstem=paste(datpath, "/", "Rdat/", task, fstem, sep=""), N=N, min=min, max=max, dv=dv, spacer=spacer)
+  unzp(datpath, rxvnme, rxvsub, task, j, N)
+  ds <- lapply(1:j, get.dens, fstem=paste(datpath, rxvsub, "/", task, fstem, sep=""), N=N, min=min, max=max, dv=dv, spacer=spacer)
   ds <- lapply(1:j, function(x) do.call(rbind, ds[[x]])) 
   ds <- Reduce('+', ds)
   out <- data.frame(Nsz = rep(N, each=ncol(ds)*2),
@@ -630,7 +631,7 @@ add.dens <- function(fstem, N, j, min, max, spacer, dv, datpath, rxvnme, task){
                     d = c(ds["ffx",], ds["rfx",]),
                     x = seq(min, max, by=abs(max-min)/spacer))
   # remove data files
-#  unlink(paste(datpath, "/Rdat", sep=""), recursive=TRUE)
+  #  unlink(paste(datpath, "/Rdat", sep=""), recursive=TRUE)
   out
 }
 
@@ -649,18 +650,18 @@ get.dens <- function(fstem, N, j, min, max, dv, spacer){
   # -- dv = which d for which to compute density
   
   load(sprintf(fstem, N, j))
-  ffx = out[out$mod=="ffx",]
-  rfx = out[out$mod=="rfx",]
+  ffx = out[out$mod=="RM-AN",]
+  rfx = out[out$mod=="LME",]
   if (dv == "p"){
     # if (dens_dtype == "probit"){
     #   # see https://www.rdocumentation.org/packages/gtools/versions/3.5.0/topics/logit
     #   ffx.d <- gen.dens(min, max, spacer=spacer, log( ffx[,eval(dv)] / (1- ffx[,eval(dv)] )))
     #   rfx.d <- gen.dens(min, max, spacer=spacer, log( rfx[,eval(dv)] / (1- rfx[,eval(dv)] )))
     # } else {
-      ffx.d <- gen.dens(min, max, spacer=spacer, log(ffx[,eval(dv)]))
-      rfx.d <- gen.dens(min, max, spacer=spacer, log(rfx[,eval(dv)]))
+    ffx.d <- gen.dens(min, max, spacer=spacer, log(ffx[,eval(dv)]))
+    rfx.d <- gen.dens(min, max, spacer=spacer, log(rfx[,eval(dv)]))
     # }
-  } else if (dv == "d") {
+  } else if (dv == "esz") {
     ffx.d <- gen.dens(min, max, spacer=spacer, ffx[,eval(dv)])
     rfx.d <- gen.dens(min, max, spacer=spacer, rfx[,eval(dv)])
   } else {
@@ -766,11 +767,11 @@ plt.fx.sz <- function(data, ylims){
   data %>% filter(measure=="d") %>%
     ggplot(mapping=aes(x=value, y=n)) + #, fill=stat(x))) +
     geom_density_ridges(scale=2, rel_min_height=.01, fill=wes_palette("IsleofDogs1")[1], color=wes_palette("IsleofDogs1")[5]) +
-#    geom_density_ridges_gradient(scale = 2, rel_min_height = 0.01, gradient_lwd = 1.) +
+    #    geom_density_ridges_gradient(scale = 2, rel_min_height = 0.01, gradient_lwd = 1.) +
     theme_ridges() +
-#    scale_fill_viridis_c(name = "value", option = "C") +
+    #    scale_fill_viridis_c(name = "value", option = "C") +
     xlab('d') + ylab('N') + theme_cowplot() + xlim(ylims) +
- #   scale_y_discrete(breaks = seq(23, 303, by = 20), labels=as.character(seq(23, 303, by = 20))) +
+    #   scale_y_discrete(breaks = seq(23, 303, by = 20), labels=as.character(seq(23, 303, by = 20))) +
     guides(fill = FALSE, colour = FALSE) +
     ggtitle(paste(data$model[1])) +
     theme(axis.title.x = element_text(face = "italic"))
@@ -803,9 +804,9 @@ plt.rfx <- function(data, xlims){
     geom_density_ridges(scale=2, rel_min_height=.01, fill=wes_palette("IsleofDogs1")[5], color=wes_palette("IsleofDogs1")[4]) +
     #    geom_density_ridges_gradient(scale = 2, rel_min_height = 0.01, gradient_lwd = 1.) +
     theme_ridges() +
-#    scale_fill_viridis_c(name = "value", option = "C") +
+    #    scale_fill_viridis_c(name = "value", option = "C") +
     xlab(expression(sigma)) + ylab('N') + theme_cowplot() + xlim(xlims) + 
-#    scale_y_discrete(breaks = seq(23, 303, by = 20), labels=as.character(seq(23, 303, by = 20))) +
+    #    scale_y_discrete(breaks = seq(23, 303, by = 20), labels=as.character(seq(23, 303, by = 20))) +
     facet_wrap(~model*rfx) +
     guides(fill = FALSE, colour = FALSE) +
     theme(axis.title.x = element_text(face = "italic"))
@@ -814,18 +815,31 @@ plt.rfx <- function(data, xlims){
 # ----------------------------------------------------------------------------------------------------
 # More data wrangles
 # ----------------------------------------------------------------------------------------------------
-unzp <- function(datpath, rxnme, task, j, subN){
+unzp <- function(datpath, rxvnme, rxvsub, task, j, subN){
   # function to unzip specific files from the data archive
   # :: datpath = where is the data?
   # :: rxnme = name of zipped (rxiv) file
   # :: task = which task do you want to extract data for?
   # :: j = total number of permutations/parent sets
   # :: subs = the sub Ns used in the perms
-  lapply(1:j, function(y) unzip(paste(datpath, rxnme, sep=""), 
-                                      file=paste("Rdat/", task, sprintf("_N-%d_parent-%d.RData", subN, y ), sep=""),
-                                      exdir=datpath))
+  
+  lapply(1:j, function(y) unzip(paste(datpath, rxvnme, sep=""), 
+                                file=paste(rxvsub, "/", task, sprintf("_N-%d_parent-%d.RData", subN, y ), sep=""),
+                                exdir=datpath))
   
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
