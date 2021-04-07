@@ -1,14 +1,15 @@
 ### written by K. Garner, April 2020
 ### edited by Z. Nott, September 2020
-### for the project 'On the detectability of effects in executive function and implicit learning tasks'
+### for the project 'On the detectability of effects in executive
+### function and implicit learning tasks'
 ### Garner, KG*, Nydam, A*, Nott, Z., & Dux, PE 
 
 ### custom functions for running statistical analyses and plotting 
 
-# ----------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # select a data subset
-# ----------------------------------------------------------------------------------------------------
-sample.N <- function(subs, N, k, replace){
+# ------------------------------------------------------------------------------
+sample.N <- function(subs, N, k, replace) {
   # get k x N subject numbers and assign to a dataframe for future filtering  
   this.sample <- data.frame(sub=unlist(lapply(N, sample, x=subs, replace=replace)),
                             Nsz=unlist(lapply(N,  function(x) rep(x, each=x))),
@@ -16,9 +17,9 @@ sample.N <- function(subs, N, k, replace){
   this.sample
 }
 
-# ----------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ###### t-test functions (paired samples)
-###### ----------------------------------------------------------------------------
+###### -------------------------------------------------------------------------
 
 get.ps.t.test <- function(data, iv, dv, x){
   # run t.test on the dv between the variables x & y 
@@ -55,9 +56,9 @@ run.t.test.sim <- function(data, iv="trialtype", dv="RT", x="Random Block", subs
   out
 }
 
-###### -----------------------------------------------------------------------------------------------
+###### -------------------------------------------------------------------------
 ###### t-test functions (one sample t test, used for VSL)
-###### -----------------------------------------------------------------------------------------------
+###### -------------------------------------------------------------------------
 
 get.os.t.test <- function(sum.data, dv){
   # run one sample t.test 
@@ -94,9 +95,9 @@ run.os.t.test.sim <- function(data, dv = "acc"){
   out
 }
 
-###### -----------------------------------------------------------------------------------------------
+###### -------------------------------------------------------------------------
 ###### prevalence statistics functions
-###### -----------------------------------------------------------------------------------------------
+###### -------------------------------------------------------------------------
 
 # run.mont.frst.lvl <- function(data, N){
 #   # data = 1 participants VSL data! N = number of montecarlo simulations
@@ -170,14 +171,14 @@ calc.flvl.dist <- function(answers_a, answers_b, responses_a) {
   ratio_counts
 }
 
-gen.samps <- function(k, nsubs){
+gen.samps <- function(k, nsubs) {
   data <- data.frame(shuffle=rep(2:k, nsubs),
                      sub=rep(1:nsubs, each=k-1),
                      p=unlist(lapply(1:nsubs, function (x) sample(2:k, k-1, replace=T))))
   data
 }
 
-get.perm.mins <- function(slvl.idx, flvl.idx, flvl.neut, samp.data){   
+get.perm.mins <- function(slvl.idx, flvl.idx, flvl.neut, samp.data) {   
   inner_join(slvl.idx, cbind(inner_join(flvl.idx, samp.data, by=c("sub","trial")) %>% select(-Response), inner_join(flvl.neut, samp.data, by=c("sub", "trial")) %>% select(Response)), by=c("sub", "p")) %>%
     group_by(shuffle, sub) %>%
     summarise(acc=mean(Target.Order == Response)) %>%
@@ -186,7 +187,7 @@ get.perm.mins <- function(slvl.idx, flvl.idx, flvl.neut, samp.data){
     select(min.acc)
 }
 
-get.flvl.sub.dists <- function(data, nsubs){
+get.flvl.sub.dists <- function(data, nsubs) {
   responses <- data %>% group_by(sub) %>% count(Response) %>% spread(Response, n)
   answers <- data %>% group_by(sub) %>% count(Target.Order) %>% spread(Target.Order, n)
   sar <- inner_join(answers, responses, by="sub", suffix=c(".ans", ".resp"))
@@ -197,7 +198,7 @@ gen.slvl <- function(flvldists){
   unlist(lapply(flvldists, function(x) sample(x$acc, 1, prob=x$p, replace=TRUE)))
 }
 
-prev.test <- function(samp.data, alpha, k, NfL){
+prev.test <- function(samp.data, alpha, k, NfL) {
   # samp.data = sample of data
   # k = the number of 2nd level perms
   # NfL = the number of first level perms
@@ -261,16 +262,15 @@ run.prev.test <- function(data, alpha=.05, k=1000, Np=1000){
   results
 }
 
-get.ps.vsl <- function(data){
+get.ps.vsl <- function(data) {
   # run t-test and prevalence test for VSL data
-  
   t <- run.os.t.test.sim(data)
   prev <- run.prev.test(data)
-  
+
   # COLLATE OUTPUT VARIABLES
-  # -----------------------------------------------------------------------------
+  # ----------------------------------------------------------------------------
   out <- list()
-  
+
   # p 
   p <- c(t$p, prev$p)
   out$p <- p
@@ -285,10 +285,10 @@ get.ps.vsl <- function(data){
   out
 }
 
-# ----------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ###### LME and sim functions for SRT data
-#### -------------------------------------------------------------------------------------------------
-get.ps.srt <- function(data){
+#### ---------------------------------------------------------------------------
+get.ps.srt <- function(data) {
   # run t-test and linear mixed effects model on SRT data
   
   options(contrasts = c("contr.sum", "contr.poly")) # set options   
@@ -301,11 +301,11 @@ get.ps.srt <- function(data){
   data$sub <- rep(1:nsubs, each = length(levels(data$trialtype)))
   
   # RUN t-test
-  # -----------------------------------------------------------------------------
+  # ----------------------------------------------------------------------------
   t <- run.t.test.sim(data, subs = unique(data$sub))
   
   # RUN LME VERSION
-  # -----------------------------------------------------------------------------
+  # ----------------------------------------------------------------------------
   mod <- lmer(RT ~ trialtype + (1|sub), data=data)
   lme.an <- Anova(mod)
   
@@ -486,7 +486,7 @@ get.ps.aov.AB <- function(data){
 # ----------------------------------------------------------------------------------------------------
 ###### functions to run sims ACROSS ALL TASKS
 #### -------------------------------------------------------------------------------------------------
-run.outer <- function(in.data, subs, N, k, j, cores, fstem,  f, samp){
+run.outer <- function(in.data, subs, N, k, j, outer_index, cores, fstem,  f, samp, seeds) {
   # this function runs the outer permutation loop
   # for 1:j permutations, for a given N
   # arguments:
@@ -495,35 +495,56 @@ run.outer <- function(in.data, subs, N, k, j, cores, fstem,  f, samp){
   # -- N = the number to sample from subs
   # -- k = the total number of inner permutations, 1 if using immediate sampling
   # -- j = how many outer loops? 1000 for both types of sampling
+  # -- outer_index = which outer_index to run (NA == all)
   # -- cores = how many cores do you want to use?
   # -- fstem = what do you want the output files from the inner loop to be called?
   # -- f: is the reference to the function you want to run for this task
   # -- samp: sampling type: 'int' for intermediate or 'imm' for immediate
-  
-  # settings for the sampling technique 
-  if (samp == "int"){
-    replace=FALSE
-  } else if (samp == "imm"){
-    replace=TRUE
+  # -- seeds: random seeds for reproducible results
+
+  # settings for the sampling technique
+  if (samp == "int") {
+    replace <- FALSE
+  } else if (samp == "imm") {
+    replace <- TRUE
   }
-  sub.idx = lapply(1:j, function(x) sample.N(subs, N, x, replace=replace)) # select an idx of N unique if int, or with replacement if imm
+  # select an idx of N unique if int, or with replacement if imm
+  sub.idx = lapply(1:j, function(x) sample.N(subs, N, x, replace=replace))
   sub.idx = do.call(rbind, sub.idx) # index for all the outerloops
   # here I mclapply over each 'parent sample' to pass into run.inner
-  names(in.data)[names(in.data)=="Subj.No"] = "sub"
+  names(in.data)[names(in.data)=="Subj.No"] <- "sub"
   
   # so pass in all the data that will be used only on this outer loop
-  mclapply(1:j, function(x) run.inner(in.data=inner_join(sub.idx, in.data, by="sub") %>% filter(perm == x) %>% select(-c("Nsz", "perm")),
-                                      parent.subs=sub.idx$sub[sub.idx$perm == x],
-                                      N=N,
-                                      k=k,
-                                      j=x,
-                                      fstem=fstem,
-                                      f=f,
-                                      samp=samp),
-           mc.cores=cores)
+  outer_filter <- function(x) inner_join(sub.idx, in.data, by="sub") %>%
+                              filter(perm == x) %>%
+                              select(-c("Nsz", "perm"))
+
+  if (!is.na(outer_index)) {
+    # reseed
+    set.seed(seeds[outer_index])
+    run.inner(in.data=outer_filter(outer_index),
+              parent.subs=sub.idx$sub[sub.idx$perm == outer_index],
+              N=N,
+              k=k,
+              j=outer_index,
+              fstem=fstem,
+              f=f,
+              samp=samp)
+  } else {
+    mclapply(1:j,
+            function(x) run.inner(in.data=outer_filter(x),
+                                  parent.subs=sub.idx$sub[sub.idx$perm == x],
+                                  N=N,
+                                  k=k,
+                                  j=x,
+                                  fstem=fstem,
+                                  f=f,
+                                  samp=samp),
+            mc.cores=cores)
+  }
 }
 
-run.inner <- function(in.data, parent.subs, N, k, j, fstem, f, samp){
+run.inner <- function(in.data, parent.subs, N, k, j, fstem, f, samp) {
   # this function runs the inner permutation loop
   # for 1:k permutations, run.AB.models is run, and the output
   # collated. The results are saved in a binary file in the
