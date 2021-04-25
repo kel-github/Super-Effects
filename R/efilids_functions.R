@@ -703,17 +703,25 @@ plot.d <- function(d, m, yl, sc, med){
   #--med: median sample size
   
   total_p <- d %>% group_by(mod, Nsz) %>% summarise(sum=sum(d)) 
-  d %>% inner_join(total_p, by=c("mod", "Nsz")) %>% mutate(dp = d/sum) %>% 
-    filter(mod == eval(m)) %>% 
-    ggplot(aes(x=x, y=Nsz, height=dp, group=Nsz)) +
-    geom_density_ridges(stat="identity", scale=sc, rel_min_height=.01, fill=wes_palette("IsleofDogs1")[1], color=wes_palette("IsleofDogs1")[5]) +
-    theme_ridges() +
-    geom_hline(yintercept=which(abs(as.numeric(levels(d$Nsz))-med) == min(abs(as.numeric(levels(d$Nsz))-med)))[1],
-               linetype="dashed", color=wes_palette("IsleofDogs1")[3]) +
-    xlab('d') + ylab('N') + theme_cowplot() + xlim(yl) +
-    guides(fill = FALSE, colour = FALSE) +
-    ggtitle(eval(m)) +
-    theme(axis.title.x = element_text(face = "italic"))
+  p <- d %>% inner_join(total_p, by=c("mod", "Nsz")) %>% mutate(dp = d/sum) %>% 
+        filter(mod == eval(m)) %>% 
+        ggplot(aes(x=x, y=Nsz, height=dp, group=Nsz)) +
+        geom_density_ridges(stat="identity", scale=sc, rel_min_height=.01, fill=wes_palette("IsleofDogs1")[1], color=wes_palette("IsleofDogs1")[5]) +
+        theme_ridges() +
+        geom_hline(yintercept=which(abs(as.numeric(levels(d$Nsz))-med) == min(abs(as.numeric(levels(d$Nsz))-med)))[1],
+                    linetype="dashed", color=wes_palette("IsleofDogs1")[3]) +
+        ylab('N') + theme_cowplot() + xlim(yl) +
+        guides(fill = FALSE, colour = FALSE) +
+        ggtitle(eval(m)) 
+  if (m == "RM-AN") {
+    p + xlab(expression(paste(eta[p]^{2}))) +
+          theme(axis.title.x = element_text(face = "italic"))
+  } else if (m=="LME"){
+    p + xlab(expression(tilde(paste(eta[p]^{2})))) +
+          theme(axis.title.x = element_text(face = "italic"))
+  } else if (m == "t")
+    p + xlab("d") +
+          theme(axis.title.x = element_text(face = "italic"))
 }
 
 calc.crit.d <- function(df, N){
@@ -732,9 +740,9 @@ plot.d.by.samp <- function(d, yl, sc, m){
   d %>% inner_join(total_p, by=c("mod", "Nsz", "samp")) %>% mutate(dp = d) %>% # amend if want to make a normalised distribution
     filter(mod == eval(m)) %>% 
     ggplot(aes(x=x, y=as.factor(Nsz), height=dp, group=as.factor(Nsz), fill=as.factor(samp))) +
-    geom_density_ridges(stat="identity", scale=sc, rel_min_height=.0001, fill=wes_palette("IsleofDogs1")[1], color=wes_palette("IsleofDogs1")[1]) +
+    geom_density_ridges(stat="identity", scale=sc, rel_min_height=.0001, fill=wes_palette("IsleofDogs1")[1], color=wes_palette("IsleofDogs1")[5]) +
     theme_ridges() + facet_wrap(~as.factor(samp)) +
-    xlab('d') + ylab('N') + theme_cowplot() + xlim(yl) +
+    xlab('effect') + ylab('N') + theme_cowplot() + xlim(yl) +
     scale_color_manual(values="white") +
     scale_fill_manual(values=wes_palette("IsleofDogs1")[6]) +
     theme(axis.title.x = element_text(face = "italic"))
