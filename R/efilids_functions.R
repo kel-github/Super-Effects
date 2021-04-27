@@ -2,7 +2,6 @@
 ### edited by Z. Nott, September 2020
 ### for the project 'On the detectability of effects in executive
 ### function and implicit learning tasks'
-### Garner, KG*, Nydam, A*, Nott, Z., & Dux, PE 
 
 ### custom functions for running statistical analyses and plotting 
 

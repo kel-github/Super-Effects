@@ -34,24 +34,24 @@ sub.Ns = round(exp(seq(log(13), log(313), length.out = 20)))
 n.perms = 1000# for each sample size, we will repeat our experiment n.perms^2 times 
 cores = 2
 datpath = "../data/AB/"
-rxvnme = "IMMAB.zip"
-rxvsub = "IMMAB"
-task = "imm_AB"
-savekey = "imm_AB"
+rxvnme = "AB.zip"
+rxvsub = "AB"
+task = "AB"
+savekey = "AB"
 j = 1000
 
 # ----------------------------------------------------------------------------------------------------
 # attain densities for each subject N, across all outer samples
 # ----------------------------------------------------------------------------------------------------
-# AB settings (currently run all on this!)
-# esz rnge = -5 to 1, p rng = -1000 to 0, rfx = c(0, 0.75)
- 
+# AB settings
+# esz rnge = -1 to 1, p rng = -1000 to 0, 
+
 dens.across.N(fstem="_N-%d_parent-%d.RData", Ns=sub.Ns, j=j, 
               min=-1000, max=0, spacer=1000, dv="p", 
               savekey=savekey, task=task, datpath=datpath, 
               rxvnme=rxvnme, rxvsub=rxvsub, cores=cores)
 dens.across.N(fstem="_N-%d_parent-%d.RData", Ns=sub.Ns, j=j, 
-              min=-5, max=1, spacer=1000, dv="esz", 
+              min=-10, max=1, spacer=10001, dv="esz", 
               savekey=savekey, task=task, datpath=datpath, 
               rxvnme=rxvnme, rxvsub=rxvsub, cores=cores)
 dens.across.N(fstem="_N-%d_parent-%d.RData", Ns=sub.Ns, j=j, 

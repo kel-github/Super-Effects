@@ -29,14 +29,15 @@ source("R_rainclouds.R") # functions for plotting
 args <- commandArgs(trailingOnly=TRUE)
 
 n.outer <- 1000
-n.inner <- 100
+n.inner <- 1000
 i.outer <- NA
-cores <- 1
+cores <- 10
 sub.Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
+sub.Ns <- 59
 
 if (length(args) == 0) {
   fname <- "../data/total_of_313_subs_AB_task_trial_level_data.csv"
-  outpath <- "$HOME/tmp"
+  outpath <- "../data/AB"
 } else if (length(args) == 1) {
   fname <- args[1]
   outpath <- "$HOME/tmp"
