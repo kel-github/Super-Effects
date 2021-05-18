@@ -61,7 +61,7 @@ source('R/R_rainclouds.R')
 source('R/doc_functions.R') # some specific plotting functions for the document
 ```
 
-**Running headline**: Quantifying effect sizes in cognitive psychology
+**Running headline**: Quantifying imprecision in effect size estimates for tasks tapping executive function and implicit learning.  
 
 **Abstract**: 
 
@@ -69,8 +69,29 @@ source('R/doc_functions.R') # some specific plotting functions for the document
 
 # Introduction
 
-
 <br>
+
+~100 words per paragraph
+
+The brain is the most complex organism known to humans, yet decision making regarding theory for its function tends to be made on binary (i.e. pass or fail) terms, at least in the experimental psychological sciences. Specifically, theories often propose experimental tests for the presence or absence of given effects, rather than quantifying the extent to which an effect should be observed, i.e. the anticipated effect size. The latter prediction is more risky, and therefore constitutes a more desirable prediction for theory testing [insert Popper reference]. In fact, it seems unlikely that such pass/fail decision-making will be sufficient to disentangle the myriad functional systems that the brain has developed over millions of years of evolution. 
+
+For example, in the study of EF: [AB: theory of p/f vs Ragnaroc?], MT costs - .  
+
+Likewise, in the study of IL: VSL, CC, SRT
+
+To promote quantised theories in experimental psychology, one extra piece of pertinent information that is informative to theory development is - we normally do x (insert Cummings refs), but it is missing y.
+
+This is also useful for experimental development. i.e. The other important thing is that to ensure that we provide sufficiently precise information, so that this can be used. To do that we need to perform power calculations, There are at least 3 ways to do this: have a sufficiently precise theory that quantifies the effect size of interest, arbitrarily assume an effect size of theoretical interest, but unmotivated, or create an estimate by sampling the field. The problem with the latter is that given the current sample sizes typically employed, we have no idea if that estimate is precise and should be used.
+
+A method to determine the precision of effect  
+
+For example, theories in the experimental psychological sciences have tended only to predict the presence or absence, rather than the extent of a given phenomena. For example [example from implicit learning]. However, clear to see that if we are to understand how such a complex system processes sensory information, coordinates tasks and acquires new behavioural repertoires, a precise mapping between theory and outcome is going to be necessary. [get some Vehicles notions in that previous sentence]. Therefore important to start thinking about the size of effects - however, current state of field, very little knowledge about anticipated effect sizes due to x, y, & z.
+
+
+Using a large dataset we will address this gap. Data on x-tasks. We will apply a simulation analysis to determine x, y and z.
+
+Moreover, we will address two pertinrent analytical gaps: i) A further development is the recent use of linear mixed effects models, and the recommendation that we use them instead of
+ii) it is common to use t-test on accuracies against chance but Allefeld (VSL).
 
 # Methods
 
@@ -80,7 +101,7 @@ source('R/doc_functions.R') # some specific plotting functions for the document
 
 <br>
 
-The current study utilises a dataset collected in the lab for a previous [pre-registered](https://osf.io/nxysg) project examining the relationship between executive function and individual differences. This dataset consists of performance measures from 313 participants. Participants were undergraduate students, aged 18 to 35 years old (mean = 20.14 yrs, sd = 3.46). Of the total sample, 208 reported being of female sex, and 269 reported being right handed. Participants received course credits as compensation. All procedures were approved by the University of Queensland Human Reseach Ethics Committee and adhered to the [National Statement on Ethical Conduct in Human Research](https://www.nhmrc.gov.au/about-us/publications/national-statement-ethical-conduct-human-research-2007-updated-2018).
+The current study utilises a dataset collected in the lab for a previous [pre-registered](https://osf.io/nxysg) project examining the relationship between executive function and implicit learning. This dataset consists of performance measures from 313 participants. Participants were undergraduate students, aged 18 to 35 years old (mean = 20.14 yrs, sd = 3.46). Of the total sample, 208 reported being of female sex, and 269 reported being right handed. Participants received course credits as compensation. All procedures were approved by the University of Queensland Human Reseach Ethics Committee and adhered to the [National Statement on Ethical Conduct in Human Research](https://www.nhmrc.gov.au/about-us/publications/national-statement-ethical-conduct-human-research-2007-updated-2018).
 
 <br>
 
