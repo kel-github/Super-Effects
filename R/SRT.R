@@ -24,10 +24,16 @@ source("efilids_functions.R") # custom functions written for this project
 source("R_rainclouds.R") # functions for plotting
 
 args <- commandArgs(trailingOnly=TRUE)
-Nind <- NA
+
+n.outer <- 1000
+n.inner <- 1000
+i.outer <- NA
+cores <- 10
+sub.Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
+
 if (length(args) == 0) {
   fname <- "../data/total_of_313_subs_SRT_task_trial_level_data.csv"
-  outpath <- "$HOME/tmp"
+  outpath <-  "../data/SRT"
 } else if (length(args) == 1) {
   fname <- args[1]
   outpath <- "$HOME/tmp"
@@ -40,6 +46,8 @@ if (length(args) == 3) {
 }
 
 set.seed(42) 
+seeds <- sample(1:n.outer, n.outer, replace=FALSE)
+
 # -----------------------------------------------------------------------------
 # load data and wrangle into tidy form
 # (see https://r4ds.had.co.nz/tidy-data.html), plus relabel to make
@@ -64,33 +72,31 @@ ffx.dat <- dat %>% filter(Block.No > 2) %>%
               summarise(RT=mean(RT.ms))
 
 
-# ----------------------------------------------------------------------------------------------------
-# define levels for simulations
-# ----------------------------------------------------------------------------------------------------
 
-sub.Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
-if (!is.na(Nind)) {
-  sub.Ns <- sub.Ns[Nind]
-}
-n.perms =1000# for each sample size, we will repeat our experiment n.perms times
-cores = 20
-subs  <- unique(ffx.dat$Subj.No)
 
 # ----------------------------------------------------------------------------------------------------
 # run simulations, getting p values from linear models, and cohen's d values, and save results to a list, using intermediate sampling
 # ----------------------------------------------------------------------------------------------------
 fstem <- paste(outpath, "/imm_SRT_N-%d_parent-%d.RData", sep="")
-lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, 
-                                     k=1, j=n.perms, cores=cores, 
-                                     f=get.ps.srt, fstem=fstem, samp="imm"))
+lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1,
+                                     j=n.outer, outer_index=i.outer,
+                                     cores=cores, 
+                                     f=get.ps.srt, 
+                                     fstem=fstem, 
+                                     samp="imm",
+                                     seeds=seeds))
 
 # ----------------------------------------------------------------------------------------------------
 # run simulations, getting p values from linear models, and cohen's d values, and save results to a list, using intermediate sampling
 # ----------------------------------------------------------------------------------------------------
 fstem <- paste(outpath, "/SRT_N-%d_parent-%d.RData", sep="")
 lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, 
-                                     k=n.perms, j=n.perms, cores=cores, 
-                                     f=get.ps.srt, fstem=fstem, samp="int"))
+                                     k=n.inner, j=n.outer, outer_index=i.outer,
+                                     cores=cores, 
+                                     f=get.ps.srt, 
+                                     fstem=fstem, 
+                                     samp="int",
+                                     seeds=seeds))
 
 # ----------------------------------------------------------------------------------------------------
 # get outta here

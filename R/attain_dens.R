@@ -32,7 +32,7 @@ source("R_rainclouds.R") # functions for plotting
 sub.Ns = round(exp(seq(log(13), log(313), length.out = 20)))
 # sub.Ns = c(13, 25, 50, 115) # for the first sampling (method B)
 n.perms = 1000# for each sample size, we will repeat our experiment n.perms^2 times 
-cores = 2
+cores = 8
 datpath = "../data/AB/"
 rxvnme = "AB.zip"
 rxvsub = "AB"
@@ -47,11 +47,11 @@ j = 1000
 # esz rnge = -1 to 1, p rng = -1000 to 0, 
 
 dens.across.N(fstem="_N-%d_parent-%d.RData", Ns=sub.Ns, j=j, 
-              min=-1000, max=0, spacer=1000, dv="p", 
+              min=-1000, max=0, spacer=5000, dv="p", 
               savekey=savekey, task=task, datpath=datpath, 
               rxvnme=rxvnme, rxvsub=rxvsub, cores=cores)
 dens.across.N(fstem="_N-%d_parent-%d.RData", Ns=sub.Ns, j=j, 
-              min=-10, max=1, spacer=10001, dv="esz", 
+              min=-10, max=10, spacer=100, dv="esz", 
               savekey=savekey, task=task, datpath=datpath, 
               rxvnme=rxvnme, rxvsub=rxvsub, cores=cores)
 dens.across.N(fstem="_N-%d_parent-%d.RData", Ns=sub.Ns, j=j, 

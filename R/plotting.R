@@ -31,7 +31,7 @@ d_scale_ffx = 2
 d_scale_rfx = 2
 p_scale_ffx = 2
 p_scale_rfx = 2
-px_rng_d_ffx = c(0,2)
+px_rng_d_ffx = c(0,1)
 px_rng_d_rfx = c(0,2)
 px_rng_p_ffx = c(-800,0)
 px_rng_p_rfx = c(-800,0)
@@ -87,17 +87,18 @@ load(fnames[2])
 
 d$Nsz <- as.factor(d$Nsz)
 # recode model factor to reflect actual models used
-d$numod[d$mod == "ffx"] = "t"
+d$numod[d$mod == "ffx"] = "RM-AN"
 d$numod[d$mod == "rfx"] = "LME"
 d$mod = d$numod
 d$numod <- NULL
 d$mod <- as.factor(d$mod)
 
+if (task == "AB") d <- d %>% filter(as.numeric(Nsz) < 17)
 if (task == "imm_AB") d <- d %>% filter(as.numeric(Nsz) < 17)
 if (task == "imm_SD") d <- d %>% filter(as.numeric(Nsz) < 15) # remove sample sizes saturated at 0
 if (task == "imm_SRT") d <- d %>% filter(as.numeric(Nsz) < 17)
 
-ffx.p <- plot.p(d, "t", px_rng_p_ffx, p_scale_ffx, med)
+ffx.p <- plot.p(d, "RM-AN", px_rng_p_ffx, p_scale_ffx, med)
 rfx.p <- plot.p(d, "LME", px_rng_p_rfx, p_scale_rfx, med)
 
 p = plot_grid(ffx.d, rfx.d, ffx.p, rfx.p, labels=c('A', 'B', 'C', 'D'), label_size = 12, align="v")
