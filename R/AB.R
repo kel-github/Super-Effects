@@ -1,7 +1,7 @@
 ### written by K. Garner, April 2020
 ### edited by Z. Nott, July 2020
 ### for the project 'On the detectability of effects in executive function and implicit learning tasks'
-### Garner, KG*, Nydam, A*, Nott, Z., & Dux, PE 
+### Garner, KG*, Nolan, C., Nydam, A, Nott, Z., Bowman, H., & Dux, PE 
 
 # ----------------------------------------------------------------------------------------------------
 rm(list=ls())

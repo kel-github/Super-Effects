@@ -2,7 +2,7 @@
 ### edited by Z. Nott, August 2020
 ### edited by C. Nolan, March 2021
 ### for the project 'On the detectability of effects in executive function and implicit learning tasks'
-### Garner, KG*, Nydam, A, Nott, Z., Nolan, C., Bowman, H., & Dux, PE 
+### Garner, KG*, Nolan, C., Nydam, A, Nott, Z., Bowman, H., & Dux, PE 
 
 rm(list=ls())
 ### run analysis of sample size x effect size variability on the AB data
