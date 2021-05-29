@@ -1,5 +1,6 @@
 ### written by K. Garner, April 2020
 ### edited by Z. Nott, September 2020
+### much enhanced by C. Nolan, Jan+ 2021
 ### for the project 'On the detectability of effects in executive
 ### function and implicit learning tasks'
 
@@ -345,15 +346,24 @@ get.ps.CC <- function(data){
   
   names(data) <- c("sub", "Nsz", "perm", "block", "trialtype", "RT")
   
-  # number subjects
   data$block <- as.factor(data$block)
   data$trialtype <- as.factor(data$trialtype)
-  nsubs <- length(data$sub)/(length(levels(data$block)) * length(levels(data$trialtype)))
-  data$sub <- as.factor(rep(1:nsubs, each=length(levels(data$block)) * length(levels(data$trialtype))))
   
+  # number subjects and get number of reps to set SS type
+  ntrials = 24
+  data$trial = 1:ntrials
+  type = set.SS.type(data)
+  
+  # now get n subs
+  nsubs <- length(data$sub)/(length(levels(data$block)) * length(levels(data$trialtype)))
+  # set subject identifiers as unique
+  data$sub <- as.factor(rep(1:nsubs, each=length(levels(data$block)) * length(levels(data$trialtype))))
+
   # RUN RM ANOVA (see anova function notes for choice)
   # -----------------------------------------------------------------------------
-  an <- get_anova_table(anova_test(data=data%>%ungroup(), dv=RT, wid=sub, within=c(block,trialtype), effect.size="pes"))
+  # running type 3 SS to match with spss - however, data are balanced so the results are the same either way
+  # however SS calcs crash when 1 sub appears > 3 times, so at theat time use SS type 1
+  an <- get_anova_table(anova_test(data=data%>%ungroup(), dv=RT, wid=sub, within=c(block,trialtype), effect.size="pes", type=type))
   
   # RUN LME VERSION
   # -----------------------------------------------------------------------------
@@ -395,15 +405,18 @@ get.ps.SD <- function(data){
   
   names(data) <- c("sub", "Nsz", "perm", "task", "trialtype", "RT")
   
-  # number subjects
+  # org factors, number subjects and set SS type
   data$task <- as.factor(data$task)
   data$trialtype <- as.factor(data$trialtype)
+  data$trial <- c(1:4)
+  type <- set.SS.type(data)
+  
   nsubs <- length(data$sub)/(length(levels(data$task)) * length(levels(data$trialtype)))
   data$sub <- as.factor(rep(1:nsubs, each=length(levels(data$task)) * length(levels(data$trialtype))))
   
   # RUN RM ANOVA
   # -----------------------------------------------------------------------------
-  an <- get_anova_table(anova_test(data=data%>%ungroup(), dv=RT, wid=sub, within=c(task,trialtype), effect.size="pes"))
+  an <- get_anova_table(anova_test(data=data%>%ungroup(), dv=RT, wid=sub, within=c(task,trialtype), effect.size="pes", type=type))
   
   # RUN LME VERSION
   # -----------------------------------------------------------------------------
@@ -444,15 +457,20 @@ get.ps.aov.AB <- function(data){
   
   options(contrasts = c("contr.sum", "contr.poly")) # set options
   names(data) <- c("sub", "Nsz", "perm", "lag", "T1", "T2gT1")
-  # number subjects
+  
   data$lag <- as.factor(data$lag)
+  # get SS type - WARNING - HARD CODING!
+  data$trial <- c(1:4)
+  type <- set.SS.type(data)
+  
+  # number subs
   nsubs <- length(data$sub)/length(levels(data$lag))
   data$sub <- as.factor(rep(1:nsubs, each=length(levels(data$lag))))
   
   # RUN RM ANOVA
   # -----------------------------------------------------------------------------
   # aov doesn't do sum of squares 3, ezANOVA = ~500 ms slower than get_anova_table
-  an <- get_anova_table(anova_test(data=data%>%ungroup(), dv=T2gT1, wid=sub, within=lag, effect.size="pes"))
+  an <- get_anova_table(anova_test(data=data%>%ungroup(), dv=T2gT1, wid=sub, within=lag, effect.size="pes", type=type))
   
   # RUN LME VERSION
   # -----------------------------------------------------------------------------
@@ -480,6 +498,21 @@ get.ps.aov.AB <- function(data){
   out$eRes = c(NA, df$sdcor[df$grp=="Residual"])
   out
 }
+
+
+# SET SS TYPE
+set.SS.type <- function(data){
+  # note! data must have the trial numbers added
+  sub_list = data %>% filter(trial == 1) %>% select(sub) 
+  reps=unique(sapply(sub_list$sub, function(x)(sum(x==sub_list$sub))))
+  if (max(reps) > 2){
+    type=1
+  } else {
+    type=3
+  }
+  type
+}
+
 
 
 # ----------------------------------------------------------------------------------------------------

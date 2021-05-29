@@ -1,5 +1,6 @@
 ### written by K. Garner, April 2020
 ### edited by Z. Nott, August 2020
+### edited by C. Nolan, March 2021
 ### for the project 'On the detectability of effects in executive function and implicit learning tasks'
 ### Garner, KG*, Nydam, A, Nott, Z., Nolan, C., Bowman, H., & Dux, PE 
 
