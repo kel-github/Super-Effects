@@ -3,10 +3,7 @@ title: "super-fx"
 author: "Garner, KG., Knott, Z., Nydam, A., Nolan, CR., Bowman, H., & Dux, PE.,"
 date: '`r format(Sys.time())`'
 output:
-  bookdown::html_document2:
-    number_sections: no
-    theme: readable
-    toc: yes
+  bookdown::word_document2: null
   bookdown::tufte_html2:
     number_sections: no
     toc: yes
@@ -18,7 +15,10 @@ output:
     latex_engine: xelatex
     number_sections: no
     toc: no
-  bookdown::word_document2: null
+  bookdown::html_document2:
+    number_sections: no
+    theme: readable
+    toc: yes
 fontsize: 12pt
 linestretch: 1.5
 link-citations: yes
@@ -56,9 +56,11 @@ library(tidyverse)
 library(wesanderson)
 library(ggridges)
 library(cowplot)
-source('../R/efilids_functions.R')
-source('../R/R_rainclouds.R')
-#source('R/doc_functions.R') # some specific plotting functions for the document
+library(rstatix)
+library(emmeans)
+source('R/efilids_functions.R')
+source('R/R_rainclouds.R')
+source('R/doc_functions.R') # some specific plotting functions for the document
 ```
 
 **Running headline**: Quantifying imprecision in effect size estimates for tasks tapping executive function and implicit learning.  
@@ -252,7 +254,7 @@ To ascertain whether participants learned the repeating sequences, RTs in the fi
 
 ##### Protocol
 
-The VSL task was adapted from Fiser and Aslin [-fiserUnsupervisedStatisticalLearning2001]. For each participant, twelve abstract shapes were grouped into 6 base pairs. On each trial of the learning phase, three base pairs were randomly positioned onto a 3 x 3 grid, which subtended ?$^\circ$ of visual angle. Each shape subtended ?$^\circ$. A total of 144 of these displays were each presented for 2000 ms, interleaved with a blank screen presented for 1000 ms. Participants were instructed to pay attention to the displays. The test phase consisted of trials where two shape pairs were each presented for 2000 ms, with an intervening blank screen lasting 1000 ms. One pair was selected from the 6 base pairs for that participant, and one pair was formed by a novel recombination formed by randomly selecting two of the 12 shapes, with the constraint that a base pair could not be selected. Participants were instructed to report which of the two pairs was more familiar, using the 'z' and 'm' keys to denote the first or second pair respectively, with the exact mapping counterbalanced across participants. Paticipants completed a total of 24 trials, with each base pair presented 4 times. The order of base and novel pairs was counterbalanced across trials, and trial order was randomised for each participant. Response accuracy in the testing phase was taken as the dependent variable of interest.
+The VSL task was adapted from Fiser and Aslin [-@fiserUnsupervisedStatisticalLearning2001]. For each participant, twelve abstract shapes were grouped into 6 base pairs. On each trial of the learning phase, three base pairs were randomly positioned onto a 3 x 3 grid, which subtended ?$^\circ$ of visual angle. Each shape subtended ?$^\circ$. A total of 144 of these displays were each presented for 2000 ms, interleaved with a blank screen presented for 1000 ms. Participants were instructed to pay attention to the displays. The test phase consisted of trials where two shape pairs were each presented for 2000 ms, with an intervening blank screen lasting 1000 ms. One pair was selected from the 6 base pairs for that participant, and one pair was formed by a novel recombination formed by randomly selecting two of the 12 shapes, with the constraint that a base pair could not be selected. Participants were instructed to report which of the two pairs was more familiar, using the 'z' and 'm' keys to denote the first or second pair respectively, with the exact mapping counterbalanced across participants. Paticipants completed a total of 24 trials, with each base pair presented 4 times. The order of base and novel pairs was counterbalanced across trials, and trial order was randomised for each participant. Response accuracy in the testing phase was taken as the dependent variable of interest.
 
 <br>
 
@@ -278,7 +280,7 @@ Having calculated the $p$ value for a given set of neutral accuracies, we can co
 
 $$\gamma = \frac{\alpha^\frac{1}{N} - p^\frac{1}{N}}{1-p^\frac{1}{N}}$$
 
-To facilitate comparison between the outcomes from the t-tests and the prevalence tests, the $d$ values were converted
+To facilitate comparison between the outcomes from the t-tests and the prevalence tests, the $d$ values were converted to $\eta_{p}^2$ using the formula: 
 
 <br>
 
@@ -290,11 +292,18 @@ To facilitate comparison between the outcomes from the t-tests and the prevalenc
 
 ```{r, plot_AB, fig.align='center', out.width="600pix", fig.cap="Figure xxxx: Results from the Attentional Blink Paradigm. A)"}
 
-fname <- "../data/total_of_313_subs_AB_task_trial_level_data.csv"
+fname <- "/Users/kels/Dropbox/documents/MC-Docs/Super-Effects/data/total_of_313_subs_AB_task_trial_level_data.csv"
 acc.p <- plot.AB.results(fname)
+```
+```{r, AB_analysis, warning=FALSE, echo=FALSE}
+
+res <- do.AB.analysis(fname)
+res[[1]]
 
 
 ```
+
+In accordance with the often observed finding that detection of a second visual target is impaired if it appears close in time to the first target, the data showed a significant main effect of lag F(`r res[[1]]$DFn`, `r res[[1]]$DFd`) = `r res[[1]]$F`, $\eta_{p}^2$ = `r res[[1]]$pes`, p = `r res[[1]]$p`).
 
 ## References
 
