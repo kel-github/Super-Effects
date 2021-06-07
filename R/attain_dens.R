@@ -37,8 +37,8 @@ datpath = "../data/AB/"
 rxvnme = "AB.zip"
 rxvsub = "AB"
 task = "AB"
-savekey = "AB"
-j = 1000
+savekey = "AB_int_1"
+j = 1
 
 # ----------------------------------------------------------------------------------------------------
 # attain densities for each subject N, across all outer samples
@@ -51,7 +51,7 @@ dens.across.N(fstem="_N-%d_parent-%d.RData", Ns=sub.Ns, j=j,
               savekey=savekey, task=task, datpath=datpath, 
               rxvnme=rxvnme, rxvsub=rxvsub, cores=cores)
 dens.across.N(fstem="_N-%d_parent-%d.RData", Ns=sub.Ns, j=j, 
-              min=-10, max=10, spacer=100, dv="esz", 
+              min=-10, max=10, spacer=10000, dv="esz", 
               savekey=savekey, task=task, datpath=datpath, 
               rxvnme=rxvnme, rxvsub=rxvsub, cores=cores)
 dens.across.N(fstem="_N-%d_parent-%d.RData", Ns=sub.Ns, j=j, 

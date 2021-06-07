@@ -57,34 +57,6 @@ height = 8
 # define datas and load ds
 # ----------------------------------------------------------------------------------------------------
 
-fnames = c(paste("../data/", subfol, "/", task, "_esz", "_d.RData", sep=""), paste("../data/", subfol, "/", task, "_p", "_d.RData", sep=""))
-load(fnames[1])
-
-# ----------------------------------------------------------------------------------------------------
-# define factors and plot
-# ----------------------------------------------------------------------------------------------------
-
-d$Nsz <- as.factor(d$Nsz)
-#d$mod <- as.factor(d$mod)
-
-# recode model factor to reflect actual models used
-d$mod[d$mod == "ffx"] = "RM-AN"
-d$mod[d$mod == "rfx"] = "LME"
-d$mod <- as.factor(d$mod)
-
-if (task == "imm_AB") d$x[d$mod == "LME"] = d$x[d$mod == "LME"]*-1
-if (task == "AB") d$x[d$mod == "LME"] = d$x[d$mod == "LME"]*-1
-
-
-ffx.d <- plot.d(d, "RM-AN", px_rng_d_ffx, d_scale_ffx, med)
-rfx.d <- plot.d(d, "LME", px_rng_d_rfx, d_scale_rfx, med)
-
-# ----------------------------------------------------------------------------------------------------
-# load p, define factors and plot
-# ----------------------------------------------------------------------------------------------------
-
-load(fnames[2])
-
 d$Nsz <- as.factor(d$Nsz)
 # recode model factor to reflect actual models used
 d$numod[d$mod == "ffx"] = "RM-AN"

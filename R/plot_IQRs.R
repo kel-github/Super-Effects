@@ -25,13 +25,13 @@ source("R_rainclouds.R")
 # define session variables
 # ----------------------------------------------------------------------------------------------------
 
-task = "SRT"
-mod = "rfx"
+task = "AB"
+mod = "ffx"
 d_scale_ffx = 2
 d_scale_rfx = 4
 p_scale_ffx = 2
 p_scale_rfx = 2
-px_rng_d = c(0,10)
+px_rng_d = c(0,1)
 px_rng_p_ffx = c(-800,0)
 px_rng_p_rfx = c(-800,0)
 width = 8
@@ -40,9 +40,10 @@ height = 8
 # ----------------------------------------------------------------------------------------------------
 # define datas and load d's
 # ----------------------------------------------------------------------------------------------------
-
-fnames = list(paste("../data/", task, "_d", "_d.RData", sep=""), paste("../data/", task, "_int_1_d", "_d.RData", sep=""), 
-              paste("../data/", task, "_imm_d", "_d.RData", sep=""))
+fdir = "/Users/kels/Dropbox/documents/MC-Docs/Super-Effects/"
+fnames = list(paste(fdir, "data/", task, "/", task, "_esz", "_d.RData", sep=""), 
+              paste(fdir, "data/", task, "/", task, "_int_1_esz", "_d.RData", sep=""), 
+              paste(fdir, "data/", task, "/", "imm_", task, "_esz", "_d.RData", sep=""))
 
 get.dat <- function(fname){
   load(fname)

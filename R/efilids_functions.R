@@ -363,8 +363,14 @@ get.ps.CC <- function(data){
   # -----------------------------------------------------------------------------
   # running type 3 SS to match with spss - however, data are balanced so the results are the same either way
   # however SS calcs crash when 1 sub appears > 3 times, so at theat time use SS type 1
-  an <- get_anova_table(anova_test(data=data%>%ungroup(), dv=RT, wid=sub, within=c(block,trialtype), effect.size="pes", type=type))
-  
+
+  # adding a further tryCatch to the situ for times where type 3 fails
+  an <- tryCatch({
+          get_anova_table(anova_test(data=data%>%ungroup(), dv=RT, wid=sub, within=c(block,trialtype), effect.size="pes", type=type))
+  }, error=function(cond) {
+          get_anova_table(anova_test(data=data%>%ungroup(), dv=RT, wid=sub, within=c(block,trialtype), effect.size="pes", type=1))
+  })
+
   # RUN LME VERSION
   # -----------------------------------------------------------------------------
   mod <- lmer( RT ~ block*trialtype + (1|sub), data=data )
@@ -793,11 +799,11 @@ plot.d.by.samp <- function(d, yl, sc, m){
   d %>% inner_join(total_p, by=c("mod", "Nsz", "samp")) %>% mutate(dp = d) %>% # amend if want to make a normalised distribution
     filter(mod == eval(m)) %>% 
     ggplot(aes(x=x, y=as.factor(Nsz), height=dp, group=as.factor(Nsz), fill=as.factor(samp))) +
-    geom_density_ridges(stat="identity", scale=sc, rel_min_height=.0001, fill=wes_palette("IsleofDogs1")[1], color=wes_palette("IsleofDogs1")[5]) +
+    geom_density_ridges(stat="identity", scale=sc, rel_min_height=.0001, fill=wes_palette("IsleofDogs1")[1]) + #, color=wes_palette("IsleofDogs1")[5]) +
     theme_ridges() + facet_wrap(~as.factor(samp)) +
     xlab('effect') + ylab('N') + theme_cowplot() + xlim(yl) +
-    scale_color_manual(values="white") +
-    scale_fill_manual(values=wes_palette("IsleofDogs1")[6]) +
+#    scale_color_manual(values="white") +
+#    scale_fill_manual(values=wes_palette("IsleofDogs1")[6]) +
     theme(axis.title.x = element_text(face = "italic"))
 }
 
