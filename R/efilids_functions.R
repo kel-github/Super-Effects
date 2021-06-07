@@ -422,7 +422,12 @@ get.ps.SD <- function(data){
   
   # RUN RM ANOVA
   # -----------------------------------------------------------------------------
-  an <- get_anova_table(anova_test(data=data%>%ungroup(), dv=RT, wid=sub, within=c(task,trialtype), effect.size="pes", type=type))
+
+  an <- tryCatch({
+          get_anova_table(anova_test(data=data%>%ungroup(), dv=RT, wid=sub, within=c(task,trialtype), effect.size="pes", type=type))
+  }, error=function(cond) {
+          get_anova_table(anova_test(data=data%>%ungroup(), dv=RT, wid=sub, within=c(task,trialtype), effect.size="pes", type=1))
+  })
   
   # RUN LME VERSION
   # -----------------------------------------------------------------------------
@@ -476,8 +481,11 @@ get.ps.aov.AB <- function(data){
   # RUN RM ANOVA
   # -----------------------------------------------------------------------------
   # aov doesn't do sum of squares 3, ezANOVA = ~500 ms slower than get_anova_table
-  an <- get_anova_table(anova_test(data=data%>%ungroup(), dv=T2gT1, wid=sub, within=lag, effect.size="pes", type=type))
-  
+  an <- tryCatch({
+          get_anova_table(anova_test(data=data%>%ungroup(), dv=T2gT1, wid=sub, within=lag, effect.size="pes", type=type))
+  }, error=function(cond) {
+          get_anova_table(anova_test(data=data%>%ungroup(), dv=T2gT1, wid=sub, within=lag, effect.size="pes", type=1))
+  })
   # RUN LME VERSION
   # -----------------------------------------------------------------------------
   mod <- lmer( T2gT1 ~ lag + (1|sub), data=data )
