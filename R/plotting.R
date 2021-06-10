@@ -32,11 +32,12 @@ d_scale_rfx = 2
 p_scale_ffx = 2
 p_scale_rfx = 2
 px_rng_d_ffx = c(0,1)
-px_rng_d_rfx = c(0,2)
+px_rng_d_rfx = c(0,1)
 px_rng_p_ffx = c(-800,0)
 px_rng_p_rfx = c(-800,0)
 width = 8
 height = 8
+convert_on = "LME"
 
 # ----------------------------------------------------------------------------------------------------
 # LIST OF SETTINGS
@@ -57,6 +58,13 @@ height = 8
 # define datas and load ds
 # ----------------------------------------------------------------------------------------------------
 
+fnames = c(paste("../data/", subfol, "/", task, "_esz", "_d.RData", sep=""), paste("../data/", subfol, "/", task, "_p", "_d.RData", sep=""))
+load(fnames[1])
+
+# ----------------------------------------------------------------------------------------------------
+# define factors and plot
+# ----------------------------------------------------------------------------------------------------
+
 d$Nsz <- as.factor(d$Nsz)
 # recode model factor to reflect actual models used
 d$numod[d$mod == "ffx"] = "RM-AN"
@@ -64,6 +72,26 @@ d$numod[d$mod == "rfx"] = "LME"
 d$mod = d$numod
 d$numod <- NULL
 d$mod <- as.factor(d$mod)
+
+d <- d2r(d, convert_on)
+
+ffx.d <- plot.d(d, "RM-AN", px_rng_d_ffx, d_scale_ffx, med)
+rfx.d <- plot.d(d, "LME", px_rng_d_rfx, d_scale_rfx, med)
+
+# ----------------------------------------------------------------------------------------------------
+# load p, define factors and plot
+# ----------------------------------------------------------------------------------------------------
+load(fnames[2])
+
+d$Nsz <- as.factor(d$Nsz)
+# recode model factor to reflect actual models used
+d$numod[d$mod == "ffx"] = "t"
+d$numod[d$mod == "ffx"] = "RM-AN"
+d$numod[d$mod == "rfx"] = "LME"
+d$mod = d$numod
+d$numod <- NULL
+d$mod <- as.factor(d$mod)
+
 
 if (task == "AB") d <- d %>% filter(as.numeric(Nsz) < 17)
 if (task == "imm_AB") d <- d %>% filter(as.numeric(Nsz) < 17)

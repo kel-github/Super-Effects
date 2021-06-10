@@ -807,11 +807,11 @@ plot.d.by.samp <- function(d, yl, sc, m){
   d %>% inner_join(total_p, by=c("mod", "Nsz", "samp")) %>% mutate(dp = d) %>% # amend if want to make a normalised distribution
     filter(mod == eval(m)) %>% 
     ggplot(aes(x=x, y=as.factor(Nsz), height=dp, group=as.factor(Nsz), fill=as.factor(samp))) +
-    geom_density_ridges(stat="identity", scale=sc, rel_min_height=.0001, fill=wes_palette("IsleofDogs1")[1]) + #, color=wes_palette("IsleofDogs1")[5]) +
+    geom_density_ridges(stat="identity", scale=sc, rel_min_height=.0001, fill=wes_palette("IsleofDogs1")[1], color=wes_palette("IsleofDogs1")[5]) +
     theme_ridges() + facet_wrap(~as.factor(samp)) +
     xlab('effect') + ylab('N') + theme_cowplot() + xlim(yl) +
-#    scale_color_manual(values="white") +
-#    scale_fill_manual(values=wes_palette("IsleofDogs1")[6]) +
+    scale_color_manual(values="white") +
+    scale_fill_manual(values=wes_palette("IsleofDogs1")[6]) +
     theme(axis.title.x = element_text(face = "italic"))
 }
 
@@ -904,7 +904,20 @@ unzp <- function(datpath, rxvnme, rxvsub, task, j, subN){
   
 }
 
-
+d2r <- function(d, model_name){
+  # function to convert d's to r^2
+  tmp = d %>% filter(mod == model_name) %>%
+         group_by(Nsz, mod) %>%
+         mutate(x = (x/(sqrt((x^2) + 4)))^2) %>% # Cohen 1988 equation 2.2.6
+         group_by(Nsz, mod, as.factor(x)) %>%
+         summarise(d=sum(d)) %>%
+         ungroup()
+  names(tmp)[names(tmp) == "as.factor(x)"] = 'x'
+  tmp$x <- as.numeric(paste(tmp$x))
+  rbind(tmp,
+        d %>% filter(mod != model_name) %>%
+        filter(x>0))
+  }
 
 
 

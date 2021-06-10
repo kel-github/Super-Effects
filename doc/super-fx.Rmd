@@ -1,0 +1,248 @@
+---
+title: Quantifying effect sizes in implicit learning tasks; the role of some stuff
+authors:
+  - name: Kelly G. Garner
+    thanks: Corresponding author
+    department: School of Psychology
+    affiliation: University of Birmingham
+    location: Edgbaston, UK, B13 2TT
+    email: getkellygarner@gmail.com
+  - name: Christopher R. Nolan
+    department: School of Psychology
+    affiliation: University of New South Wales
+    location: Sydney, Australia
+    email: cnolan@cn.id.au
+  - name: Abbey Nydham
+    department: School of Psychology
+    affiliation: University of Queensland
+    location: St. Lucia, Australia, 4072
+  - name: Zoie Nott
+    department: School of Psychology
+    affiliation: University of Queensland
+    location: St. Lucia, Australia, 4072
+  - name: Howard Bowman
+    department: School of Psychology
+    affiliation: University of Birmingham
+    location: Edgbaston, Birmingham, B13 2TT
+    email: h.bowman@bham.ac.uk
+  - name: Paul E. Dux
+    department: School of Psychology
+    affiliation: University of Queensland
+    location: St. Lucia, Australia, 4072
+    email: paul.e.dux@gmail.com
+abstract: |
+  Enter the text of your abstract here.
+keywords:
+  - blah
+  - blee
+  - bloo
+  - these are optional and can be removed
+bibliography: refs.bib
+biblio-style: unsrt
+output: 
+  rticles::arxiv_article:
+    keep_tex: true
+---
+
+```{r knitr_options, echo=FALSE}
+library(knitr)
+# rstudio will set the folder where .Rmd file seats as work directory
+# set it back to the folder where .Rproj seats
+#opts_knit$set(root.dir = normalizePath("../")) 
+opts_chunk$set(fig.align = 'center', cache = FALSE, warning = FALSE,
+  message = TRUE, echo = FALSE)
+options(digits = 3, width = 88, knitr.graphics.auto_pdf = TRUE,
+        knitr.kable.NA = '')
+```
+
+```{r loadpackagesandfunctions, echo=FALSE, message=F, warning=F}
+library(tidyverse)
+library(wesanderson)
+library(ggridges)
+library(cowplot)
+library(rstatix)
+library(emmeans)
+library(ggridges)
+library(car)
+library(parallel)
+source('../R/efilids_functions.R')
+source('../R/R_rainclouds.R')
+source('../R/doc_functions.R') # some specific plotting functions for the document
+```
+
+# Introduction
+
+~100 words per paragraph
+
+The brain is the most complex organism known to humans, yet decision making regarding theory for its function tends to be made on binary (i.e. pass or fail) terms, at least in the experimental psychological sciences. Specifically, theories often propose experimental tests for the presence or absence of given effects, rather than quantifying the extent to which an effect should be observed, i.e. the anticipated effect size. The latter prediction is more risky, and therefore constitutes a more desirable prediction for theory testing [insert Popper reference]. In fact, it seems unlikely that such pass/fail decision-making will be sufficient to disentangle the myriad functional systems that the brain has developed over millions of years of evolution. 
+
+For example, in the study of EF: [AB: theory of p/f vs Ragnaroc?], MT costs - .  
+
+Likewise, in the study of IL: VSL, CC, SRT
+
+To promote quantised theories in experimental psychology, one extra piece of pertinent information that is informative to theory development is - we normally do x (insert Cummings refs), but it is missing y.
+
+This is also useful for experimental development. i.e. The other important thing is that to ensure that we provide sufficiently precise information, so that this can be used. To do that we need to perform power calculations, There are at least 3 ways to do this: have a sufficiently precise theory that quantifies the effect size of interest, arbitrarily assume an effect size of theoretical interest, but unmotivated, or create an estimate by sampling the field. The problem with the latter is that given the current sample sizes typically employed, we have no idea if that estimate is precise and should be used.
+
+A method to determine the precision of effect  
+
+For example, theories in the experimental psychological sciences have tended only to predict the presence or absence, rather than the extent of a given phenomena. For example [example from implicit learning]. However, clear to see that if we are to understand how such a complex system processes sensory information, coordinates tasks and acquires new behavioural repertoires, a precise mapping between theory and outcome is going to be necessary. [get some Vehicles notions in that previous sentence]. Therefore important to start thinking about the size of effects - however, current state of field, very little knowledge about anticipated effect sizes due to x, y, & z.
+
+
+Using a large dataset we will address this gap. Data on x-tasks. We will apply a simulation analysis to determine x, y and z.
+
+Moreover, we will address two pertinrent analytical gaps: i) A further development is the recent use of linear mixed effects models, and the recommendation that we use them instead of
+ii) it is common to use t-test on accuracies against chance but Allefeld (VSL).
+
+PUT IN INTRO
+Additionally, given the documented advantages of linear mixed effects models (LME) over repeated-measures ANOVA [@muthAlternativeModelsSmall2016; @bagiellaMixedeffectsModelsPsychophysiology2000; @mccullochRepeatedMeasuresANOVA2005], and that only a conceptual proxy of $\eta_{p}^{2}$ is computable from these models [@brysbaertPowerAnalysisEffect2018; @westfallStatisticalPowerOptimal2014], and c) there exists no data that we know of that quantifies to what extent we can expect comparable outcomes between both methods, we (where relevant) opted to apply both the commonly used statistical model, and a LME model to each $k$ sample
+
+# Methods
+
+I'll insert a summary sentence here during write up.
+
+\label{sec:Method}
+
+See Section \ref{sec:Method}.
+
+## Participants
+\label{sec:Participants}
+
+The current study uses a data set collected for a previous [pre-registered](https://osf.io/nxysg) project examining the relationship between executive function and implicit learning. This data set contains performance measures from N = 313 participants. Participants were undergraduate students, aged 18 to 35 years old (mean = 20.14 yrs, sd = 3.46). Of the total sample, 208 reported being female sex, and 269 reported being right handed. Participants received course credits as compensation. All procedures were approved by the University of Queensland Human Research Ethics Committee and adhered to the [National Statement on Ethical Conduct in Human Research](https://www.nhmrc.gov.au/about-us/publications/national-statement-ethical-conduct-human-research-2007-updated-2018).
+
+## Apparatus
+\label{sec:Apparatus}
+
+Experimental procedures were run on an Apple Mac Minicomputer (OS X Late 2014, 2.8 GHz Intel Core i5) with custom code using the Psychophysics toolbox (v3.0.14) [@brainardPsychophysicsToolbox1997; @pelliVideoToolboxSoftwareVisual1997] in Matlab v2015b. Participants completed 5 tasks; Attentional Blink (AB), Dual Task (DT), Contextual Cueing (CC), Serial Response Task (SRT), and Visual Statistical Learning (VSL). Task order was randomised for each participant, apart from the VSL task, which was presented last. This was because the recognition component of the task may have allowed participants to infer that other tasks were also assessing implicit learning. 
+
+## Procedures
+\label{sec:Procedures}
+
+Across all tasks, participants sat approximately 57 cm from the monitor. An overview of the task procedures is presented in Figure \ref{fig:FigureParadigm}. Further details regarding the task protocols are presented within each section below. In the interest of reducing working memory load, we provide an overview of the simulation procedures, before detailing the specific procedural and statistical methods for each task.
+
+NEXT STEP: check this: https://bookdown.org/yihui/bookdown/figures.html
+
+```{r fig:FigureParadigm, out.width='70%', fig.cap='Task battery. A) Attentional Blink Paradigm (AB). Participants report the two letter targets from the rapid serial visual presentation of numbers and letters, B) Multitasking Paradigm (MT). Participants make a discriminate the colour of a disc, a complex tone, or both C) Contextual Cueing Paradigm (CC). i) Participants perform an inefficient visual search task. ii) Unknown to participants, half of the search arrays are repeated throughout the course of the experiment. D) Serial reaction time task (SRT). Participants respond to one of four stimuli, each mapped to a spatially-compatible button press. Unknown to participants, for half of the blocks the stimulus follows a repeating sequence. E) Visual Statistical Learning Paradigm (VSL): i) 12 shapes are grouped into 6 base pairs. ii) Learning: three of the six pairs are presented as an array, this is repeated as participants passively view the displays. iii) Test: participants are presented with a base pair, and a novel pair formed from a recombination of the 12 shapes, and is asked which of the two pairs they have seen previously.'}
+
+paradigm.fig.pth <- '../images/FigXXXX_alltasks.png'
+knitr::include_graphics(paradigm.fig.pth)
+
+```
+
+<!-- \begin{figure} -->
+<!--   \centering -->
+<!--   \caption{Task battery. A) Attentional Blink Paradigm (AB). Participants report the two letter targets from the rapid serial visual presentation of numbers and letters, B) Multitasking Paradigm (MT). Participants make a discriminate the colour of a disc, a complex tone, or both C) Contextual Cueing Paradigm (CC). i) Participants perform an inefficient visual search task. ii) Unknown to participants, half of the search arrays are repeated throughout the course of the experiment. D) Serial reaction time task (SRT). Participants respond to one of four stimuli, each mapped to a spatially-compatible button press. Unknown to participants, for half of the blocks the stimulus follows a repeating sequence. E) Visual Statistical Learning Paradigm (VSL): i) 12 shapes are grouped into 6 base pairs. ii) Learning: three of the six pairs are presented as an array, this is repeated as participants passively view the displays. iii) Test: participants are presented with a base pair, and a novel pair formed from a recombination of the 12 shapes, and is asked which of the two pairs they have seen previously.} -->
+<!--   \label{fig:FigureParadigm} -->
+<!-- \end{figure} -->
+
+
+All the [data]() and [code](https://github.com/kel-github/Super-Effects) used for the current analysis are available online. The analysis of the data from each task followed two steps. First, to ascertain that we observed the typical findings for each of the paradigms, we applied the conventional statistical model for that to the full dataset (N=313). The details of each analysis are presented below. Next, we implemented a simulation procedure to determine the effect size and p-values that would be attained over many experiments conducted at multiple levels of sample size. 
+
+### Sampling procedure
+
+For each task, we sampled across 20 different sample sizes ($N$s), defined on a logarithmic interval between N=13 and N=313. We opted for a logarithmic interval given the decreasing information gained at higher $N$ values. To simulate $k$ experiments at each of our chosen $N$, we developed a sampling procedure that sought to leverage information from across the whole dataset while also protecting against any reductions in effect size variablility that may be attributable to saturation as $N$ approaches the maximum ($N_{max}$=313). Specifically, it could be that as $N$ approaches 313, the overlap of participants between subsamples may be greater than when $N$ equals a lower number such as 13. It follows then that any decreasing variability in effect size estimates at higher $N$s could be due to the decrease in variability of the subsamples, rather than the improved estimate of the population variance should come with a larger $N$. 
+
+To protect against this possibility we applied the following procedure; for each level of $N$ ($N_{1}, N_{2}, ...N_{20}$), we first selected a subsample from the total dataset _without_ replacement, e.g. $N$ of 13 unique samples from the total $N$=313. We refer to this from now on as the _parent subsample_. From this parent subsample, we sampled $k$ = 1000 times _with_ replacement - e.g. $N$=13 sampled from $N$=13. These shall now be referred to as the _child subsamples_. The relevant analysis was then applied to each of the child subsamples. Sampling with replacement ensured that the child subsamples carried the Markov property. Given that this procedure reduces the heterogeneity of the parent sample (for example, in the case of $N$=13, all the child subsamples are derived from only 13 unique observations), we then repeated the entire process over $j$ = 1000 iterations. Therefore the presented data reflects $j * k$ simulated experiments for each level of $N$. We refer to this now as the two-step sampling procedure: $j$ = 1000, $k$ = 1000. It is worth noting that we compared this procedure to one where we performed the two-step sampling procedure with $j$ = 1, and to a one-step sampling procedure where we sampled $N$ with replacement from the entire dataset, i.e. $k$=1000 and $j$ = 0. Outcomes were comparable between the sampling procedures, with the two-step procedure ($j$ = 1000) offering better resolution of the resulting densities (see Figure \ref{fig:samples} for a representative example). 
+
+```{r supp_sampling, out.width='70%'}
+
+# fig.cap="Supplemental Figure xxxx: Comparison between sampling procedures for the AB task data fit with a repeated measures ANOVA for 4 levels of N; densities of observed effect sizes for the A) two-step sampling procedure j=1000^k=1000, the B) two-step sampling procedure, j=1^k=1000, and C) the one-step procedure, $k$ = 1000"
+
+# paradigm.fig.pth <- '../images/SuppFigXXXX_AB_sampling.png'
+# #paradigm.fig <- readPNG(paradigm.fig.pth, native=TRUE, info=TRUE)
+# include_graphics(paradigm.fig.pth)
+source('../R/plot_IQRs.R')
+plot.d.by.samp(dat, px_rng_d, 1, mod) + xlab(bquote(eta['p']^2)) + theme(axis.text.x = element_text(size=11),
+                                                                         axis.text.y = element_text(size=11))
+```
+
+\begin{figure}
+  \centering
+  \caption{Comparison between sampling procedures for the AB task data fit with a repeated measures ANOVA for 4 levels of N; densities of observed effect sizes for the A) two-step sampling procedure $j$=1000, $k$=1000, the B) two-step sampling procedure, $j$=1, $k$=1000, and C) the one-step procedure, $k$ = 1000}
+  \label{fig:samples}
+\end{figure}
+
+$$
+\xi _{ij}(t)=P(x_{t}=i,x_{t+1}=j|y,v,w;\theta)= {\frac {\alpha _{i}(t)a^{w_t}_{ij}\beta _{j}(t+1)b^{v_{t+1}}_{j}(y_{t+1})}{\sum _{i=1}^{N} \sum _{j=1}^{N} \alpha _{i}(t)a^{w_t}_{ij}\beta _{j}(t+1)b^{v_{t+1}}_{j}(y_{t+1})}}
+$$
+
+### Headings: third level
+\lipsum[6]
+
+\paragraph{Paragraph}
+\lipsum[7]
+
+# Examples of citations, figures, tables, references
+\label{sec:others}
+
+\lipsum[8] some text [@kour2014real; @kour2014fast] and see @hadash2018estimate.
+
+The documentation for \verb+natbib+ may be found at
+\begin{center}
+  \url{http://mirrors.ctan.org/macros/latex/contrib/natbib/natnotes.pdf}
+\end{center}
+Of note is the command \verb+\citet+, which produces citations
+appropriate for use in inline text.  For example,
+
+\begin{verbatim}
+   \citet{hasselmo} investigated\dots
+\end{verbatim}
+
+produces
+
+\begin{quote}
+  Hasselmo, et al.\ (1995) investigated\dots
+\end{quote}
+
+\begin{center}
+  \url{https://www.ctan.org/pkg/booktabs}
+\end{center}
+
+
+## Figures
+
+\lipsum[10] 
+See Figure \ref{fig:fig1}. Here is how you add footnotes. [^Sample of the first footnote.]
+
+\lipsum[11] 
+
+\begin{figure}
+  \centering
+  \fbox{\rule[-.5cm]{4cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
+  \caption{Sample figure caption.}
+  \label{fig:fig1}
+\end{figure}
+
+```{r}
+plot(mtcars$mpg)
+```
+
+
+## Tables
+
+\lipsum[12]
+
+See awesome Table~\ref{tab:table}.
+
+\begin{table}
+ \caption{Sample table title}
+  \centering
+  \begin{tabular}{lll}
+    \toprule
+    \multicolumn{2}{c}{Part}                   \\
+    \cmidrule(r){1-2}
+    Name     & Description     & Size ($\mu$m) \\
+    \midrule
+    Dendrite & Input terminal  & $\sim$100     \\
+    Axon     & Output terminal & $\sim$10      \\
+    Soma     & Cell body       & up to $10^6$  \\
+    \bottomrule
+  \end{tabular}
+  \label{tab:table}
+\end{table}
+
+## Lists
+
+- Lorem ipsum dolor sit amet
+- consectetur adipiscing elit. 
+- Aliquam dignissim blandit est, in dictum tortor gravida eget. In ac rutrum magna.

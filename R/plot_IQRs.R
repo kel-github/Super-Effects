@@ -4,23 +4,22 @@
 ###
 ### code plots densities across sampling methods, per task
 ### NOTES: check file naming conventions below
-# ----------------------------------------------------------------------------------------------------
-rm(list=ls())
-# ----------------------------------------------------------------------------------------------------
-
-# ----------------------------------------------------------------------------------------------------
-# load packages and source function files
-# ----------------------------------------------------------------------------------------------------
-
-library(tidyverse) # for data wrangling
-library(wesanderson) # palette for some sweet figure colours
-library(cowplot)
-library(lme4) # for mixed effects modelling
-library(ggridges)
-library(car)
-library(parallel)
-source("efilids_functions.R") # custom functions written for this project
-source("R_rainclouds.R")
+# # ----------------------------------------------------------------------------------------------------
+# rm(list=ls())
+# # ----------------------------------------------------------------------------------------------------
+# 
+# # ----------------------------------------------------------------------------------------------------
+# # load packages and source function files
+# # ----------------------------------------------------------------------------------------------------
+# 
+# library(tidyverse) # for data wrangling
+# library(wesanderson) # palette for some sweet figure colours
+# library(cowplot)
+# library(ggridges)
+# library(car)
+# library(parallel)
+# source("efilids_functions.R") # custom functions written for this project
+# source("R_rainclouds.R")
 # ----------------------------------------------------------------------------------------------------
 # define session variables
 # ----------------------------------------------------------------------------------------------------
@@ -41,6 +40,7 @@ height = 8
 # define datas and load d's
 # ----------------------------------------------------------------------------------------------------
 fdir = "/Users/kels/Dropbox/documents/MC-Docs/Super-Effects/"
+fdir = "../"
 fnames = list(paste(fdir, "data/", task, "/", task, "_esz", "_d.RData", sep=""), 
               paste(fdir, "data/", task, "/", task, "_int_1_esz", "_d.RData", sep=""), 
               paste(fdir, "data/", task, "/", "imm_", task, "_esz", "_d.RData", sep=""))
@@ -73,7 +73,7 @@ dat <- dat %>% filter(Nsz %in% subs.2.plt)
 # now plot
 # ----------------------------------------------------------------------------------------------------
 
-plot.d.by.samp(dat, px_rng_d, 1, mod) 
+#plot.d.by.samp(dat, px_rng_d, 1, mod) 
 
-fname = paste("../images/", task, "_", mod, "_sampling.png", sep="")
-ggsave(filename=fname, plot=last_plot(), units = "cm", width = 17, height = 10, dpi = 300)
+#fname = paste("../images/", task, "_", mod, "_sampling.png", sep="")
+#ggsave(filename=fname, plot=last_plot(), units = "cm", width = 17, height = 10, dpi = 300)
