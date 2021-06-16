@@ -554,6 +554,10 @@ run.outer <- function(in.data, subs, N, k, j, outer_index, cores, fstem,  f, sam
   } else if (samp == "imm") {
     replace <- TRUE
   }
+  if (!is.na(outer_index)) {
+    # reseed
+    set.seed(seeds[outer_index])
+  }
   # select an idx of N unique if int, or with replacement if imm
   sub.idx = lapply(1:j, function(x) sample.N(subs, N, x, replace=replace))
   sub.idx = do.call(rbind, sub.idx) # index for all the outerloops
@@ -566,8 +570,6 @@ run.outer <- function(in.data, subs, N, k, j, outer_index, cores, fstem,  f, sam
                               select(-c("Nsz", "perm"))
 
   if (!is.na(outer_index)) {
-    # reseed
-    set.seed(seeds[outer_index])
     run.inner(in.data=outer_filter(outer_index),
               parent.subs=sub.idx$sub[sub.idx$perm == outer_index],
               N=N,
