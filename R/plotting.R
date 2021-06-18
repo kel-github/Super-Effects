@@ -1,14 +1,14 @@
 ### written by K. Garner, Jan 2021
-### for the project 'On the detectability of effects in executive function and implicit learning tasks'
-### Garner, KG*, Nydam, A*, Nott, Z., & Dux, PE 
+### for the project 'On the detectability of effects
+# in executive function and implicit learning tasks
+### Garner, KG*, Nydam, A*, Nott, Z., & Dux, PE
 
 ### Call plotting functions for observed effect sizes and p values
+rm(list = ls())
 
-rm(list=ls())
-
-# ----------------------------------------------------------------------------------------------------
+# ----------------------------------------------------
 # load packages and source function files
-# ----------------------------------------------------------------------------------------------------
+# ----------------------------------------------------
 
 library(tidyverse) # for data wrangling
 library(wesanderson) # palette for some sweet figure colours
@@ -20,93 +20,91 @@ library(parallel)
 source("efilids_functions.R") # custom functions written for this project
 source("R_rainclouds.R") # functions for plotting
 
-# ----------------------------------------------------------------------------------------------------
+# ----------------------------------------------------
 # define session variables
-# ----------------------------------------------------------------------------------------------------
+# ----------------------------------------------------
+datpath <- "../data/"
+task <- "CC"
+med <- 23
 
-task = "AB"
-subfol = "AB"
-med = 24
-d_scale_ffx = 2
-d_scale_rfx = 2
-p_scale_ffx = 2
-p_scale_rfx = 2
-px_rng_d_ffx = c(0,1)
-px_rng_d_rfx = c(0,1)
-px_rng_p_ffx = c(-800,0)
-px_rng_p_rfx = c(-800,0)
-width = 8
-height = 8
-convert_on = "LME"
-
-# ----------------------------------------------------------------------------------------------------
+# ----------------------------------------------------
 # LIST OF SETTINGS
-# ----------------------------------------------------------------------------------------------------
-# AB
-# med=24, d_scale_ffx = 2, d_scale_rfx = 2, p_scale_ffx = 2, p_scale_rfx = 2, p_rng_d_ffx = c(0,1), p_rng_d_rfx = c(0,2), px_rng_p_ffx = c(-800,0), px_rng_p_rfx = c(-800,0)
+# ----------------------------------------------------
+# AB med = 24
+# CC med = 23
+# SRT med = 39
+# SD med = 24
 
-# CC 
-# med = 23, d_scale_ffx = 2, d_scale_rfx = 2, p_scale_ffx = 2, p_scale_rfx = 2, p_rng_d_ffx = c(0,1), p_rng_d_rfx = c(-1,1), px_rng_p_ffx = c(-100,0), px_rng_p_rfx = c(-100,0)
+# ----------------------------------------------------
+# load data
+# ----------------------------------------------------
+load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
 
-# SRT
-# med = 39, d_scale_ffx = 2, d_scale_rfx = 2, p_scale_ffx = 2, p_scale_rfx = 2, p_rng_d_ffx = c(0,2), p_rng_d_rfx = c(0,2), px_rng_p_ffx = c(-750,0), px_rng_p_rfx = c(-750,0)
+# ----------------------------------------------------
+# session variables
+# ----------------------------------------------------
+sel_n <- paste(c(25, 59, 136, 313))
+xl <- c(-10, 10)
+jmax <- 2
+w <- 1.96
+h <- 2.36
+dv <- "dens_fx"
+xlabs <- c("a", "b") # to be fixed
+max_idx <- c(5, 20)
 
-# SD
-# med = 24, d_scale_ffx = 2, d_scale_rfx = 2, p_scale_ffx = 2, p_scale_rfx = 2, p_rng_d = c(0,3), px_rng_p_ffx = c(-1000,0), px_rng_p_rfx = c(-1000,0)
+# ----------------------------------------------------
+# define functions
+# ----------------------------------------------------
+plot_dens <- function(task, jmax, dv, w, h, xlabs, xl, max_idx) {
+    # plot the density functions for select n
+    # saves to a png file in the project image folder
+    # kwargs
+    # -- task: "CC" or "AB" etc
+    # -- jmax: max number of plots for loop
+    # -- dv: "dens_fx" or "dens_p"
+    # -- w: width in inches
+    # -- h: height in inches
+    # -- xlabs: vector of labels for x axis, 1 per plot
+    # -- xl: xlims
+    # -- max_idx: from which element should the max y value be taken from
+    #             number corresponds to idx for sub.Ns
 
-# ----------------------------------------------------------------------------------------------------
-# define datas and load ds
-# ----------------------------------------------------------------------------------------------------
+    pdf(paste("../images/", task, "_", dv, ".pdf", sep = ""),
+        width = w, height = h)
+    par(mfrow = c(jmax, 1), mar = c(2, 3, 3, 1), mgp = c(2, 1, 0), las = 1)
+    for (j in 1:jmax) {
+        plot(res[sel_n[1], ][[dv]][[j]],
+             col = wes_palette("IsleofDogs1")[1],
+             lwd = 3,
+             ylim = c(0,
+                      max(res[max_idx[j], ][[dv]][[j]]["y"]$y)),
+             xlim = xl,
+             main = " ", ylab = "density",
+             xlab = xlabs[j],
+             bty = "n",
+             cex.lab = 0.75,
+             cex.axis = 0.5)
+        polygon(res[sel_n[1], ][[dv]][[j]],
+                col = adjustcolor(wes_palette("IsleofDogs1")[1],
+                alpha.f = 0.5))
+    for (i in c(2:length(sel_n))) {
+        lines(res[sel_n[i], ][[dv]][[j]],
+              col = wes_palette("IsleofDogs1")[i], lwd = 2)
+        polygon(res[sel_n[i], ][[dv]][[j]],
+              col = adjustcolor(wes_palette("IsleofDogs1")[i],
+              alpha.f = 0.5))
+    }
+    # if a p statistic plot, add the criteria for significance
+    if (dv == "dens_p") {
+        abline(v = qnorm(.05), col = "#161616",
+               lty = 2, lwd = 1)
+    }
+ }
+ dev.off()
+}
 
-fnames = c(paste("../data/", subfol, "/", task, "_esz", "_d.RData", sep=""), paste("../data/", subfol, "/", task, "_p", "_d.RData", sep=""))
-load(fnames[1])
+# ----------------------------------------------------
+# plotting
+# ----------------------------------------------------
 
-# ----------------------------------------------------------------------------------------------------
-# define factors and plot
-# ----------------------------------------------------------------------------------------------------
-
-d$Nsz <- as.factor(d$Nsz)
-# recode model factor to reflect actual models used
-d$numod[d$mod == "ffx"] = "RM-AN"
-d$numod[d$mod == "rfx"] = "LME"
-d$mod = d$numod
-d$numod <- NULL
-d$mod <- as.factor(d$mod)
-
-d <- d2r(d, convert_on)
-
-ffx.d <- plot.d(d, "RM-AN", px_rng_d_ffx, d_scale_ffx, med)
-rfx.d <- plot.d(d, "LME", px_rng_d_rfx, d_scale_rfx, med)
-
-# ----------------------------------------------------------------------------------------------------
-# load p, define factors and plot
-# ----------------------------------------------------------------------------------------------------
-load(fnames[2])
-
-d$Nsz <- as.factor(d$Nsz)
-# recode model factor to reflect actual models used
-d$numod[d$mod == "ffx"] = "t"
-d$numod[d$mod == "ffx"] = "RM-AN"
-d$numod[d$mod == "rfx"] = "LME"
-d$mod = d$numod
-d$numod <- NULL
-d$mod <- as.factor(d$mod)
-
-
-if (task == "AB") d <- d %>% filter(as.numeric(Nsz) < 17)
-if (task == "imm_AB") d <- d %>% filter(as.numeric(Nsz) < 17)
-if (task == "imm_SD") d <- d %>% filter(as.numeric(Nsz) < 15) # remove sample sizes saturated at 0
-if (task == "imm_SRT") d <- d %>% filter(as.numeric(Nsz) < 17)
-
-ffx.p <- plot.p(d, "RM-AN", px_rng_p_ffx, p_scale_ffx, med)
-rfx.p <- plot.p(d, "LME", px_rng_p_rfx, p_scale_rfx, med)
-
-p = plot_grid(ffx.d, rfx.d, ffx.p, rfx.p, labels=c('A', 'B', 'C', 'D'), label_size = 12, align="v")
-# #p # print out the plot so you can see it
-p = p + ggsave(paste("../images/", task, ".png", sep=""), width = width, height = height, units="in")
-
-# ----------------------------------------------------------------------------------------------------
-# get some intel for talk
-# ----------------------------------------------------------------------------------------------------
-source("doc_functions.R") # custom functions written for this project
-do.stats(subfol, task)
+plot_dens(task, jmax, dv = "dens_p", w, h, xlabs, xl, max_idx)
