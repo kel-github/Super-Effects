@@ -32,7 +32,6 @@ n.inner <- 1000
 i.outer <- NA
 cores <- 10
 sub.Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
-sub.Ns <- 13
 
 if (length(args) == 0) {
   fname <- "../data/total_of_313_subs_CC_task_trial_level_data.csv"
