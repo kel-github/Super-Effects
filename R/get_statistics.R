@@ -23,16 +23,16 @@ source("R_rainclouds.R") # functions for plotting
 # task settings
 # -----------------------------------------------------------------
 # AB
-# convert = LME, med=24, xrng_esz = c(x, x), xrng_p = c(-100, 1)
+# convert = LME
 
 # CC
-# convert = LME, med = 23, xrng_esz = c(x, x), xrng_p = c(-100, 1)
+# convert = LME
 
 # SRT
-# med = 39, d_scale_ffx = 2, d_scale_rfx = 2, p_scale_ffx = 2, p_scale_rfx = 2, p_rng_d_ffx = c(0,2), p_rng_d_rfx = c(0,2), px_rng_p_ffx = c(-750,0), px_rng_p_rfx = c(-750,0)
+# 
 
 # SD
-# med = 24, d_scale_ffx = 2, d_scale_rfx = 2, p_scale_ffx = 2, p_scale_rfx = 2, p_rng_d = c(0,3), px_rng_p_ffx = c(-1000,0), px_rng_p_rfx = c(-1000,0)
+# convert = LME
 
 
 # -----------------------------------------------------------------
@@ -43,9 +43,6 @@ subfol <- "CC"
 sub.Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
 convert <- "LME"
 
-med <- 23
-xrng_esz <- c(0, 0.4)
-xrng_p <- c(-10, 10)
 # -----------------------------------------------------------------
 # relatively constant settings
 # -----------------------------------------------------------------
@@ -56,16 +53,8 @@ datpath <- "../data/"
 rxvnme <- task
 
 # -----------------------------------------------------------------
-# plot settings
-# -----------------------------------------------------------------
-sc <- 2
-w <- 12
-h <- 8
-
-# -----------------------------------------------------------------
 # define functions
 # -----------------------------------------------------------------
-
 get_data <- function(fstem, n, j, datpath, rxvnme){
   # concatenate data for one task
   # -- fstem: fstem = filestem to be sprintf'd with N and j
@@ -180,7 +169,7 @@ stats_4_subs <- function(fstem, n, j, datpath, rxvnme, convert) {
 # ------------------------------------------------------------
 res <- lapply(sub.Ns, stats_4_subs,
                       fstem = fstem,
-                      j = 10,
+                      j = j,
                       datpath = datpath,
                       rxvnme = rxvnme,
                       convert = convert)
