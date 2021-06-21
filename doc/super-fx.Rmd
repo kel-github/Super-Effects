@@ -40,8 +40,11 @@ keywords:
 bibliography: refs.bib
 biblio-style: unsrt
 output: 
-  rticles::arxiv_article:
+  bookdown::pdf_book:
+    base_format: rticles::arxiv_article
     keep_tex: true
+  bookdown::word_document2:
+    toc: true
 ---
 
 ```{r knitr_options, echo=FALSE}
@@ -118,131 +121,205 @@ Experimental procedures were run on an Apple Mac Minicomputer (OS X Late 2014, 2
 ## Procedures
 \label{sec:Procedures}
 
-Across all tasks, participants sat approximately 57 cm from the monitor. An overview of the task procedures is presented in Figure \ref{fig:FigureParadigm}. Further details regarding the task protocols are presented within each section below. In the interest of reducing working memory load, we provide an overview of the simulation procedures, before detailing the specific procedural and statistical methods for each task.
+Across all tasks, participants sat approximately 57 cm from the monitor. An overview of the task procedures is presented in Figure \@ref(fig:FigureParadigm). Further details regarding the task protocols are presented within each section below. In the interest of reducing working memory load, we provide an overview of the simulation procedures, before detailing the specific procedural and statistical methods for each task.
 
-NEXT STEP: check this: https://bookdown.org/yihui/bookdown/figures.html
 
-```{r fig:FigureParadigm, out.width='70%', fig.cap='Task battery. A) Attentional Blink Paradigm (AB). Participants report the two letter targets from the rapid serial visual presentation of numbers and letters, B) Multitasking Paradigm (MT). Participants make a discriminate the colour of a disc, a complex tone, or both C) Contextual Cueing Paradigm (CC). i) Participants perform an inefficient visual search task. ii) Unknown to participants, half of the search arrays are repeated throughout the course of the experiment. D) Serial reaction time task (SRT). Participants respond to one of four stimuli, each mapped to a spatially-compatible button press. Unknown to participants, for half of the blocks the stimulus follows a repeating sequence. E) Visual Statistical Learning Paradigm (VSL): i) 12 shapes are grouped into 6 base pairs. ii) Learning: three of the six pairs are presented as an array, this is repeated as participants passively view the displays. iii) Test: participants are presented with a base pair, and a novel pair formed from a recombination of the 12 shapes, and is asked which of the two pairs they have seen previously.'}
+```{r, FigureParadigm, out.width='70%', fig.cap='Task battery. A) Attentional Blink Paradigm (AB). Participants report the two letter targets from the rapid serial visual presentation of numbers and letters, B) Multitasking Paradigm (MT). Participants make a discriminate the colour of a disc, a complex tone, or both C) Contextual Cueing Paradigm (CC). i) Participants perform an inefficient visual search task. ii) Unknown to participants, half of the search arrays are repeated throughout the course of the experiment. D) Serial reaction time task (SRT). Participants respond to one of four stimuli, each mapped to a spatially-compatible button press. Unknown to participants, for half of the blocks the stimulus follows a repeating sequence. E) Visual Statistical Learning Paradigm (VSL): i) 12 shapes are grouped into 6 base pairs. ii) Learning: three of the six pairs are presented as an array, this is repeated as participants passively view the displays. iii) Test: participants are presented with a base pair, and a novel pair formed from a recombination of the 12 shapes, and is asked which of the two pairs they have seen previously.'}
 
 paradigm.fig.pth <- '../images/FigXXXX_alltasks.png'
 knitr::include_graphics(paradigm.fig.pth)
 
 ```
 
-<!-- \begin{figure} -->
-<!--   \centering -->
-<!--   \caption{Task battery. A) Attentional Blink Paradigm (AB). Participants report the two letter targets from the rapid serial visual presentation of numbers and letters, B) Multitasking Paradigm (MT). Participants make a discriminate the colour of a disc, a complex tone, or both C) Contextual Cueing Paradigm (CC). i) Participants perform an inefficient visual search task. ii) Unknown to participants, half of the search arrays are repeated throughout the course of the experiment. D) Serial reaction time task (SRT). Participants respond to one of four stimuli, each mapped to a spatially-compatible button press. Unknown to participants, for half of the blocks the stimulus follows a repeating sequence. E) Visual Statistical Learning Paradigm (VSL): i) 12 shapes are grouped into 6 base pairs. ii) Learning: three of the six pairs are presented as an array, this is repeated as participants passively view the displays. iii) Test: participants are presented with a base pair, and a novel pair formed from a recombination of the 12 shapes, and is asked which of the two pairs they have seen previously.} -->
-<!--   \label{fig:FigureParadigm} -->
-<!-- \end{figure} -->
-
-
-All the [data]() and [code](https://github.com/kel-github/Super-Effects) used for the current analysis are available online. The analysis of the data from each task followed two steps. First, to ascertain that we observed the typical findings for each of the paradigms, we applied the conventional statistical model for that to the full dataset (N=313). The details of each analysis are presented below. Next, we implemented a simulation procedure to determine the effect size and p-values that would be attained over many experiments conducted at multiple levels of sample size. 
+All the [data]() and [code](https://github.com/kel-github/Super-Effects) used for the current analysis are available online. All data were analysed using R @rcoreteamLanguageEnvironmentStatistical2015 and RStudio @rstudiocitation. The analysis of the data from each task followed two steps. First, to ascertain that we observed the typical findings for each of the paradigms, we applied the conventional statistical model for that to the full dataset (N=313). The details of each analysis are presented below. Next, we implemented a simulation procedure to determine the effect size and p-values that would be attained over many experiments conducted at multiple levels of sample size. 
 
 ### Sampling procedure
 
 For each task, we sampled across 20 different sample sizes ($N$s), defined on a logarithmic interval between N=13 and N=313. We opted for a logarithmic interval given the decreasing information gained at higher $N$ values. To simulate $k$ experiments at each of our chosen $N$, we developed a sampling procedure that sought to leverage information from across the whole dataset while also protecting against any reductions in effect size variablility that may be attributable to saturation as $N$ approaches the maximum ($N_{max}$=313). Specifically, it could be that as $N$ approaches 313, the overlap of participants between subsamples may be greater than when $N$ equals a lower number such as 13. It follows then that any decreasing variability in effect size estimates at higher $N$s could be due to the decrease in variability of the subsamples, rather than the improved estimate of the population variance should come with a larger $N$. 
 
-To protect against this possibility we applied the following procedure; for each level of $N$ ($N_{1}, N_{2}, ...N_{20}$), we first selected a subsample from the total dataset _without_ replacement, e.g. $N$ of 13 unique samples from the total $N$=313. We refer to this from now on as the _parent subsample_. From this parent subsample, we sampled $k$ = 1000 times _with_ replacement - e.g. $N$=13 sampled from $N$=13. These shall now be referred to as the _child subsamples_. The relevant analysis was then applied to each of the child subsamples. Sampling with replacement ensured that the child subsamples carried the Markov property. Given that this procedure reduces the heterogeneity of the parent sample (for example, in the case of $N$=13, all the child subsamples are derived from only 13 unique observations), we then repeated the entire process over $j$ = 1000 iterations. Therefore the presented data reflects $j * k$ simulated experiments for each level of $N$. We refer to this now as the two-step sampling procedure: $j$ = 1000, $k$ = 1000. It is worth noting that we compared this procedure to one where we performed the two-step sampling procedure with $j$ = 1, and to a one-step sampling procedure where we sampled $N$ with replacement from the entire dataset, i.e. $k$=1000 and $j$ = 0. Outcomes were comparable between the sampling procedures, with the two-step procedure ($j$ = 1000) offering better resolution of the resulting densities (see Figure \ref{fig:samples} for a representative example). 
+To protect against this possibility we applied the following procedure; for each level of $N$ ($N_{1}, N_{2}, ...N_{20}$), we first selected a subsample from the total dataset _without_ replacement, e.g. $N$ of 13 unique samples from the total $N$=313. We refer to this from now on as the _parent subsample_. From this parent subsample, we sampled $k$ = 1000 times _with_ replacement - e.g. $N$=13 sampled from $N$=13. These shall now be referred to as the _child subsamples_. The relevant analysis was then applied to each of the child subsamples. Sampling with replacement ensured that the child subsamples carried the Markov property. Given that this procedure reduces the heterogeneity of the parent sample (for example, in the case of $N$=13, all the child subsamples are derived from only 13 unique observations), we then repeated the entire process over $j$ = 1000 iterations. Therefore the presented data reflects $j * k$ simulated experiments for each level of $N$. We refer to this now as the two-step sampling procedure: $j$ = 1000, $k$ = 1000. It is worth noting that we compared this procedure to one where we performed the two-step sampling procedure with $j$ = 1, and to a one-step sampling procedure where we sampled $N$ with replacement from the entire dataset, i.e. $k$=1000 and $j$ = 0. Outcomes were comparable, but not identical, between the sampling procedures. The two-step procedure ($j$ = 1000) offering better resolution of the resulting densities (see Figure for a representative example). 
 
-```{r supp_sampling, out.width='70%'}
+NOTE: insert analysis of central tendency of the distributions at this point.
 
-# fig.cap="Supplemental Figure xxxx: Comparison between sampling procedures for the AB task data fit with a repeated measures ANOVA for 4 levels of N; densities of observed effect sizes for the A) two-step sampling procedure j=1000^k=1000, the B) two-step sampling procedure, j=1^k=1000, and C) the one-step procedure, $k$ = 1000"
+```{r supp_sampling_data, message=F}
 
 # paradigm.fig.pth <- '../images/SuppFigXXXX_AB_sampling.png'
 # #paradigm.fig <- readPNG(paradigm.fig.pth, native=TRUE, info=TRUE)
 # include_graphics(paradigm.fig.pth)
 source('../R/plot_IQRs.R')
+```
+
+```{r figSuppSamp, out.width='70%', fig.cap='Comparison between sampling procedures for the AB task data fit with a repeated measures ANOVA for 5 levels of N; densities of observed effect sizes for the A) two-step sampling procedure $j$=1000, $k$=1000, the B) two-step sampling procedure, $j$=1, $k$=1000, and C) the one-step procedure, $k$ = 1000', message=F}
 plot.d.by.samp(dat, px_rng_d, 1, mod) + xlab(bquote(eta['p']^2)) + theme(axis.text.x = element_text(size=11),
                                                                          axis.text.y = element_text(size=11))
 ```
 
-\begin{figure}
-  \centering
-  \caption{Comparison between sampling procedures for the AB task data fit with a repeated measures ANOVA for 4 levels of N; densities of observed effect sizes for the A) two-step sampling procedure $j$=1000, $k$=1000, the B) two-step sampling procedure, $j$=1, $k$=1000, and C) the one-step procedure, $k$ = 1000}
-  \label{fig:samples}
-\end{figure}
 
-$$
-\xi _{ij}(t)=P(x_{t}=i,x_{t+1}=j|y,v,w;\theta)= {\frac {\alpha _{i}(t)a^{w_t}_{ij}\beta _{j}(t+1)b^{v_{t+1}}_{j}(y_{t+1})}{\sum _{i=1}^{N} \sum _{j=1}^{N} \alpha _{i}(t)a^{w_t}_{ij}\beta _{j}(t+1)b^{v_{t+1}}_{j}(y_{t+1})}}
-$$
-
-### Headings: third level
-\lipsum[6]
-
-\paragraph{Paragraph}
-\lipsum[7]
-
-# Examples of citations, figures, tables, references
-\label{sec:others}
-
-\lipsum[8] some text [@kour2014real; @kour2014fast] and see @hadash2018estimate.
-
-The documentation for \verb+natbib+ may be found at
-\begin{center}
-  \url{http://mirrors.ctan.org/macros/latex/contrib/natbib/natnotes.pdf}
-\end{center}
-Of note is the command \verb+\citet+, which produces citations
-appropriate for use in inline text.  For example,
-
-\begin{verbatim}
-   \citet{hasselmo} investigated\dots
-\end{verbatim}
-
-produces
-
-\begin{quote}
-  Hasselmo, et al.\ (1995) investigated\dots
-\end{quote}
-
-\begin{center}
-  \url{https://www.ctan.org/pkg/booktabs}
-\end{center}
+Specific details regarding which analyses were applied to each $k$ sample are detailed below for each paradigm. Note that given the iterative fitting procedure that is inherent to the LME approach, the models specified were the simplest possible, as the computational requirements for fitting more complex models would have resulted in simulations running for over 11 months. Therefore, the following results should be interpreted with the caveat that a more complex model may well yield different results in the LME case. In these findings we present examples of the simplest case, to provide a basis for comparison, or a set of minimum assumptions for researchers interested in applying LME models to their data on these or comparable paradigms. 
 
 
-## Figures
+_Effect Sizes_
+For each task, we report the following information from the observed effect size densities: to assess the best estimate of the effect size of interest and its variability, we report the central tendency and standard deviation observed for our highest N (apart from in one case of bimodality, where we report the two points of highest probability). To determine imprecision in current effect size estimates in the field, we report the Kullback-Leibler Divergence between the distribution observed at each level of N, and the distribution that reflects our best estimate, i.e. the one from our highest N level of (313). This measure quantifies the information lost (in bits), should we use the distribution observed at any level of N as an approximation for our best estimate. To compare outcomes between the standard and LME approaches, we compare the ratio of the range of the effect size distribution found at each level of N, using the difference between the .025 and .975 quantiles as our estimate of the range. Lastly, to provide an estimate of the effect size that would be yielded through a meta-analysis of the published literature, we compute the mean effect size for all analyses that yielded a statistically significant result (p<.05). To determine the impact that increasing sample size would have on the meta-analytically attained effect size, we take the ratio between the meta-analytic mean and our mean observed effect sizes for each N.
 
-\lipsum[10] 
-See Figure \ref{fig:fig1}. Here is how you add footnotes. [^Sample of the first footnote.]
+_p Values_
+To determine the N required to achieve 90% power to reject the null hypothesis, we report the N for which over 90% of p-values pass the threshold for significance ($\alpha$=.05). To assess the range of p-values that one can expect to observe given $k=1000^2$ experiments across N's, i.e. the confidence for the most likely observed p-value, we report the .025 and .975 quantiles for the observed p-values for each N. To compare the standard and the LME approaches, we then determine whether there is agreement in the N required to achieve greater than 90% statistical power. 
 
-\lipsum[11] 
+## Attentional Blink (AB)
 
-\begin{figure}
-  \centering
-  \fbox{\rule[-.5cm]{4cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
-  \caption{Sample figure caption.}
-  \label{fig:fig1}
-\end{figure}
+<br>
 
-```{r}
-plot(mtcars$mpg)
+### Protocol
+
+The AB protocol was the same as that reported in [@benderRelationshipResponseSelection2016]. Each trial began with a black fixation cross presented in the center of a gray screen [RGB: 128, 128, 128] for a variable interval of 200-600 ms. On each trial, letters targets and digit distracters were each presented centrally for 100 ms in rapid serial presentation. The eight distractors were drawn without replacement from the digits 2-9. The target letters were randomly selected from the English alphabet, excluding I, L, O, Q, U, V and X. The first target (T1) was the third item to be presented (serial position 3), and T2 was presented at either lag 2 (200 ms), 3 (300 ms), 5 (500 ms) or 7 (700 ms) relative to T1. All stimuli subtended 2.7$^\circ$ visual angle. Participants were instructed to make an unspeeded report of the identity of both targets at the end of each trial. Participants completed 24 practice trials and four test blocks of 24 trials. For the current analysis we calculated T2 accuracy, given that T1 was correctly reported (T2|T1), for each lag. 
+
+<br>
+
+### Statistical Approach
+
+As is typical for the field, and to ascertain the effectiveness of the lag manipulation, T2|T1 accuracy was subject to a repeated measures ANOVA, with lag (2, 3, 5, & 7) as the independent variable. This analysis was also applied to each $k$ sample. For each $k$ sample, $\eta_{p}^2$ and the resulting $p$ value were taken for the main effect of lag. For this task, and all remaining ANOVA tests, models were fit using the anova_test() function from the [rstatix](https://rpkgs.datanovia.com/rstatix/index.html) package. Where possible, the models were fit using type 3 sum of squares, owing to the computational expediency and match to commercial statistical software packages. In some cases, models were unable to be fit using type 3 sum of squares, owing to rank deficiencies in the underlying design matrix (e.g. when one participant was drawn more than twice within a child subsample). In these cases, models were fit using type 1 sum of squares. However, as the experiment designs were fully balanced, each sum of squares type should yield the same results.
+
+We also applied a LME to estimate the fixed effect of lag, with a random intercept for each participant ($j$) and an intercept for random error ($i$): 
+
+\begin{equation}
+  y_{ij} \sim \beta_{0} + \beta_{1}lag + e_{j} + e_{ij}
+  (\#eq:ABLME)
+\end{equation}
+
+This, and all subsequent LME's were fit using the lmer() function from the lme4 package @batesFittingLinearMixedEffects2015. To compute an effect size estimate from the LME approach, a proxy for $d$ can be calculated as the ratio of the estimated fixed effect of interest (lag) to the squareroot of the sum of the variance accounted for by the random effects in the model (see @brysbaertPowerAnalysisEffect2018; @westfallStatisticalPowerOptimal2014):
+
+\begin{equation}
+  d = \frac{lag}{\sqrt{{\sigma_{e_{i}} + \sigma_{e_{ij}}}}}
+  (\#eq:LMEd)
+\end{equation}
+
+To facilitate comparison with $\eta_{p}^2$ (which is a generalisation of $r^2$, see Cohen -@cohenStatisticalPowerAnalysis1988), the resulting $d$ value was converted to $r^2$ using the following from Cohen -@cohenStatisticalPowerAnalysis1988:
+
+\begin{equation}
+  r^2 = \biggl(\frac{d}{\sqrt(d^2 + \frac{1}{pq})}\biggr)^2
+  (\#eq:d2r)
+\end{equation}
+
+For this and for all subsequent applications of LME models, the $p$ value for the regressor of interest (in this case 'lag') was attained by applying Wald's chi-square test as implemented using the Anova function from the car package [@foxCompanionAppliedRegression2018] (note: all the results were comparable regardless of whether we used Wald's test or whether we performed a log-likelihood test between the model of interest and a null model, which for the current AB case contained only the two random intercept terms $e_{ij}$ and $e_{i}$). 
+
+## Multitasking (MT)
+
+### Protocol
+
+The MT protocol was previously reported in [@benderRelationshipResponseSelection2016]. Each trial began with a black fixation cross presented in the center of a gray screen [RGB: 128, 128, 128] for a variable interval of 200-600 ms. Next either one of two possible coloured circles [red, RGB: 237, 32, 36 or blue, RGB: 44, 71, 151] or one of two possible sounds (complex tones taken from [@duxIsolationCentralBottleneck2006]), or both (circle and sound) were presented for 200 ms. The coloured circle subtended 1.3$^\circ$ visual angle. Participants were instructed to respond to all presented tasks by using the appropriate key press ['A' or 'S' for left hand responses, 'J' or 'K' for right hand responses, with the task-hand mapping counterbalanced across participants]. The DT consisted of 4 blocks of 36 trials, with each trial type (ST visual, ST auditory or DT) randomly mixed within blocks. Participants completed the DT task after completing two ST blocks as practice, one for the visual task and one for the auditory task. Mean response times (RTs) to each task modality x condition were taken as the dependent variable of interest.
+
+### Statistical Analysis
+
+To ascertain the effectiveness of the multitasking manipulation, the data were modelled using a 2 (task-modality: visual-manual vs auditory-manual) x 2 (task: single vs dual) repeated-measures ANOVA. This analysis was also applied to each $k$ sample; $\eta_{p}^2$ and $p$ are reported for the main effect of task. We also applied an LME model which included fixed effects regressors for task-modality, task and their interaction, and random intercepts for participants $e_{ij}$, and measurement error $e_{i}$. As above, $d$ was computed as the ratio of the estimated fixed effect for the task regressor to the square root of the summed variance of the estimated random effects, and was converted to $r^2$. Again, Wald's chi-square test was applied to attain a $p$ value for the main effect of task.
+
+## Contextual Cueing (CC)
+
+### Protocol
+
+The CC protocol was the same as that reported by Nydam et al -@nydamCathodalElectricalStimulation2018. Each trial began with a white fixation cross presented on a grey screen [RGB: 80, 80, 80. An array of 12 L's and a single T were then presented presented within an invisible 15 x 15 grid that subtended 10$^\circ$ x 10$^\circ$ of visual angle. Orientation of each L was determined randomly to be rotated 0$^\circ$, 90$^\circ$, 180$^\circ$ or 270$^\circ$ clockwise. The T was oriented to either 90$^\circ$ or 270$^\circ$. Participants reported whether the T was oriented to the left (using the 'z' key) or the right (using the 'm' key). The task consisted of 12 blocks of 24 trials. For half the trials in each block, the display was taken (without replacement) from 1 of 12 configurations that was uniquely generated for each participant, where the location of the distractors and target (but not the orientation of the target) was fixed. These trials were called 'repeats'. For the remaining trials, the display was randomly generated for each trial, making them 'novel'. Displays were generated with the constraint that equal items be placed in each quadrant and each eccentricity. Target positions were matched between the repeat and novel displays for both quadrant and eccentricity. The exact location of the item was jittered within each cell for each presentation, to prevent perceptual learning or adaptation to the specific position of the item. The order of display type (repeat vs novel), configuration (1-12) and target orientation (left or right) was randomised for each block. Mean RTs to each block (1:12) and display type (repeat vs novel) were taken as the dependent variable of interest.
+
+### Statistical Approach
+
+To ascertain whether participants speeded responses to repeat relative to novel trials over the course of the experiment (i.e. whether participants learned the statistical regularities of the repeated arrays), the data were subject to a block (1:12) x condition (repeat vs novel array) repeated measures ANOVA. Specifically, learning should be evidenced by a significant block x condition interaction. This analysis was applied to each $k$ sample, and we report $\eta_{p}^2$ and $p$ for the block x condition interaction. We also applied LME models, containing fixed effects regressors for block, condition and their interaction, and random intercepts for subjects and general measurement error. We report $r^2$ for the block x condition interaction and the resulting $p$ value from Wald's chi-square test.
+
+## Serial Response Task (SRT)
+
+### Protocol
+
+The SRT was adapted from [@nissenAttentionalRequirementsLearning1987]. The task began with a []. Four square placeholders were presented across the horizontal meridian, subtending w$^\circ$ x h$^\circ$. A red circle [RGB: ] appeared in one of the 4 squares for 500 ms. This served as the target stimulus. Participants responded by pressing the finger of their dominant hand that spatially aligned to the placeholder within which the circle appeared, using the relevant 'j', 'k', 'l' or ';' keys. The next target stimulus would appear 500 ms after the correct response had been made. Participants completed 4 blocks of 100 trials. For blocks 1 and 4, the location of the target stimulus for each trial was randomly selected from a uniform distribution. These blocks are referred to as 'random'. For blocks 2 and 3, a repeating sequence of 10 elements was used to determine the target location. The sequence was repeated 10 times. The repeating sequence was 4-2-3-1-3-2-4-2-3-1, with 1 being the leftmost placeholder, and 4 being the rightmost placeholder. These blocks are referred to as 'repeats'. Of interest is the RT for Random and Repeat blocks in the latter half of the experiment (block 4 vs 3).
+
+### Statistical Approach
+
+To ascertain whether participants learned the repeating sequences, RTs in the final block of repeats (block 3) were compared to those in the final block of random trials (block 4) using a paired-samples t-test. This analysis was also applied to each $k$ sample, and we present the resulting Cohen's $d$, converted to $r^2$, and $p$ value from each test. We also applied an LME approach where we fit models with a fixed effects regressor for block (3 vs 4), and included the same random intercepts as described above. We report the resulting $r^2$ and $p$ values for the fixed effect of block.
+
+<br>
+
+#### Visual Statistical Learning (VSL)
+
+<br>
+
+##### Protocol
+
+The VSL task was adapted from Fiser and Aslin [-@fiserUnsupervisedStatisticalLearning2001]. For each participant, twelve abstract shapes were grouped into 6 base pairs. On each trial of the learning phase, three base pairs were randomly positioned onto a 3 x 3 grid, which subtended ?$^\circ$ of visual angle. Each shape subtended ?$^\circ$. A total of 144 of these displays were each presented for 2000 ms, interleaved with a blank screen presented for 1000 ms. Participants were instructed to pay attention to the displays. The test phase consisted of trials where two shape pairs were each presented for 2000 ms, with an intervening blank screen lasting 1000 ms. One pair was selected from the 6 base pairs for that participant, and one pair was formed by a novel recombination formed by randomly selecting two of the 12 shapes, with the constraint that a base pair could not be selected. Participants were instructed to report which of the two pairs was more familiar, using the 'z' and 'm' keys to denote the first or second pair respectively, with the exact mapping counterbalanced across participants. Paticipants completed a total of 24 trials, with each base pair presented 4 times. The order of base and novel pairs was counterbalanced across trials, and trial order was randomised for each participant. Response accuracy in the testing phase was taken as the dependent variable of interest.
+
+<br>
+
+##### Statistical Approach
+
+To assess whether participants recognised familiar base pairs more than would be expected by chance, it is typical to apply a one-sample t-test to recognition test accuracies, against theoretical chance (p=.5) (e.g. @fiserUnsupervisedStatisticalLearning2001). Therefore we applied this test to our data to determine if our results corroborated that of the field. We applied this test to each $k$ sample, and we report the resulting $r^2$ and $p$ values.
+
+It has recently been shown that the assumptions of the one-sample t-test are not met when data are from an information based measure such as classification accuracy [@allefeldValidPopulationInference2016]. Specifically, because the true value of such a measure can never be below chance (50 % in the case of a 2 alternative-forced-choice), application of the t-test, which carries the assumption that the null distribution can include values above and below 50 %, becomes a fixed effects analysis (see Allefeld et al [-@allefeldValidPopulationInference2016] for a full treatment). Instead, application of the prevalence statistic [@allefeldValidPopulationInference2016] allows for valid second-level inference with information-based measures such as classification accuracy. 
+
+Implementing the prevalence statistic typically involves a two step permutation procedure. First, a null distribution is generated for each participant's accuracies (first level permutations), given their responses and the trials to which they were exposed. This is typically attained by shuffling the trial labels over multiple iterations (e.g. $m$ = 1000), and taking the participant's accuracy under each permutation (with the constraint that $m$ = 1 is the observed data) [@allefeldValidPopulationInference2016]. This yields $m$ accuracies per participant that would be attained given the null hypothesis ($H_0$) was true, where $H_0$ is that the participant is guessing. Secondly, to attain the second-level null distribution, each participant's first level permutations are sampled $z$ times (e.g. $z$ = 1000), with the constraint that $z_{1}$ contains the observed accuracies across participants. This results in $z$ sets of N accuracies as would be expected given the second-level $H_0$. The minimum accuracy is then taken from each of the $z$ sets of permutated accuracies ($PA_{min}$). The proportion for which the observed minimum accuracy ($OA_{min}$) is greater than PA ($p = \frac{1}{i} \sum_{i=1}^z [OA_{min} > PA_{min}{z}]$) is taken as the probability that the observed accuracies are drawn from the distribution defined by $H_0$ (i.e. serves as the $p$ value of the second-level inferential test). 
+
+Given that our sampling procedure already entailed $N*j*k$ permutations, and that such a permutation procedure as defined above would require $N*j*k*m*z$ permutations (which in our case is 2$e$+13), we opted to instead apply an analytical definition of the first- and second level distributions for $H_0$. 
+
+To summarise this analytical distribution; each set of participant responses comes from a binary forced choice task with possible answers $a$ and $b$, consisting of $T$ trials with exactly half of the trials having each possible answer as the correct response (i.e. $A_a = A_b = \frac{1}{2}N$). For any given set of responses $R_a + R_b = N$, we assign the identity of $a$ and $b$ to the possible choices such that $R_a \le A_a$.
+
+Now we can assemble a distribution for this configuration of responses by computing the number of possible combinations of $x$ responses in $A_a$ 'slots', multiplied by the number of $R_a - x$ responses in $A_b$ 'slots', for all x between zero and $R_a$. Or if $F(x)$ is the frequency for a given (not necessarily unique) accuracy, and $G(x)$ is the corresponding accuracy:
+
+\begin{equation}
+  F(x) = {{A_a}\choose {x}} \times {{A_b}\choose {R_a - x}}, G(x) = \frac{x + R_b - (R_a - x)}{R_a+R_b} , \forall x \in \mathbb{Z} \mid 0 \le x \le R_a
+  (\#eq:FLPrev)
+\end{equation}
+
+To generate the second level null distribution, we then sampled each participant's first level distribution $z$ = 1000 times, to provide $z$ iterations of N accuracies as would be expected under $H_0$. 
+
+Having calculated the $p$ value for a given set of neutral accuracies, we can compute the proportion of the population expected to show the effect $\gamma$, given the observed $p$ statistic (i.e. an effect size), using the formula defined by Allefeld et al [-@allefeldValidPopulationInference2016]:
+
+\begin{equation}
+  \gamma = \frac{\alpha^\frac{1}{N} - p^\frac{1}{N}}{1-p^\frac{1}{N}}
+  (\#eq:gamma)
+\end{equation}
+
+
+# Results
+
+## Attentional Blink
+
+
+In accordance with the often observed finding that detection of a second visual target is impaired if it appears close in time to the first target, the data showed a significant main effect of lag F(`r ab_res[[1]]$DFn`, `r ab_res[[1]]$DFd`) = `r ab_res[[1]]$F`, $\eta_{p}^2$ = `r ab_res[[1]]$pes`, p = `r ab_res[[1]]$p`).
+
+## Contextual Cueing
+
+```{r, CC_interaction, message=F}
+ccfname <- "../data/CC/CCstats.RData"
+#cc_int_plt <- plot.CC.results(ccfname) + ylab(paste(bquote(mu), "RT (seconds)", sep=" "))
 ```
 
+```{r, CC_analysis, warning=FALSE, echo=FALSE, message=F}
+load(ccfname)
+```
 
-## Tables
+In accordance with the notion that RTs for repeat displays speed up to a greater extent than for novel displays (i.e. that participants learn the repeat displays), a significant block x display interaction was found (F (`r cc_res[[1]]$DFn`, `r cc_res[[1]]$DFd`) = `r cc_res[[1]]$F`, $\eta_{p}^2$ = `r cc_res[[1]]$pes`, p = `r cc_res[[1]]$p`). Specifically, while there was no statitically significant difference between repeat and novel displays in the first block (t (`r cc_res[[2]][[1]]$parameter`) = `r cc_res[[2]][[1]]$statistic`, p = `r cc_res[[2]][[1]]$p.value`, $\mu$ difference = `r cc_res[[2]][[1]]$estimate` sec), RT's to repeat displays were on average `r cc_res[[2]][[2]]$estimate` sec faster than RTs to novel displays by block 12 (t (`r cc_res[[2]][[2]]$parameter`) = `r cc_res[[2]][[2]]$statistic`, p = `r cc_res[[2]][[2]]$p.value`).
 
-\lipsum[12]
+```{r, CC_do_p_plts, warning=FALSE, echo=FALSE, message=F}
+# ----------------------------------------------------------------------------------------------------
+# define datas and load ds
+# ----------------------------------------------------------------------------------------------------
 
-See awesome Table~\ref{tab:table}.
+ccfx <- paste("../data/", "CC", "/", "CC", "_esz", "_d.RData", sep="")
+load(ccfx)
+# ----------------------------------------------------------------------------------------------------
+# define factors and plot
+# ----------------------------------------------------------------------------------------------------
 
-\begin{table}
- \caption{Sample table title}
-  \centering
-  \begin{tabular}{lll}
-    \toprule
-    \multicolumn{2}{c}{Part}                   \\
-    \cmidrule(r){1-2}
-    Name     & Description     & Size ($\mu$m) \\
-    \midrule
-    Dendrite & Input terminal  & $\sim$100     \\
-    Axon     & Output terminal & $\sim$10      \\
-    Soma     & Cell body       & up to $10^6$  \\
-    \bottomrule
-  \end{tabular}
-  \label{tab:table}
-\end{table}
+d$Nsz <- as.factor(d$Nsz)
+# recode model factor to reflect actual models used
+d$numod[d$mod == "ffx"] = "RM-AN"
+d$numod[d$mod == "rfx"] = "LME"
+d$mod = d$numod
+d$numod <- NULL
+d$mod <- as.factor(d$mod)
 
-## Lists
+# convert LME fx to r^2
+convert_on = "LME"
+d <- d2r(d, convert_on)
 
-- Lorem ipsum dolor sit amet
-- consectetur adipiscing elit. 
-- Aliquam dignissim blandit est, in dictum tortor gravida eget. In ac rutrum magna.
+cc_fx_plts <- plot_fx_szs(d, med=23, d_scale_ffx=1, d_scale_rfx=1, px_rng_d=c(0, .4))
+```
+
+```{r, cc_disp_fx, warning=FALSE, echo=FALSE, message=F}
+
+plot_grid(cc_int_plt, cc_fx_plts[[2]], NULL, cc_fx_plts[[1]] + xlab("r2"), labels=c('A', 'B', '', 'C'), label_size=12, ncol=2)
+```
+# References
