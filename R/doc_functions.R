@@ -77,62 +77,134 @@ do.AB.analysis <- function(fname){
 }
 
 
-plot.in.doc <- function(task, med, d_scale_ffx, d_scale_rfx, p_scale_ffx, p_scale_rfx, px_rng_d, px_rng_p_ffx, px_rng_p_rfx){
-  
-  ### written by K. Garner, Jan 2021
-  ### for the project 'On the detectability of effects in executive function and implicit learning tasks'
-  
-  ### Call plotting functions for observed effect sizes and p values, for plotting in the manuscript document
+# ----------------------------------------------------------------------------------------------------
+# CC specific analysis
+# ---------------------------------------------------------------------------------------------------- 
+plot.CC.results <- function(fname){
+  ## plot the trial type x block interaction for mean RTs
+
+  # ----------------------------------------------------------------------------------------------------
+  # read in data
+  # ----------------------------------------------------------------------------------------------------  
+  dat <- read.csv(fname, header=TRUE)
   
   # ----------------------------------------------------------------------------------------------------
-  # define session variables
+  # create summary dataframe
   # ----------------------------------------------------------------------------------------------------
+  min.RT <- 200 # in msec
+  sd.crit <- 2.5
   
-  # task = "SD"
-  # med = 24
-  # d_scale_ffx = 2
-  # d_scale_rfx = 2
-  # p_scale_ffx = 2
-  # p_scale_rfx = 2
-  # px_rng_d = c(0,3)
-  # px_rng_p_ffx = c(-1000,0)
-  # px_rng_p_rfx = c(-1000,0)
-  width = 8
-  height = 8
+  ffx.dat <- dat %>% mutate(Block.No = rep(c(1:12), each = 24, length(unique(dat$Subj.No)))) %>%
+    group_by(Subj.No, Block.No, Trial.Type.Name) %>%
+    filter(Accuracy == 1) %>%
+    filter(RT.ms > min.RT) %>%
+    filter(RT.ms < (mean(RT.ms) + sd.crit*sd(RT.ms))) %>%
+    summarise(RT=mean(RT.ms))
+  subs  <- unique(ffx.dat$Subj.No)
+  names(ffx.dat) <- c("sub", "block", "type", "RT")
   
-  # ----------------------------------------------------------------------------------------------------
-  # LIST OF SETTINGS
-  # ----------------------------------------------------------------------------------------------------
-  # AB
-  # med=24, d_scale_ffx = 2, d_scale_rfx = 2, p_scale_ffx = 2, p_scale_rfx = 2, p_rng_d = c(0,5), px_rng_p_ffx = c(-800,0), px_rng_p_rfx = c(-800,0)
-  
-  # CC
-  # med = 23, d_scale_ffx = 2, d_scale_rfx = 2, p_scale_ffx = 2, p_scale_rfx = 2, p_rng_d = c(0,1), px_rng_p_ffx = c(-50,0), px_rng_p_rfx = c(-50,0)
-  
-  # SRT
-  # med = 39, d_scale_ffx = 2, d_scale_rfx = 2, p_scale_ffx = 2, p_scale_rfx = 2, p_rng_d = c(0,3), px_rng_p_ffx = c(-400,0), px_rng_p_rfx = c(-400,0)
-  
-  # SD
-  # med = 24, d_scale_ffx = 2, d_scale_rfx = 2, p_scale_ffx = 2, p_scale_rfx = 2, p_rng_d = c(0,3), px_rng_p_ffx = c(-1000,0), px_rng_p_rfx = c(-1000,0)
+  # Create a summary of the data for fixed fx depiction
+  ffx.dat <- ffx.dat %>% group_by(sub, block, type) %>%
+    summarise(RT=mean(RT)) %>%
+    group_by(block, type) %>%
+    summarise(mu=mean(RT),
+              se=sd(RT)/sqrt(length(RT))) %>% 
+    ungroup()
   
   # ----------------------------------------------------------------------------------------------------
-  # define datas and load ds
+  # plot data
+  # ----------------------------------------------------------------------------------------------------
+  ffx.dat %>% ggplot(aes(x=as.factor(block), y=mu, group=type, fill=type)) +
+    geom_line(aes(colour=type)) +
+    geom_errorbar(aes(ymin=mu-(1.96*se), ymax=mu+(1.96*se), colour=type), width=0.2) +
+    scale_colour_manual(values=wes_palette("IsleofDogs1")[c(3,2)]) +
+    theme_cowplot() + ylab(paste(bquote(mu), "RT", sep=" ")) + xlab("block")
+  
+}
+
+do.CC.analysis <- function(fname){
+  
+  # ----------------------------------------------------------------------------------------------------
+  # load data and wrangle into tidy form 
   # ----------------------------------------------------------------------------------------------------
   
-  fnames = c(paste("../data/", task, "_d", "_d.RData", sep=""), paste("../data/", task, "_p", "_d.RData", sep=""))
-  load(fnames[1])
+  dat <- read.csv(fname, header=TRUE)
+  # ----------------------------------------------------------------------------------------------------
+  # create summary dataframe for CC data
+  # ----------------------------------------------------------------------------------------------------
+  min.RT <- 200 # in msec
+  sd.crit <- 2.5
+  ffx.dat <- dat %>% mutate(Block.No = rep(c(1:12), each = 24, length(unique(dat$Subj.No)))) %>%
+    group_by(Subj.No, Block.No, Trial.Type.Name) %>%
+    filter(Accuracy == 1) %>%
+    filter(RT.ms > min.RT) %>%
+    filter(RT.ms < (mean(RT.ms) + sd.crit*sd(RT.ms))) %>%
+    summarise(RT=mean(RT.ms))
+  subs  <- unique(ffx.dat$Subj.No)
+  names(ffx.dat) <- c("sub", "block", "type", "RT")
+
+  # ----------------------------------------------------------------------------------------------------
+  # run anova
+  # ----------------------------------------------------------------------------------------------------
+  an <- rstatix::get_anova_table(rstatix::anova_test(data=ffx.dat%>%ungroup(), dv=RT, wid=sub, within=c(block,type), effect.size="pes", type=3))
+  
+  # ----------------------------------------------------------------------------------------------------
+  # do post-hoc t - tests on 1st block and 12th block
+  # ----------------------------------------------------------------------------------------------------
+  a = c(1, 12)
+  ts = lapply(a, function(x) t.test(ffx.dat$RT[ffx.dat$block == x & ffx.dat$type == "Novel"],
+                                    ffx.dat$RT[ffx.dat$block == x & ffx.dat$type == "Repeated"],
+                                    paired=TRUE,
+                                    var.equal=FALSE))
+  
+  # ----------------------------------------------------------------------------------------------------
+  # return
+  # ----------------------------------------------------------------------------------------------------
+  list(an, ts)
+  
+}
+
+CC.sum.dat <- function(data){
+  # ----------------------------------------------------------------------------------------------------
+  # create summary dataframe for CC data
+  # ----------------------------------------------------------------------------------------------------
+  min.RT <- 200 # in msec
+  sd.crit <- 2.5
+  
+  ffx.dat <- dat %>% mutate(Block.No = rep(c(1:12), each = 24, length(unique(dat$Subj.No)))) %>%
+    group_by(Subj.No, Block.No, Trial.Type.Name) %>%
+    filter(Accuracy == 1) %>%
+    filter(RT.ms > min.RT) %>%
+    filter(RT.ms < (mean(RT.ms) + sd.crit*sd(RT.ms))) %>%
+    summarise(RT=mean(RT.ms))
+  subs  <- unique(ffx.dat$Subj.No)
+  names(ffx.dat) <- c("sub", "block", "type", "RT")
+  ffx.dat
+}
+
+
+plot_fx_szs <- function(d, med, d_scale_ffx, d_scale_rfx, px_rng_d){
+  ### Call plotting functions for observed effect sizes 
+  # kwargs
+  # -- d: dataframe
+  # -- med: median sample size
+  # -- d_scale_ffx: scaling factor (ffx)
+  # -- d_scale_rfx: scaling factor (lme/prev)
+  # -- px_rng_d: range of values to plot
   
   # ----------------------------------------------------------------------------------------------------
   # define factors and plot
   # ----------------------------------------------------------------------------------------------------
-  
   d$Nsz <- as.factor(d$Nsz)
   d$mod <- as.factor(d$mod)
+  plts <- lapply(print(levels(d$mod)), function(x) plot.d(d, x, px_rng_d, d_scale_ffx, med))
+  # ----------------------------------------------------------------------------------------------------
+  # return!
+  # ----------------------------------------------------------------------------------------------------  
+  plts
+}
   
-  
-  ffx.d <- plot.d(d, "ffx", px_rng_d, d_scale_ffx, med)
-  rfx.d <- plot.d(d, "rfx", px_rng_d, d_scale_rfx, med)
-  
+plot_ps <- function(d){  
   # ----------------------------------------------------------------------------------------------------
   # load p, define factors and plot
   # ----------------------------------------------------------------------------------------------------
@@ -148,8 +220,9 @@ plot.in.doc <- function(task, med, d_scale_ffx, d_scale_rfx, p_scale_ffx, p_scal
   ffx.p <- plot.p(d, "ffx", px_rng_p_ffx, p_scale_ffx, med)
   rfx.p <- plot.p(d, "rfx", px_rng_p_rfx, p_scale_rfx, med)
   
-  p = plot_grid(ffx.d, rfx.d, ffx.p, rfx.p, labels=c('A', 'B', 'C', 'D'), label_size = 12, align="v")
-  p
+  list(ffx.p, rfx.p)
+  # p = plot_grid(ffx.d, rfx.d, ffx.p, rfx.p, labels=c('A', 'B', 'C', 'D'), label_size = 12, align="v")
+  # p
   # #p # print out the plot so you can see it
   #p = p + ggsave(paste("../images/", task, ".png", sep=""), width = width, height = height, units="in")
 }

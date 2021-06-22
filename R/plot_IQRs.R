@@ -56,7 +56,7 @@ dat <- lapply(fnames, get.dat)
 # define subs for plotting and get data into one dataframe
 # ----------------------------------------------------------------------------------------------------
 subs <- unique(dat[[1]]$Nsz)
-subs.2.plt <- c(13, 25, 50, 115)
+subs.2.plt <- c(13, 25, 50, 115, 313)
 
 relabel <- function(dat, samps, x){
   data <- dat[[x]]
