@@ -53,6 +53,46 @@ p <- list(datpath = "../data/",
           leg_id = 1,
           leg_locs = c(0, 0.45))
 
+KL <- list(datpath = "../data/",
+           task = "CC",
+           dv = "dens_fx",
+           ratio_type = "KL",
+           origin = "313",
+           sub_Ns = sub_Ns,
+           w = 1.96,
+           h = 2.36,
+           leg_id = TRUE,
+           leg_locs = c(5, 20),
+           leg_txt = c("RM-AN", "LME"),
+           ylabel = expression(italic("KL p||q")))
+           
+model_rats <- list(datpath = "../data/",
+              task = "CC",
+              dv = "stats_fx",
+              ratio_type = "model",
+              origin = "",
+              sub_Ns = sub_Ns,
+              w = 1.96,
+              h = 2.36,
+              leg_id = TRUE,
+              leg_locs = c(5, 20),
+              leg_txt = "",
+              ylabel = expression(italic("RM-AN / LME")),
+              mods = c("RM-AN", "LME"))
+sig <- list(datpath = "../data/",
+            task = "CC",
+            dv = "sig",
+            ratio_type = "stats_sig",
+            origin = "",
+            sub_Ns = sub_Ns,
+            w = 1.96,
+            h = 2.36,
+            leg_id = TRUE,
+            leg_locs = c(5, 20),
+            leg_txt = "",
+            ylabel = expression(italic("meta / sim")),
+            mods = c("RM-AN", "LME"))
+
 # ----------------------------------------------------
 # define functions
 # ----------------------------------------------------
@@ -173,30 +213,35 @@ calc_KL_sing_origin <- function(rat_inputs, res){
     origin <- rat_inputs$origin
     sub_Ns <- rat_inputs$sub_Ns
     dv <- rat_inputs$dv
-    # get models from which to return results
-    mods <- unique(colnames(res[, dv][[origin]]))
-    base <- do.call(cbind, lapply(mods, 
-                                  function (x) list(mu = res[ , dv][[origin]][ , x][1][[1]],
-                                                    sd = res[ , dv][[origin]][ , x][2][[1]]) ))
-    colnames(base) <- mods # just labeling for sanity checks
-    compare <- lapply(sub_Ns, 
-                      function (x) lapply(mods,
-                                          function(y) list(mu = res[ , dv][[x]][ , y][1][[1]],
-                                                           sd = res[ , dv][[x]][ , y][2][[1]])))
-    compare <- do.call(rbind, compare)
-    colnames(compare) <- mods
-    rownames(compare) <- sub_Ns
-    getKL <- function( mu_a, sd_a, mu_b, sd_b ) {
-        # https://stats.stackexchange.com/questions/7440/kl-divergence-between-two-univariate-gaussians
-        log((sd_b/sd_a) + ((sd_a + (mu_a - mu_b)^2) / (2*sd_b)) - 0.5)
-    }
+    mods <- unique(unique(colnames(res[, "stats_fx"][[origin]])))
+    # first calculate the approximating function for the all the densities
+    d.funcs <- lapply(sub_Ns, function(j) 
+                              lapply(mods, function(z) 
+                                     approxfun(x=res[ , dv][[j]][[z]]$x, 
+                                     y=res[ , dv][[j]][[z]]$y/length(res[ , dv][[j]][[z]]$y), 
+                                     rule=1)))
+    names(d.funcs) <- sub_Ns
     
+    # then select a series of bin widths, or xs
+    xvals <- seq(0,1, by=.001) # cos our effect sizes are positive correlations
+    # do the same for the second distribution
+    # calculate the KL divergence between the two
+    KLfunc <- function(pf, qf, x){
+        # -- pf: function for p - P IS THE P DIST
+        # -- pq: function for q - Q IS THE APPROXIMATING DIST
+        # -- x: values of x
+        p <- pf(x)
+        q <- qf(x)
+        sum(p*log2(p/q), na.rm=T)
+    }
+    # next, match binwidths between the 
+
     KL4plotting <- lapply(sub_Ns, function(x) 
-                                  lapply(mods, function(y) 
-                                               getKL(compare[x , y][[1]]$mu,
-                                                     compare[x , y][[1]]$sd,
-                                                     base[, y]$mu,
-                                                     base[, y]$sd)))
+                                  lapply(1:length(mods), 
+                                         function(y) 
+                                         KLfunc(pf=d.funcs[[origin]][[y]],
+                                                qf=d.funcs[[x]][[y]],
+                                                x=xvals)))
     KL4plotting <- do.call(rbind, KL4plotting)
     colnames(KL4plotting) <- mods
     rownames(KL4plotting) <- sub_Ns
@@ -213,6 +258,9 @@ calc_ratios_by_model <- function(rat_inputs, res){
     # -- dv: "stats_fx", "stats_p", "stats_sig"
     # -- sub_Ns: names of subject groups (Ns)
     # -- mods: names of the two models to compare e.g c("RM-AN", "LME")
+    dv <- rat_inputs$dv
+    sub_Ns <- rat_inputs$sub_Ns
+    mods <- rat_inputs$mods
     ratios4plotting <- do.call(rbind, lapply(sub_Ns, 
                                       function(x) abs(diff(res[,dv][[x]][3, mods[1]][[1]])) /
                                                   abs(diff(res[,dv][[x]][3, mods[2]][[1]])) ))
@@ -221,22 +269,48 @@ calc_ratios_by_model <- function(rat_inputs, res){
     ratios4plotting   
 }
 
+calc_meta_vs_model <- function(rat_inputs, res){
+    # calculate ratio between the mu's for the sig and
+    # the sim distributions
+    sub_Ns <- rat_inputs$sub_Ns
+    mods <- rat_inputs$mods
+    dv <- rat_inputs$dv
+    ratios4plotting <- do.call(rbind, lapply(sub_Ns, function(y)
+                                lapply( mods, function(x)
+                                res[ , dv][[y]][ , x][[1]] /
+                                res[ ,"stats_fx"][[y]][ , x][[1]])))
+    colnames(ratios4plotting) <- mods
+    rownames(ratios4plotting) <- sub_Ns
+    ratios4plotting
+}
+
 plot_ratios <- function(rat_inputs) {
     # plot ratio between x and y
     # kwargs
     # -- rat_inputs: a list comprising of:
     # -- datpath: e.g. "../data/
     # -- task: e.g. "CC"
-    # -- dv: "stats_fx", "stats_p", "stats_sig"
-    # -- ratio_type: "origin" or "model"
+    # -- dv: e.g. "dens_fx", "stats_fx", "stats_p", "stats_sig"
+    # -- ratio_type: "origin" or "model" or "KL"
     # -- origin <- e.g. "313" i.e. calc ratio to this one
-    # -- dv <- "stats_fx", "stats_p", "stats_sig"
     # -- sub_Ns <- names of subject groups (Ns)
+    # -- w width of plot in inches
+    # -- h: height of plot in inches
+    # -- leg_id: legend? TRUE or FALSE
+    # -- leg_locs: e.g. c(5, 20)
+    # -- leg_txt: e.g. c("RM-AN", "LME")
     datpath <- rat_inputs$datpath
     task <- rat_inputs$task
     dv <- rat_inputs$dv
     ratio_type <- rat_inputs$ratio_type
-    
+    ylabel <- rat_inputs$y_label
+    sub_Ns <- rat_inputs$sub_Ns
+    leg_id <- rat_inputs$leg_id
+    leg_locs <- rat_inputs$leg_locs
+    leg_txt <- rat_inputs$leg_txt
+    w <- rat_inputs$w
+    h <- rat_inputs$h
+    ylabel <- rat_inputs$ylabel
     # ----------------------------------------------------
     # load data
     # ----------------------------------------------------
@@ -249,11 +323,70 @@ plot_ratios <- function(rat_inputs) {
         ratios <- calc_ratios_sing_origin(rat_inputs, res)
     } else if (ratio_type == "model") {
         ratios <- calc_ratios_by_model(rat_inputs, res)
+    } else if (ratio_type == "KL"){
+        ratios <- calc_KL_sing_origin(rat_inputs, res) 
+    } else if (ratio_type == "stats_sig") {
+        ratios <- calc_meta_vs_model(rat_inputs, res)
     }
-    
+
     # ----------------------------------------------------
     # plot ratios
     # ----------------------------------------------------
+    pdf(paste("../images/", task, "_", ratio_type, ".pdf", sep = ""),
+        width = w, height = h)
+    par(mfrow = c(1, 1), mar = c(3, 3, 3, 1), mgp = c(2, 1, 0), las = 1)
+    if (ncols(ratios) > 1) {
+        plot(x=1:length(rownames(ratios)), y = ratios[,"RM-AN"], 
+             xaxt = "n",
+             bty = "n",
+             type = "l", lty = 1,
+             lwd = 2,
+             col = wes_palette("IsleofDogs1")[6],
+             ylim = c(0, 
+                      max(cbind(do.call(cbind, ratios[ , "RM-AN"]), 
+                                do.call(cbind, ratios[ , "LME"])))),
+             ylab = ylabel,
+             xlab = expression(italic("N")),
+             cex.lab = 0.75,
+             cex.axis = 0.5)
+        axis(1, at = seq(1, 20, 2), 
+             labels = sub_Ns[seq(1, 20, 2)], 
+             cex.lab = 0.75,
+             cex.axis = 0.5)
+        lines(x=1:length(rownames(ratios)), y = ratios[, "LME"],
+              lwd = 2,
+              col = wes_palette("IsleofDogs1")[5])
+        # do you want a legend, and if so where to put it?
+        if (leg_id) {
+            leg_cols <- wes_palette("IsleofDogs1")[c(6, 5)]
+            legend(leg_locs[1], leg_locs[2], legend = leg_txt,
+                   col = leg_cols, lty = 1, bty = "n", cex = 0.75)
+        }
+        if (ratio_type == "stats_sig"){
+            abline(h=1, lty=2, col="grey48")
+        }
+    } else if (ncols(ratios) == 1){
+        plot(x=1:length(rownames(ratios)), y = ratios[,"ratio"], 
+             xaxt = "n",
+             bty = "n",
+             type = "l", lty = 1,
+             lwd = 2,
+             col = wes_palette("IsleofDogs1")[4],
+             ylim = c(0, 
+                      max(ratios[,"ratio"])+0.5),
+             ylab = ylabel,
+             xlab = expression(italic("N")),
+             cex.lab = 0.75,
+             cex.axis = 0.5)
+        axis(1, at = seq(1, 20, 2), 
+             labels = sub_Ns[seq(1, 20, 2)], 
+             cex.lab = 0.75,
+             cex.axis = 0.5)
+    } else if (ratio_type == "stats_sig"){
+        
+        
+    }
+    dev.off()
 }
 
 # ----------------------------------------------------
@@ -261,3 +394,5 @@ plot_ratios <- function(rat_inputs) {
 # ----------------------------------------------------
 plot_dens(fx)
 plot_dens(p)
+plot_ratios(KL)
+plot_ratios(model_rats)
