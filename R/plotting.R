@@ -53,7 +53,7 @@ p <- list(datpath = "../data/",
           leg_id = 1,
           leg_locs = c(0, 0.45))
 
-KL <- list(datpath = "../data/",
+kl <- list(datpath = "../data/",
            task = "CC",
            dv = "dens_fx",
            ratio_type = "KL",
@@ -79,9 +79,10 @@ model_rats <- list(datpath = "../data/",
               leg_txt = "",
               ylabel = expression(italic("RM-AN / LME")),
               mods = c("RM-AN", "LME"))
+
 sig <- list(datpath = "../data/",
             task = "CC",
-            dv = "sig",
+            dv = "stats_sig",
             ratio_type = "stats_sig",
             origin = "",
             sub_Ns = sub_Ns,
@@ -174,7 +175,7 @@ plot_dens <- function(inputs4plot) {
  dev.off()
 }
 
-calc_ratios_sing_origin <- function(rat_inputs, res){
+calc_ratios_sing_origin <- function(rat_inputs, res) {
     # calculate ratio between x_1 and y_1_to_j
     # NOTE: this is for the ratio between 95% of 
     # distribution ONLY!
@@ -183,22 +184,25 @@ calc_ratios_sing_origin <- function(rat_inputs, res){
     # origin <- e.g. "313"
     # dv <- "stats_fx", "stats_p", "stats_sig"
     # sub_Ns <- names of subject groups (Ns)
-    
     # -- res: stored results from get_statistics.R
     origin <- rat_inputs$origin
     sub_Ns <- rat_inputs$sub_Ns
     dv <- rat_inputs$dv
     # get models from which to return results
     mods <- unique(colnames(res[, dv][[origin]]))
-    base <- do.call(cbind, lapply(mods, 
-                                  function (x) abs(diff(res[, dv][[origin]][, x][[3]]))))
+    base <- do.call(cbind, lapply(mods,
+                           function(x)
+                           abs(diff(res[, dv][[origin]][, x][[3]]))))
     colnames(base) <- mods # just labeling for sanity checks
-    ratios4plotting <- do.call(rbind, lapply(sub_Ns, function(x) abs(diff(res[, dv][[x]][[3]])) / base))
+    ratios4plotting <- do.call(rbind, 
+                                lapply(sub_Ns, 
+                                function(x) 
+                                abs(diff(res[, dv][[x]][[3]])) / base))
     rownames(ratios4plotting) <- sub_Ns
     ratios4plotting
 }
 
-calc_KL_sing_origin <- function(rat_inputs, res){
+calc_kl_sing_origin <- function(rat_inputs, res) {
     #### this project on hold
     # calculate ratio between x_1 and y_1_to_j
     # NOTE: this is for the ratio between 95% of 
@@ -208,44 +212,43 @@ calc_KL_sing_origin <- function(rat_inputs, res){
     # origin <- e.g. "313"
     # dv <- "stats_fx", "stats_p", "stats_sig"
     # sub_Ns <- names of subject groups (Ns)
-    
     # -- res: stored results from get_statistics.R
     origin <- rat_inputs$origin
     sub_Ns <- rat_inputs$sub_Ns
     dv <- rat_inputs$dv
     mods <- unique(unique(colnames(res[, "stats_fx"][[origin]])))
     # first calculate the approximating function for the all the densities
-    d.funcs <- lapply(sub_Ns, function(j) 
-                              lapply(mods, function(z) 
-                                     approxfun(x=res[ , dv][[j]][[z]]$x, 
-                                     y=res[ , dv][[j]][[z]]$y/length(res[ , dv][[j]][[z]]$y), 
-                                     rule=1)))
-    names(d.funcs) <- sub_Ns
-    
+    d_funcs <- lapply(sub_Ns, function(j)
+                              lapply(mods, function(z)
+                                approxfun(x = res[, dv][[j]][[z]]$x,
+                                y=res[ , dv][[j]][[z]]$y/length(res[ , dv][[j]][[z]]$y),
+                                rule=1)))
+    names(d_funcs) <- sub_Ns
     # then select a series of bin widths, or xs
-    xvals <- seq(0,1, by=.001) # cos our effect sizes are positive correlations
+    xvals <- seq(0, 1, by = .001) 
+    # cos our effect sizes are positive correlations
     # do the same for the second distribution
     # calculate the KL divergence between the two
-    KLfunc <- function(pf, qf, x){
+    kl_func <- function(pf, qf, x) {
         # -- pf: function for p - P IS THE P DIST
         # -- pq: function for q - Q IS THE APPROXIMATING DIST
         # -- x: values of x
         p <- pf(x)
         q <- qf(x)
-        sum(p*log2(p/q), na.rm=T)
+        sum(p * log2(p / q), na.rm = T)
     }
     # next, match binwidths between the 
 
-    KL4plotting <- lapply(sub_Ns, function(x) 
-                                  lapply(1:length(mods), 
+    kl4plotting <- lapply(sub_Ns, function(x)
+                                  lapply(1:length(mods),
                                          function(y) 
-                                         KLfunc(pf=d.funcs[[origin]][[y]],
-                                                qf=d.funcs[[x]][[y]],
-                                                x=xvals)))
-    KL4plotting <- do.call(rbind, KL4plotting)
-    colnames(KL4plotting) <- mods
-    rownames(KL4plotting) <- sub_Ns
-    KL4plotting
+                                         kl_func(pf = d_funcs[[origin]][[y]],
+                                                 qf = d_funcs[[x]][[y]],
+                                                 x = xvals)))
+    kl4plotting <- do.call(rbind, kl4plotting)
+    colnames(kl4plotting) <- mods
+    rownames(kl4plotting) <- sub_Ns
+    kl4plotting
 }
 
 calc_ratios_by_model <- function(rat_inputs, res){
@@ -261,12 +264,13 @@ calc_ratios_by_model <- function(rat_inputs, res){
     dv <- rat_inputs$dv
     sub_Ns <- rat_inputs$sub_Ns
     mods <- rat_inputs$mods
-    ratios4plotting <- do.call(rbind, lapply(sub_Ns, 
-                                      function(x) abs(diff(res[,dv][[x]][3, mods[1]][[1]])) /
-                                                  abs(diff(res[,dv][[x]][3, mods[2]][[1]])) ))
-    colnames(ratios4plotting) <- "ratio"
-    rownames(ratios4plotting) <- sub_Ns
-    ratios4plotting   
+    r4p <- do.call(rbind,
+                   lapply(sub_Ns,
+                     function(x) abs(diff(res[, dv][[x]][3, mods[1]][[1]])) /
+                                 abs(diff(res[, dv][[x]][3, mods[2]][[1]]))))
+    colnames(r4p) <- "ratio"
+    rownames(r4p) <- sub_Ns
+    r4p
 }
 
 calc_meta_vs_model <- function(rat_inputs, res){
@@ -277,11 +281,72 @@ calc_meta_vs_model <- function(rat_inputs, res){
     dv <- rat_inputs$dv
     ratios4plotting <- do.call(rbind, lapply(sub_Ns, function(y)
                                 lapply( mods, function(x)
-                                res[ , dv][[y]][ , x][[1]] /
-                                res[ ,"stats_fx"][[y]][ , x][[1]])))
+                                res[, dv][[y]][, x][[1]] /
+                                res[, "stats_fx"][[y]][, x][[1]])))
     colnames(ratios4plotting) <- mods
     rownames(ratios4plotting) <- sub_Ns
     ratios4plotting
+}
+
+plot_diagonal <- function(rat_inputs) {
+    # plot x vs y, draw a dotted line on
+    # the diagonal
+    # kwargs
+    # -- rat_inputs: a list comprising of
+    # -- datpath e.g. "../data/
+    # -- task: e.g. "CC"
+    # -- dvs: e.g. c("stats_fx", "stats_sig")
+    # -- sub_Ns <- names of subject groups (Ns)
+    # -- w width of plot in inches
+    # -- h: height of plot in inches
+    # -- axl: axis labels - e.g. c("sim", "M-A")
+    datpath <- rat_inputs$datpath
+    task <- rat_inputs$task
+    dvs <- rat_inputs$dvs
+    sub_Ns <- rat_inputs$sub_Ns
+    mods <- rat_inputs$mods
+    w <- rat_inputs$w
+    h <- rat_inputs$h
+    axl <- rat_inputs$axl
+
+    # ----------------------------------------------------
+    # load data
+    # ----------------------------------------------------
+    load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
+    # ----------------------------------------------------
+    # get xs and ys
+    # ----------------------------------------------------
+    xys <- do.call(rbind, lapply(sub_Ns, function(j)
+                          lapply(mods, function(z)
+                             data.frame(x = res[, dvs[1]][[j]][, z][[1]],
+                                        y = res[, dvs[2]][[j]][, z][[1]]))))
+    colnames(xys) <- mods
+    rownames(xys) <- sub_Ns
+    xyls <- list (do.call(rbind, xys[, mods[1]]),
+                  do.call(rbind, xys[, mods[2]]))
+    names(xyls) <- mods
+    # ----------------------------------------------------
+    # now plot the things
+    # ----------------------------------------------------
+    plot(x = xyls[[mods[1]]][, "x"],
+         y = xyls[[mods[1]]][, "y"],
+         bty = "n",
+         type = "l", lty = 1,
+         lwd = 2,
+         col = wes_palette("IsleofDogs1")[6],
+         ylim = c(0,
+                  max(do.call(rbind, xyls))),
+         xlim = c(0,
+                  max(do.call(rbind, xyls))),
+         xlab = axl[1],
+         ylab = axl[2],
+         cex.lab = 0.75,
+         cex.axis = 0.5)
+         lines(x = xyls[[mods[2]]][, "x"],
+               y = xyls[[mods[2]]][, "y"],
+               lwd = 2,
+               col = wes_palette("IsleofDogs1")[5])
+         abline(a = 0, b = 1, lty = 2, col = "grey48")
 }
 
 plot_ratios <- function(rat_inputs) {
@@ -291,7 +356,7 @@ plot_ratios <- function(rat_inputs) {
     # -- datpath: e.g. "../data/
     # -- task: e.g. "CC"
     # -- dv: e.g. "dens_fx", "stats_fx", "stats_p", "stats_sig"
-    # -- ratio_type: "origin" or "model" or "KL"
+    # -- ratio_type: "origin" or "model" or "KL" or "stats_sig"
     # -- origin <- e.g. "313" i.e. calc ratio to this one
     # -- sub_Ns <- names of subject groups (Ns)
     # -- w width of plot in inches
@@ -315,7 +380,7 @@ plot_ratios <- function(rat_inputs) {
     # load data
     # ----------------------------------------------------
     load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
-    
+
     # ----------------------------------------------------
     # compute ratios
     # ----------------------------------------------------
@@ -324,7 +389,7 @@ plot_ratios <- function(rat_inputs) {
     } else if (ratio_type == "model") {
         ratios <- calc_ratios_by_model(rat_inputs, res)
     } else if (ratio_type == "KL"){
-        ratios <- calc_KL_sing_origin(rat_inputs, res) 
+        ratios <- calc_kl_sing_origin(rat_inputs, res)
     } else if (ratio_type == "stats_sig") {
         ratios <- calc_meta_vs_model(rat_inputs, res)
     }
@@ -335,25 +400,25 @@ plot_ratios <- function(rat_inputs) {
     pdf(paste("../images/", task, "_", ratio_type, ".pdf", sep = ""),
         width = w, height = h)
     par(mfrow = c(1, 1), mar = c(3, 3, 3, 1), mgp = c(2, 1, 0), las = 1)
-    if (ncols(ratios) > 1) {
-        plot(x=1:length(rownames(ratios)), y = ratios[,"RM-AN"], 
+    if (ncol(ratios) > 1) {
+        plot(x = 1:length(rownames(ratios)), y = ratios[, "RM-AN"],
              xaxt = "n",
              bty = "n",
              type = "l", lty = 1,
              lwd = 2,
              col = wes_palette("IsleofDogs1")[6],
-             ylim = c(0, 
-                      max(cbind(do.call(cbind, ratios[ , "RM-AN"]), 
-                                do.call(cbind, ratios[ , "LME"])))),
+             ylim = c(0,
+                      max(cbind(do.call(cbind, ratios[, "RM-AN"]),
+                                do.call(cbind, ratios[, "LME"])))),
              ylab = ylabel,
              xlab = expression(italic("N")),
              cex.lab = 0.75,
              cex.axis = 0.5)
-        axis(1, at = seq(1, 20, 2), 
-             labels = sub_Ns[seq(1, 20, 2)], 
+        axis(1, at = seq(1, 20, 2),
+             labels = sub_Ns[seq(1, 20, 2)],
              cex.lab = 0.75,
              cex.axis = 0.5)
-        lines(x=1:length(rownames(ratios)), y = ratios[, "LME"],
+        lines(x = 1:length(rownames(ratios)), y = ratios[, "LME"],
               lwd = 2,
               col = wes_palette("IsleofDogs1")[5])
         # do you want a legend, and if so where to put it?
@@ -365,8 +430,8 @@ plot_ratios <- function(rat_inputs) {
         if (ratio_type == "stats_sig"){
             abline(h=1, lty=2, col="grey48")
         }
-    } else if (ncols(ratios) == 1){
-        plot(x=1:length(rownames(ratios)), y = ratios[,"ratio"], 
+    } else if (ncol(ratios) == 1) {
+        plot(x = 1:length(rownames(ratios)), y = ratios[,"ratio"], 
              xaxt = "n",
              bty = "n",
              type = "l", lty = 1,
@@ -382,9 +447,6 @@ plot_ratios <- function(rat_inputs) {
              labels = sub_Ns[seq(1, 20, 2)], 
              cex.lab = 0.75,
              cex.axis = 0.5)
-    } else if (ratio_type == "stats_sig"){
-        
-        
     }
     dev.off()
 }
@@ -394,5 +456,6 @@ plot_ratios <- function(rat_inputs) {
 # ----------------------------------------------------
 plot_dens(fx)
 plot_dens(p)
-plot_ratios(KL)
+plot_ratios(kl)
 plot_ratios(model_rats)
+plot_ratios(sig)
