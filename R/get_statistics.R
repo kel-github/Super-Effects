@@ -51,6 +51,7 @@ N <- sub.Ns
 j <- 1000
 datpath <- "../data/"
 rxvnme <- task
+fname_add <- "_parent1" # string or NULL
 
 # -----------------------------------------------------------------
 # define functions
@@ -180,8 +181,11 @@ res <- do.call(rbind, res) # makes it neater for reffing
 # ------------------------------------------------------------
 # save the output
 # ------------------------------------------------------------
-save(res, file = paste(datpath, task, "/", task, "stats.RData", sep = ""))
-
+if (is.null(fname_add)){
+  save(res, file = paste(datpath, task, "/", task, "stats.RData", sep = ""))
+} else {
+  save(res, file = paste(datpath, task, "/", task, fname_add, "stats.RData", sep = ""))
+}
 # ------------------------------------------------------------
 # delete the unzipped files
 # ------------------------------------------------------------
