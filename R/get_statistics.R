@@ -38,10 +38,11 @@ source("R_rainclouds.R") # functions for plotting
 # -----------------------------------------------------------------
 # define session variables
 # -----------------------------------------------------------------
-task <- "CC"
-subfol <- "CC"
-sub.Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
+task <- "AB"
+subfol <- "AB"
+sub_Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
 convert <- "LME"
+rxvnme <- "IMMAB"
 
 # -----------------------------------------------------------------
 # relatively constant settings
@@ -50,8 +51,7 @@ fstem <- "_N-%d_parent-%d.RData"
 N <- sub.Ns
 j <- 1000
 datpath <- "../data/"
-rxvnme <- task
-fname_add <- "_parent1" # string or NULL
+fname_add <- NULL # string or NULL
 
 # -----------------------------------------------------------------
 # define functions
@@ -65,12 +65,22 @@ get_data <- function(fstem, n, j, datpath, rxvnme){
   # -- datpath: where is the data? (relative path)
   # -- rxvnme: name of zipped rxv folder e.g. "CC"
   # -- model: "rfx" (LME) or "ffx" (e.g. ANOVA)
-  dn <- lapply(n, function(x) unzp(paste(datpath, rxvnme, "/", sep = ""),
+  if (nchar(rxvnme) <= nchar("VSL")) {
+       dn <- lapply(n, function(x) unzp(paste(datpath, rxvnme, "/", sep = ""),
                                    paste(rxvnme, ".zip", sep = ""),
                                    rxvnme,
                                    rxvnme,
                                    j,
                                    x))
+  } else {
+      dn <- lapply(n, function(x) unzp(paste(datpath, sub("IMM", "", rxvnme), "/", sep = ""),
+                                             paste(rxvnme, ".zip", sep = ""),
+                                       rxvnme,
+                                       rxvnme,
+                                       j,
+                                       x))
+  }
+  # need to amend the above code to match the unzp function
   dn <- do.call(rbind, dn)
 
   get.dat <- function(f) {

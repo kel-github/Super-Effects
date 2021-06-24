@@ -34,7 +34,7 @@ fx <- list(datpath = "../data/",
            sel_n = paste(c(25, 59, 136, 313)),
            w = 1.96,
            h = 2.36 * 2,
-           xlabs = c(expression(eta[p]^2), expression("r"^2)),
+           xlabs = expression(eta[p]^2),
            xl = c(0, 0.25),
            max_idx = c(20, 20),
            leg_id = 2,
@@ -80,15 +80,50 @@ plot_dens <- function(inputs4plot) {
     # load data
     # ----------------------------------------------------
     fs <- list.files(paste(datpath, task, sep=""), "*.RData")
-    get_datas <- function(datpath, task){    
-        load(paste(datpath, task, "/", fs[1], sep=""))
-        d <- 
+
+    get_a_d <- function(datpath, f, n){
+        load(paste(datpath, task, "/", f, sep=""))
+        res[,"dens_fx"][[n]][["RM-AN"]]
     }
-    load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
+
+    ds <- lapply(fs, function(x)
+                 lapply(sel_n, function(y)
+                 get_a_d(datpath, x, paste(y))))
+    ds <- do.call(rbind, ds)
+    colnames(ds) <- paste(sel_n)
+    rownames(ds) <- fs
 
     pdf(paste("../images/", task, "_", dv, ".pdf", sep = ""),
         width = w, height = h)
-    par(mfrow = c(jmax, 1), mar = c(3, 3, 3, 1), mgp = c(2, 1, 0), las = 1)
+    par(mfrow = c(2, 2), mar = c(3, 3, 3, 1), mgp = c(2, 1, 0), las = 1)
+    
+    # plot by subject
+    make_ds <- function(ds, fs, ns){
+        plot(ds[fs[1], ns][[1]],
+             col = wes_palette("IsleofDogs1")[1],
+             lwd = 3,
+             ylim = c(0,
+                     max(c(ds[,ns][[1]]$y, ds[,ns][[2]]$y, ds[,ns][[3]]$y))),
+             xlim = xl,
+             main = " ", ylab = "density",
+             xlab = xlabs,
+             bty = "n",
+             cex.lab = 0.75,
+             cex.axis = 0.5)
+        polygon(ds[fs[1], ns][[1]],
+                 col = adjustcolor(wes_palette("IsleofDogs1")[1],
+                 alpha.f = 0.5))
+        for (i in 2:length(fs)){
+            lines(ds[fs[i], ns][[1]],
+                 col = wes_palette("IsleofDogs1")[i], lwd = 2)
+            polygon(ds[fs[i], ns][[1]],
+                 col = adjustcolor(wes_palette("IsleofDogs1")[i],
+                 alpha.f = 0.5))
+        }
+
+    }
+    lapply(paste())
+    
     for (j in 1:jmax) {
         plot(res[sel_n[1], ][[dv]][[j]],
              col = wes_palette("IsleofDogs1")[1],
@@ -130,8 +165,4 @@ plot_dens <- function(inputs4plot) {
 # ----------------------------------------------------
 # plotting
 # ----------------------------------------------------
-plot_dens(fx)
-plot_dens(p)
-plot_ratios(kl)
-plot_ratios(model_rats)
-plot_ratios(sig)
+

@@ -896,15 +896,15 @@ plt.rfx <- function(data, xlims){
 # ----------------------------------------------------------------------------------------------------
 # More data wrangles
 # ----------------------------------------------------------------------------------------------------
-unzp <- function(datpath, rxvnme, rxvsub, task, j, subN){
+unzp <- function(datpath, rxvnme, rxvsub, task, j, subN) {
   # function to unzip specific files from the data archive
   # :: datpath = where is the data?
-  # :: rxnme = name of zipped (rxiv) file
+  # :: rxnme = name of zipped (rxiv) file e.g. CC/IMMCC
   # :: rxvsub = sub folder name in rxv
-  # :: task = which task do you want to extract data for?
+  # :: task = which task do you want to extract data for? 
+  # e.g. "CC" or "imm_CC"
   # :: j = total number of permutations/parent sets
   # :: subs = the sub Ns used in the perms
-  
   lapply(1:j, function(y) unzip(paste(datpath, rxvnme, sep=""), 
                                 file=paste(rxvsub, "/", task, sprintf("_N-%d_parent-%d.RData", subN, y ), sep=""),
                                 exdir=datpath))
