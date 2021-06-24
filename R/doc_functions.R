@@ -80,48 +80,6 @@ do.AB.analysis <- function(fname){
 # ----------------------------------------------------------------------------------------------------
 # CC specific analysis
 # ---------------------------------------------------------------------------------------------------- 
-plot.CC.results <- function(fname){
-  ## plot the trial type x block interaction for mean RTs
-
-  # ----------------------------------------------------------------------------------------------------
-  # read in data
-  # ----------------------------------------------------------------------------------------------------  
-  dat <- read.csv(fname, header=TRUE)
-  
-  # ----------------------------------------------------------------------------------------------------
-  # create summary dataframe
-  # ----------------------------------------------------------------------------------------------------
-  min.RT <- 200 # in msec
-  sd.crit <- 2.5
-  
-  ffx.dat <- dat %>% mutate(Block.No = rep(c(1:12), each = 24, length(unique(dat$Subj.No)))) %>%
-    group_by(Subj.No, Block.No, Trial.Type.Name) %>%
-    filter(Accuracy == 1) %>%
-    filter(RT.ms > min.RT) %>%
-    filter(RT.ms < (mean(RT.ms) + sd.crit*sd(RT.ms))) %>%
-    summarise(RT=mean(RT.ms))
-  subs  <- unique(ffx.dat$Subj.No)
-  names(ffx.dat) <- c("sub", "block", "type", "RT")
-  
-  # Create a summary of the data for fixed fx depiction
-  ffx.dat <- ffx.dat %>% group_by(sub, block, type) %>%
-    summarise(RT=mean(RT)) %>%
-    group_by(block, type) %>%
-    summarise(mu=mean(RT),
-              se=sd(RT)/sqrt(length(RT))) %>% 
-    ungroup()
-  
-  # ----------------------------------------------------------------------------------------------------
-  # plot data
-  # ----------------------------------------------------------------------------------------------------
-  ffx.dat %>% ggplot(aes(x=as.factor(block), y=mu, group=type, fill=type)) +
-    geom_line(aes(colour=type)) +
-    geom_errorbar(aes(ymin=mu-(1.96*se), ymax=mu+(1.96*se), colour=type), width=0.2) +
-    scale_colour_manual(values=wes_palette("IsleofDogs1")[c(3,2)]) +
-    theme_cowplot() + ylab(paste(bquote(mu), "RT", sep=" ")) + xlab("block")
-  
-}
-
 do.CC.analysis <- function(fname){
   
   # ----------------------------------------------------------------------------------------------------

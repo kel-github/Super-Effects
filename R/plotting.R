@@ -1,99 +1,5 @@
 ### written by K. Garner, Jan 2021
 ### Call plotting functions for observed effect sizes and p values
-rm(list = ls())
-
-# ----------------------------------------------------
-# load packages and source function files
-# ----------------------------------------------------
-
-library(tidyverse) # for data wrangling
-library(wesanderson) # palette for some sweet figure colours
-library(cowplot)
-library(lme4) # for mixed effects modelling
-library(ggridges)
-library(car)
-library(parallel)
-source("efilids_functions.R") # custom functions written for this project
-source("R_rainclouds.R") # functions for plotting
-
-# ----------------------------------------------------
-# LIST OF SETTINGS
-# ----------------------------------------------------
-# AB med = 24
-# CC med = 23
-# SRT med = 39
-# SD med = 24
-sub_Ns <- paste(round(exp(seq(log(13), log(313), length.out = 20))))
-# ----------------------------------------------------
-# density variables
-# ----------------------------------------------------
-fx <- list(datpath = "../data/",
-           task = "CC",
-           jmax = 2,
-           dv = "dens_fx",
-           sel_n = paste(c(25, 59, 136, 313)),
-           w = 1.96,
-           h = 2.36 * 2,
-           xlabs = c(expression(eta[p]^2), expression("r"^2)),
-           xl = c(0, 0.25),
-           max_idx = c(20, 20),
-           leg_id = 2,
-           leg_locs = c(0.1, 300))
-
-p <- list(datpath = "../data/",
-          task = "CC",
-          jmax = 2,
-          dv = "dens_p",
-          sel_n = paste(c(25, 59, 136, 313)),
-          w = 1.96,
-          h = 2.36 * 2,
-          xlabs = c("p", "p"),
-          xl = c(-10, 10),
-          max_idx = c(5, 20),
-          leg_id = 1,
-          leg_locs = c(0, 0.45))
-
-kl <- list(datpath = "../data/",
-           task = "CC",
-           dv = "dens_fx",
-           ratio_type = "KL",
-           origin = "313",
-           sub_Ns = sub_Ns,
-           w = 1.96,
-           h = 2.36,
-           leg_id = TRUE,
-           leg_locs = c(5, 20),
-           leg_txt = c("RM-AN", "LME"),
-           ylabel = expression(italic("KL p||q")))
-           
-model_rats <- list(datpath = "../data/",
-              task = "CC",
-              dv = "stats_fx",
-              ratio_type = "model",
-              origin = "",
-              sub_Ns = sub_Ns,
-              w = 1.96,
-              h = 2.36,
-              leg_id = TRUE,
-              leg_locs = c(5, 20),
-              leg_txt = "",
-              ylabel = expression(italic("RM-AN / LME")),
-              mods = c("RM-AN", "LME"))
-
-sig <- list(datpath = "../data/",
-            task = "CC",
-            dv = "stats_sig",
-            ratio_type = "stats_sig",
-            origin = "",
-            sub_Ns = sub_Ns,
-            w = 1.96,
-            h = 2.36,
-            leg_id = TRUE,
-            leg_locs = c(5, 20),
-            leg_txt = "",
-            ylabel = expression(italic("meta / sim")),
-            mods = c("RM-AN", "LME"))
-
 # ----------------------------------------------------
 # define functions
 # ----------------------------------------------------
@@ -128,15 +34,14 @@ plot_dens <- function(inputs4plot) {
     max_idx <- inputs4plot$max_idx
     leg_id <- inputs4plot$leg_id
     leg_locs <- inputs4plot$leg_locs
+    figlabel <- inputs4plot$figlabel
+    figlabelon <- inputs4plot$figlabelon
 
     # ----------------------------------------------------
     # load data
     # ----------------------------------------------------
     load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
 
-    pdf(paste("../images/", task, "_", dv, ".pdf", sep = ""),
-        width = w, height = h)
-    par(mfrow = c(jmax, 1), mar = c(3, 3, 3, 1), mgp = c(2, 1, 0), las = 1)
     for (j in 1:jmax) {
         plot(res[sel_n[1], ][[dv]][[j]],
              col = wes_palette("IsleofDogs1")[1],
@@ -147,8 +52,8 @@ plot_dens <- function(inputs4plot) {
              main = " ", ylab = "density",
              xlab = xlabs[j],
              bty = "n",
-             cex.lab = 0.75,
-             cex.axis = 0.5)
+             cex.lab = 1,
+             cex.axis = 1)
         polygon(res[sel_n[1], ][[dv]][[j]],
                 col = adjustcolor(wes_palette("IsleofDogs1")[1],
                 alpha.f = 0.5))
@@ -169,10 +74,13 @@ plot_dens <- function(inputs4plot) {
         leg_cols <- adjustcolor(wes_palette("IsleofDogs1")[c(1:4)],
                                 alpha.f = 0.5)
         legend(leg_locs[1], leg_locs[2], legend = sel_n,
-               col = leg_cols, lty = 1, bty = "n", cex = 0.75)
+               col = leg_cols, lty = 1, bty = "n", cex = 1)
+    }
+    # add a label if desired
+    if (j == 1 & figlabelon) {
+        fig_label(figlabel, cex = 2)
     }
  }
- dev.off()
 }
 
 calc_ratios_sing_origin <- function(rat_inputs, res) {
@@ -194,9 +102,9 @@ calc_ratios_sing_origin <- function(rat_inputs, res) {
                            function(x)
                            abs(diff(res[, dv][[origin]][, x][[3]]))))
     colnames(base) <- mods # just labeling for sanity checks
-    ratios4plotting <- do.call(rbind, 
-                                lapply(sub_Ns, 
-                                function(x) 
+    ratios4plotting <- do.call(rbind,
+                                lapply(sub_Ns,
+                                function(x)
                                 abs(diff(res[, dv][[x]][[3]])) / base))
     rownames(ratios4plotting) <- sub_Ns
     ratios4plotting
@@ -222,10 +130,10 @@ calc_kl_sing_origin <- function(rat_inputs, res) {
                               lapply(mods, function(z)
                                 approxfun(x = res[, dv][[j]][[z]]$x,
                                 y=res[ , dv][[j]][[z]]$y/length(res[ , dv][[j]][[z]]$y),
-                                rule=1)))
+                                rule = 1)))
     names(d_funcs) <- sub_Ns
     # then select a series of bin widths, or xs
-    xvals <- seq(0, 1, by = .001) 
+    xvals <- seq(0, 1, by = .001)
     # cos our effect sizes are positive correlations
     # do the same for the second distribution
     # calculate the KL divergence between the two
@@ -237,11 +145,9 @@ calc_kl_sing_origin <- function(rat_inputs, res) {
         q <- qf(x)
         sum(p * log2(p / q), na.rm = T)
     }
-    # next, match binwidths between the 
-
     kl4plotting <- lapply(sub_Ns, function(x)
                                   lapply(1:length(mods),
-                                         function(y) 
+                                         function(y)
                                          kl_func(pf = d_funcs[[origin]][[y]],
                                                  qf = d_funcs[[x]][[y]],
                                                  x = xvals)))
@@ -253,7 +159,7 @@ calc_kl_sing_origin <- function(rat_inputs, res) {
 
 calc_ratios_by_model <- function(rat_inputs, res){
     # calculate ratio between x_1_to_j and y_1_to_j
-    # NOTE: this is for the ratio between 95% of 
+    # NOTE: this is for the ratio between 95% of
     # distribution ONLY!
     # Gives mod_a - mod_b
     # kwargs
@@ -340,8 +246,8 @@ plot_diagonal <- function(rat_inputs) {
                   max(do.call(rbind, xyls))),
          xlab = axl[1],
          ylab = axl[2],
-         cex.lab = 0.75,
-         cex.axis = 0.5)
+         cex.lab = 1,
+         cex.axis = 1)
          lines(x = xyls[[mods[2]]][, "x"],
                y = xyls[[mods[2]]][, "y"],
                lwd = 2,
@@ -397,9 +303,6 @@ plot_ratios <- function(rat_inputs) {
     # ----------------------------------------------------
     # plot ratios
     # ----------------------------------------------------
-    pdf(paste("../images/", task, "_", ratio_type, ".pdf", sep = ""),
-        width = w, height = h)
-    par(mfrow = c(1, 1), mar = c(3, 3, 3, 1), mgp = c(2, 1, 0), las = 1)
     if (ncol(ratios) > 1) {
         plot(x = 1:length(rownames(ratios)), y = ratios[, "RM-AN"],
              xaxt = "n",
@@ -412,12 +315,12 @@ plot_ratios <- function(rat_inputs) {
                                 do.call(cbind, ratios[, "LME"])))),
              ylab = ylabel,
              xlab = expression(italic("N")),
-             cex.lab = 0.75,
-             cex.axis = 0.5)
+             cex.lab = 1,
+             cex.axis = 1)
         axis(1, at = seq(1, 20, 2),
              labels = sub_Ns[seq(1, 20, 2)],
-             cex.lab = 0.75,
-             cex.axis = 0.5)
+             cex.lab = 1,
+             cex.axis = 1)
         lines(x = 1:length(rownames(ratios)), y = ratios[, "LME"],
               lwd = 2,
               col = wes_palette("IsleofDogs1")[5])
@@ -425,7 +328,7 @@ plot_ratios <- function(rat_inputs) {
         if (leg_id) {
             leg_cols <- wes_palette("IsleofDogs1")[c(6, 5)]
             legend(leg_locs[1], leg_locs[2], legend = leg_txt,
-                   col = leg_cols, lty = 1, bty = "n", cex = 0.75)
+                   col = leg_cols, lty = 1, bty = "n", cex = 1)
         }
         if (ratio_type == "stats_sig"){
             abline(h=1, lty=2, col="grey48")
@@ -441,21 +344,11 @@ plot_ratios <- function(rat_inputs) {
                       max(ratios[,"ratio"])+0.5),
              ylab = ylabel,
              xlab = expression(italic("N")),
-             cex.lab = 0.75,
-             cex.axis = 0.5)
+             cex.lab = 1,
+             cex.axis = 1)
         axis(1, at = seq(1, 20, 2), 
              labels = sub_Ns[seq(1, 20, 2)], 
-             cex.lab = 0.75,
-             cex.axis = 0.5)
+             cex.lab = 1,
+             cex.axis = 1)
     }
-    dev.off()
 }
-
-# ----------------------------------------------------
-# plotting
-# ----------------------------------------------------
-plot_dens(fx)
-plot_dens(p)
-plot_ratios(kl)
-plot_ratios(model_rats)
-plot_ratios(sig)

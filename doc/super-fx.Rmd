@@ -146,12 +146,12 @@ NOTE: insert analysis of central tendency of the distributions at this point.
 # paradigm.fig.pth <- '../images/SuppFigXXXX_AB_sampling.png'
 # #paradigm.fig <- readPNG(paradigm.fig.pth, native=TRUE, info=TRUE)
 # include_graphics(paradigm.fig.pth)
-source('../R/plot_IQRs.R')
+#source('../R/plot_IQRs.R')
 ```
 
 ```{r figSuppSamp, out.width='70%', fig.cap='Comparison between sampling procedures for the AB task data fit with a repeated measures ANOVA for 5 levels of N; densities of observed effect sizes for the A) two-step sampling procedure $j$=1000, $k$=1000, the B) two-step sampling procedure, $j$=1, $k$=1000, and C) the one-step procedure, $k$ = 1000', message=F}
-plot.d.by.samp(dat, px_rng_d, 1, mod) + xlab(bquote(eta['p']^2)) + theme(axis.text.x = element_text(size=11),
-                                                                         axis.text.y = element_text(size=11))
+# plot.d.by.samp(dat, px_rng_d, 1, mod) + xlab(bquote(eta['p']^2)) + theme(axis.text.x = element_text(size=11),
+#                                                                          axis.text.y = element_text(size=11))
 ```
 
 
@@ -277,49 +277,18 @@ Having calculated the $p$ value for a given set of neutral accuracies, we can co
 ## Attentional Blink
 
 
-In accordance with the often observed finding that detection of a second visual target is impaired if it appears close in time to the first target, the data showed a significant main effect of lag F(`r ab_res[[1]]$DFn`, `r ab_res[[1]]$DFd`) = `r ab_res[[1]]$F`, $\eta_{p}^2$ = `r ab_res[[1]]$pes`, p = `r ab_res[[1]]$p`).
-
 ## Contextual Cueing
 
 ```{r, CC_interaction, message=F}
-ccfname <- "../data/CC/CCstats.RData"
-#cc_int_plt <- plot.CC.results(ccfname) + ylab(paste(bquote(mu), "RT (seconds)", sep=" "))
+ccfname <- "../data/total_of_313_subs_CC_task_trial_level_data.csv"
+cc_res <- do.CC.analysis(ccfname)
 ```
 
-```{r, CC_analysis, warning=FALSE, echo=FALSE, message=F}
-load(ccfname)
-```
+In accordance with the notion that RTs for repeat displays speed up more than for novel displays (i.e. that participants learn the repeat displays), a significant block x display interaction was found (F (`r cc_res[[1]]$DFn[3]`, `r cc_res[[1]]$DFd[3]`) = `r cc_res[[1]]$F[3]`, $\eta_{p}^2$ = `r cc_res[[1]]$pes[3]`, p = `r cc_res[[1]]$p[3]`). Specifically, while there was no statitically significant difference between repeat and novel displays in the first block (t (`r cc_res[[2]][[1]]$parameter`) = `r cc_res[[2]][[1]]$statistic`, p = `r cc_res[[2]][[1]]$p.value`, $\mu$ difference = `r cc_res[[2]][[1]]$estimate` sec), RT's to repeat displays were on average `r cc_res[[2]][[2]]$estimate` sec faster than RTs to novel displays by block 12 (t (`r cc_res[[2]][[2]]$parameter`) = `r cc_res[[2]][[2]]$statistic`, p = `r cc_res[[2]][[2]]$p.value`). 
 
-In accordance with the notion that RTs for repeat displays speed up to a greater extent than for novel displays (i.e. that participants learn the repeat displays), a significant block x display interaction was found (F (`r cc_res[[1]]$DFn`, `r cc_res[[1]]$DFd`) = `r cc_res[[1]]$F`, $\eta_{p}^2$ = `r cc_res[[1]]$pes`, p = `r cc_res[[1]]$p`). Specifically, while there was no statitically significant difference between repeat and novel displays in the first block (t (`r cc_res[[2]][[1]]$parameter`) = `r cc_res[[2]][[1]]$statistic`, p = `r cc_res[[2]][[1]]$p.value`, $\mu$ difference = `r cc_res[[2]][[1]]$estimate` sec), RT's to repeat displays were on average `r cc_res[[2]][[2]]$estimate` sec faster than RTs to novel displays by block 12 (t (`r cc_res[[2]][[2]]$parameter`) = `r cc_res[[2]][[2]]$statistic`, p = `r cc_res[[2]][[2]]$p.value`).
 
-```{r, CC_do_p_plts, warning=FALSE, echo=FALSE, message=F}
-# ----------------------------------------------------------------------------------------------------
-# define datas and load ds
-# ----------------------------------------------------------------------------------------------------
 
-ccfx <- paste("../data/", "CC", "/", "CC", "_esz", "_d.RData", sep="")
-load(ccfx)
-# ----------------------------------------------------------------------------------------------------
-# define factors and plot
-# ----------------------------------------------------------------------------------------------------
 
-d$Nsz <- as.factor(d$Nsz)
-# recode model factor to reflect actual models used
-d$numod[d$mod == "ffx"] = "RM-AN"
-d$numod[d$mod == "rfx"] = "LME"
-d$mod = d$numod
-d$numod <- NULL
-d$mod <- as.factor(d$mod)
 
-# convert LME fx to r^2
-convert_on = "LME"
-d <- d2r(d, convert_on)
 
-cc_fx_plts <- plot_fx_szs(d, med=23, d_scale_ffx=1, d_scale_rfx=1, px_rng_d=c(0, .4))
-```
-
-```{r, cc_disp_fx, warning=FALSE, echo=FALSE, message=F}
-
-plot_grid(cc_int_plt, cc_fx_plts[[2]], NULL, cc_fx_plts[[1]] + xlab("r2"), labels=c('A', 'B', '', 'C'), label_size=12, ncol=2)
-```
 # References

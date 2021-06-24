@@ -48,7 +48,7 @@ rxvnme <- "IMMAB"
 # relatively constant settings
 # -----------------------------------------------------------------
 fstem <- "_N-%d_parent-%d.RData"
-N <- sub.Ns
+N <- sub_Ns
 j <- 1000
 datpath <- "../data/"
 fname_add <- NULL # string or NULL
@@ -56,10 +56,10 @@ fname_add <- NULL # string or NULL
 # -----------------------------------------------------------------
 # define functions
 # -----------------------------------------------------------------
-get_data <- function(fstem, n, j, datpath, rxvnme){
+get_data <- function(fstem, n, j, datpath, rxvnme) {
   # concatenate data for one task
   # -- fstem: fstem = filestem to be sprintf'd with N and j
-  # -- N: vector of sub sample sizes
+  # -- n: vector of sub sample sizes
   # -- j: outer loop size
   # -- dv: which dv do you want to know about (d or p)?
   # -- datpath: where is the data? (relative path)
@@ -73,14 +73,14 @@ get_data <- function(fstem, n, j, datpath, rxvnme){
                                    j,
                                    x))
   } else {
-      dn <- lapply(n, function(x) unzp(paste(datpath, sub("IMM", "", rxvnme), "/", sep = ""),
-                                             paste(rxvnme, ".zip", sep = ""),
-                                       rxvnme,
-                                       rxvnme,
-                                       j,
-                                       x))
+      dn <- lapply(n, function(x)
+                       unzp(paste(datpath, sub("IMM", "", rxvnme), "/", sep = ""),
+                            paste(rxvnme, ".zip", sep = ""),
+                            rxvnme,
+                            paste("imm_", sub("IMM", "", rxvnme), sep = ""),
+                            j,
+                            x))
   }
-  # need to amend the above code to match the unzp function
   dn <- do.call(rbind, dn)
 
   get.dat <- function(f) {
@@ -199,4 +199,8 @@ if (is.null(fname_add)){
 # ------------------------------------------------------------
 # delete the unzipped files
 # ------------------------------------------------------------
-unlink(paste(datpath, task, "/", task, sep = ""), recursive = TRUE)
+if (nchar(rxvnme) <= nchar("VSL")) {
+  unlink(paste(datpath, task, "/", task, sep = ""), recursive = TRUE)
+} else {
+  unlink(paste(datpath, task, "/", rxvnme, sep = ""), recursive = TRUE)
+}
