@@ -32,13 +32,13 @@ fx <- list(datpath = "../data/",
            jmax = 2,
            dv = "dens_fx",
            sel_n = paste(c(25, 59, 136, 313)),
-           w = 1.96,
+           w = 1.96 * 2,
            h = 2.36 * 2,
            xlabs = expression(eta[p]^2),
-           xl = c(0, 0.25),
+           xl = c(0, 1),
            max_idx = c(20, 20),
            leg_id = 2,
-           leg_locs = c(0.1, 300))
+           leg_locs = c(0.01, 10))
 
 
 # ----------------------------------------------------
@@ -79,7 +79,7 @@ plot_dens <- function(inputs4plot) {
     # ----------------------------------------------------
     # load data
     # ----------------------------------------------------
-    fs <- list.files(paste(datpath, task, sep=""), "*.RData")
+    fs <- list.files(paste(datpath, task, sep=""), "*stats.RData")
 
     get_a_d <- function(datpath, f, n){
         load(paste(datpath, task, "/", f, sep=""))
@@ -93,23 +93,24 @@ plot_dens <- function(inputs4plot) {
     colnames(ds) <- paste(sel_n)
     rownames(ds) <- fs
 
-    pdf(paste("../images/", task, "_", dv, ".pdf", sep = ""),
+    pdf(paste("../images/", task, "_", "sampling", ".pdf", sep = ""),
         width = w, height = h)
     par(mfrow = c(2, 2), mar = c(3, 3, 3, 1), mgp = c(2, 1, 0), las = 1)
-    
+
     # plot by subject
-    make_ds <- function(ds, fs, ns){
+    make_ds <- function(ds, fs, ns) {
         plot(ds[fs[1], ns][[1]],
              col = wes_palette("IsleofDogs1")[1],
              lwd = 3,
              ylim = c(0,
                      max(c(ds[,ns][[1]]$y, ds[,ns][[2]]$y, ds[,ns][[3]]$y))),
              xlim = xl,
-             main = " ", ylab = "density",
+             ylab = "density",
              xlab = xlabs,
              bty = "n",
              cex.lab = 0.75,
-             cex.axis = 0.5)
+             cex.axis = 0.5,
+             main = paste(ns))
         polygon(ds[fs[1], ns][[1]],
                  col = adjustcolor(wes_palette("IsleofDogs1")[1],
                  alpha.f = 0.5))
@@ -120,49 +121,22 @@ plot_dens <- function(inputs4plot) {
                  col = adjustcolor(wes_palette("IsleofDogs1")[i],
                  alpha.f = 0.5))
         }
-
-    }
-    lapply(paste())
-    
-    for (j in 1:jmax) {
-        plot(res[sel_n[1], ][[dv]][[j]],
-             col = wes_palette("IsleofDogs1")[1],
-             lwd = 3,
-             ylim = c(0,
-                      max(res[max_idx[j], ][[dv]][[j]]["y"]$y)),
-             xlim = xl,
-             main = " ", ylab = "density",
-             xlab = xlabs[j],
-             bty = "n",
-             cex.lab = 0.75,
-             cex.axis = 0.5)
-        polygon(res[sel_n[1], ][[dv]][[j]],
-                col = adjustcolor(wes_palette("IsleofDogs1")[1],
-                alpha.f = 0.5))
-    for (i in c(2:length(sel_n))) {
-        lines(res[sel_n[i], ][[dv]][[j]],
-              col = wes_palette("IsleofDogs1")[i], lwd = 2)
-        polygon(res[sel_n[i], ][[dv]][[j]],
-              col = adjustcolor(wes_palette("IsleofDogs1")[i],
-              alpha.f = 0.5))
-    }
-    # if a p statistic plot, add the criteria for significance
-    if (dv == "dens_p") {
-        abline(v = qnorm(.05), col = "#161616",
-               lty = 2, lwd = 1)
-    }
-    # do you want a legend, and if so where to put it?
-    if (j == leg_id) {
-        leg_cols <- adjustcolor(wes_palette("IsleofDogs1")[c(1:4)],
+        if (ns == "25") {
+            leg_cols <- adjustcolor(wes_palette("IsleofDogs1")[c(1:3)],
                                 alpha.f = 0.5)
-        legend(leg_locs[1], leg_locs[2], legend = sel_n,
+            legend(leg_locs[1], leg_locs[2], legend = c("j=1,k=1000", "j=k=1000", "j=0,k=1000"),
                col = leg_cols, lty = 1, bty = "n", cex = 0.75)
+        }
     }
- }
- dev.off()
+
+    lapply(paste(sel_n), make_ds, ds = ds, fs = fs)
+    # do you want a legend, and if so where to put it?
+
+    dev.off()
 }
 
 # ----------------------------------------------------
 # plotting
 # ----------------------------------------------------
 
+plot_dens(fx)

@@ -282,6 +282,7 @@ plot_ratios <- function(rat_inputs) {
     w <- rat_inputs$w
     h <- rat_inputs$h
     ylabel <- rat_inputs$ylabel
+    yl <- rat_inputs$yl
     # ----------------------------------------------------
     # load data
     # ----------------------------------------------------
@@ -303,16 +304,22 @@ plot_ratios <- function(rat_inputs) {
     # ----------------------------------------------------
     # plot ratios
     # ----------------------------------------------------
+
     if (ncol(ratios) > 1) {
+      if (is.null(yl)){
+        nuyl = c(0,
+                 max(cbind(do.call(cbind, ratios[, "RM-AN"]),
+                           do.call(cbind, ratios[, "LME"]))))
+      } else {
+        nuyl = yl
+      }
         plot(x = 1:length(rownames(ratios)), y = ratios[, "RM-AN"],
              xaxt = "n",
              bty = "n",
              type = "l", lty = 1,
              lwd = 2,
              col = wes_palette("IsleofDogs1")[6],
-             ylim = c(0,
-                      max(cbind(do.call(cbind, ratios[, "RM-AN"]),
-                                do.call(cbind, ratios[, "LME"])))),
+             ylim = nuyl,
              ylab = ylabel,
              xlab = expression(italic("N")),
              cex.lab = 1,
@@ -334,14 +341,19 @@ plot_ratios <- function(rat_inputs) {
             abline(h=1, lty=2, col="grey48")
         }
     } else if (ncol(ratios) == 1) {
+        if (is.null(yl)){
+          nuyl = c(0, 
+                   max(ratios[,"ratio"])+0.5)
+        } else {
+          nuyl = yl
+        }
         plot(x = 1:length(rownames(ratios)), y = ratios[,"ratio"], 
              xaxt = "n",
              bty = "n",
              type = "l", lty = 1,
              lwd = 2,
              col = wes_palette("IsleofDogs1")[4],
-             ylim = c(0, 
-                      max(ratios[,"ratio"])+0.5),
+             ylim = nuyl,
              ylab = ylabel,
              xlab = expression(italic("N")),
              cex.lab = 1,

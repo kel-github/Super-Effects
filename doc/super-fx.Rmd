@@ -40,11 +40,11 @@ keywords:
 bibliography: refs.bib
 biblio-style: unsrt
 output: 
+  bookdown::word_document2:
+    toc: true
   bookdown::pdf_book:
     base_format: rticles::arxiv_article
     keep_tex: true
-  bookdown::word_document2:
-    toc: true
 ---
 
 ```{r knitr_options, echo=FALSE}
@@ -102,16 +102,13 @@ Additionally, given the documented advantages of linear mixed effects models (LM
 
 # Methods
 
-I'll insert a summary sentence here during write up.
-
 \label{sec:Method}
 
-See Section \ref{sec:Method}.
 
 ## Participants
 \label{sec:Participants}
 
-The current study uses a data set collected for a previous [pre-registered](https://osf.io/nxysg) project examining the relationship between executive function and implicit learning. This data set contains performance measures from N = 313 participants. Participants were undergraduate students, aged 18 to 35 years old (mean = 20.14 yrs, sd = 3.46). Of the total sample, 208 reported being female sex, and 269 reported being right handed. Participants received course credits as compensation. All procedures were approved by the University of Queensland Human Research Ethics Committee and adhered to the [National Statement on Ethical Conduct in Human Research](https://www.nhmrc.gov.au/about-us/publications/national-statement-ethical-conduct-human-research-2007-updated-2018).
+The current study uses a data set collected for a previous [pre-registered](https://osf.io/nxysg) project examining the relationship between executive function and implicit learning. This data set contains performance measures from $N$ = 313 participants. Participants were undergraduate students, aged 18 to 35 years old (mean = 20.14 yrs, sd = 3.46). Of the total sample, 208 reported being female sex, and 269 reported being right handed. Participants received course credits as compensation. All procedures were approved by the University of Queensland Human Research Ethics Committee and adhered to the [National Statement on Ethical Conduct in Human Research](https://www.nhmrc.gov.au/about-us/publications/national-statement-ethical-conduct-human-research-2007-updated-2018).
 
 ## Apparatus
 \label{sec:Apparatus}
@@ -121,7 +118,7 @@ Experimental procedures were run on an Apple Mac Minicomputer (OS X Late 2014, 2
 ## Procedures
 \label{sec:Procedures}
 
-Across all tasks, participants sat approximately 57 cm from the monitor. An overview of the task procedures is presented in Figure \@ref(fig:FigureParadigm). Further details regarding the task protocols are presented within each section below. In the interest of reducing working memory load, we provide an overview of the simulation procedures, before detailing the specific procedural and statistical methods for each task.
+Across all tasks, participants sat approximately 57 cm from the monitor. An overview of the task procedures is presented in Figure \@ref(fig:FigureParadigm). Further details regarding the task protocols are presented within each section below. We first provide an overview of the simulation procedures, before detailing the specific procedural and statistical methods for each task.
 
 
 ```{r, FigureParadigm, out.width='70%', fig.cap='Task battery. A) Attentional Blink Paradigm (AB). Participants report the two letter targets from the rapid serial visual presentation of numbers and letters, B) Multitasking Paradigm (MT). Participants make a discriminate the colour of a disc, a complex tone, or both C) Contextual Cueing Paradigm (CC). i) Participants perform an inefficient visual search task. ii) Unknown to participants, half of the search arrays are repeated throughout the course of the experiment. D) Serial reaction time task (SRT). Participants respond to one of four stimuli, each mapped to a spatially-compatible button press. Unknown to participants, for half of the blocks the stimulus follows a repeating sequence. E) Visual Statistical Learning Paradigm (VSL): i) 12 shapes are grouped into 6 base pairs. ii) Learning: three of the six pairs are presented as an array, this is repeated as participants passively view the displays. iii) Test: participants are presented with a base pair, and a novel pair formed from a recombination of the 12 shapes, and is asked which of the two pairs they have seen previously.'}
@@ -131,42 +128,34 @@ knitr::include_graphics(paradigm.fig.pth)
 
 ```
 
-All the [data]() and [code](https://github.com/kel-github/Super-Effects) used for the current analysis are available online. All data were analysed using R @rcoreteamLanguageEnvironmentStatistical2015 and RStudio @rstudiocitation. The analysis of the data from each task followed two steps. First, to ascertain that we observed the typical findings for each of the paradigms, we applied the conventional statistical model for that to the full dataset (N=313). The details of each analysis are presented below. Next, we implemented a simulation procedure to determine the effect size and p-values that would be attained over many experiments conducted at multiple levels of sample size. 
+All the [data]() and [code](https://github.com/kel-github/Super-Effects) used for the current analysis are available online. All data were analysed using R @rcoreteamLanguageEnvironmentStatistical2015 and RStudio @rstudiocitation. The analysis of the data from each task followed two steps; first, to ascertain that we observed the typical findings for each of the paradigms, we applied the relevant conventional statistical model to the full dataset (N=313). The details of each analysis are presented below. Next, we implemented a simulation procedure to determine the effect size and p-values that would be attained over many experiments conducted at multiple levels of sample size. 
 
 ### Sampling procedure
+\label{sec:SamplingProc}
 
-For each task, we sampled across 20 different sample sizes ($N$s), defined on a logarithmic interval between N=13 and N=313. We opted for a logarithmic interval given the decreasing information gained at higher $N$ values. To simulate $k$ experiments at each of our chosen $N$, we developed a sampling procedure that sought to leverage information from across the whole dataset while also protecting against any reductions in effect size variablility that may be attributable to saturation as $N$ approaches the maximum ($N_{max}$=313). Specifically, it could be that as $N$ approaches 313, the overlap of participants between subsamples may be greater than when $N$ equals a lower number such as 13. It follows then that any decreasing variability in effect size estimates at higher $N$s could be due to the decrease in variability of the subsamples, rather than the improved estimate of the population variance should come with a larger $N$. 
+For each task, we simulated experiments across 20 different sample sizes ($N$s), defined on a logarithmic interval between N=13 and N=313. We opted for a logarithmic interval given the decreasing information gained at higher $N$ values. To simulate $k$ experiments at each of our chosen $N$, we developed a sampling procedure that sought to leverage information from across the whole dataset while also protecting against any reductions in effect size variablility that may be attributable to saturation as $N$ approaches the maximum ($N_{max}$=313). Specifically, it could be that as $N$ approaches 313, the overlap of participants between subsamples may be greater than when $N$ equals a lower number such as 13. It follows then that any decreasing variability in effect size estimates at higher $N$s could be due to the decrease in variability of the subsamples, rather than the improved estimate of the population variance should come with a larger $N$. 
 
-To protect against this possibility we applied the following procedure; for each level of $N$ ($N_{1}, N_{2}, ...N_{20}$), we first selected a subsample from the total dataset _without_ replacement, e.g. $N$ of 13 unique samples from the total $N$=313. We refer to this from now on as the _parent subsample_. From this parent subsample, we sampled $k$ = 1000 times _with_ replacement - e.g. $N$=13 sampled from $N$=13. These shall now be referred to as the _child subsamples_. The relevant analysis was then applied to each of the child subsamples. Sampling with replacement ensured that the child subsamples carried the Markov property. Given that this procedure reduces the heterogeneity of the parent sample (for example, in the case of $N$=13, all the child subsamples are derived from only 13 unique observations), we then repeated the entire process over $j$ = 1000 iterations. Therefore the presented data reflects $j * k$ simulated experiments for each level of $N$. We refer to this now as the two-step sampling procedure: $j$ = 1000, $k$ = 1000. It is worth noting that we compared this procedure to one where we performed the two-step sampling procedure with $j$ = 1, and to a one-step sampling procedure where we sampled $N$ with replacement from the entire dataset, i.e. $k$=1000 and $j$ = 0. Outcomes were comparable, but not identical, between the sampling procedures. The two-step procedure ($j$ = 1000) offering better resolution of the resulting densities (see Figure for a representative example). 
+To protect against this possibility we applied the following procedure; for each level of $N$ ($N_{1}, N_{2}, ...N_{20}$), we first selected a subsample from the total dataset _without_ replacement, e.g. $N$ of 13 unique samples from the total $N$=313. We refer to this from now on as the _parent subsample_. From this parent subsample, we sampled $k$ = 1000 times _with_ replacement - e.g. $N$=13 sampled from $N$=13. These shall now be referred to as the _child subsamples_. The relevant analysis was then applied to each of the child subsamples. Sampling with replacement ensured that the child subsamples carried the Markov property. Given that this procedure reduces the heterogeneity of the parent sample (for example, in the case of $N$=13, all the child subsamples are derived from only 13 unique observations), we then repeated the entire process over $j$ = 1000 iterations. Therefore the presented data reflects $j * k$ simulated experiments for each level of $N$. We refer to this now as the two-step sampling procedure: $j$ = 1000, $k$ = 1000. It is worth noting that we compared this procedure to one where we performed the two-step sampling procedure with $j$ = 1, and to a one-step sampling procedure where we sampled $N$ with replacement from the entire dataset, i.e. $k$=1000 and $j$ = 0. Outcomes were comparable between the sampling procedures. The two-step procedure ($j$ = 1000) offered better resolution of the resulting densities (see Figure \@ref(fig:figSuppSamp) for a representative example). 
 
-NOTE: insert analysis of central tendency of the distributions at this point.
 
-```{r supp_sampling_data, message=F}
-
-# paradigm.fig.pth <- '../images/SuppFigXXXX_AB_sampling.png'
-# #paradigm.fig <- readPNG(paradigm.fig.pth, native=TRUE, info=TRUE)
-# include_graphics(paradigm.fig.pth)
-#source('../R/plot_IQRs.R')
-```
-
-```{r figSuppSamp, out.width='70%', fig.cap='Comparison between sampling procedures for the AB task data fit with a repeated measures ANOVA for 5 levels of N; densities of observed effect sizes for the A) two-step sampling procedure $j$=1000, $k$=1000, the B) two-step sampling procedure, $j$=1, $k$=1000, and C) the one-step procedure, $k$ = 1000', message=F}
+```{r figSuppSamp, out.width='70%', fig.cap='Comparison between sampling procedures for the AB task data fit with a repeated measures ANOVA for selected N; densities of observed effect sizes for the A) two-step sampling procedure $j$=1000, $k$=1000, the B) two-step sampling procedure, $j$=1, $k$=1000, and C) the one-step procedure, $k$ = 1000', message=F}
 # plot.d.by.samp(dat, px_rng_d, 1, mod) + xlab(bquote(eta['p']^2)) + theme(axis.text.x = element_text(size=11),
-#                                                                          axis.text.y = element_text(size=11))
+samp.fig.pth <- '../images/AB_sampling.pdf'
+knitr::include_graphics(samp.fig.pth)      
+
 ```
 
 
-Specific details regarding which analyses were applied to each $k$ sample are detailed below for each paradigm. Note that given the iterative fitting procedure that is inherent to the LME approach, the models specified were the simplest possible, as the computational requirements for fitting more complex models would have resulted in simulations running for over 11 months. Therefore, the following results should be interpreted with the caveat that a more complex model may well yield different results in the LME case. In these findings we present examples of the simplest case, to provide a basis for comparison, or a set of minimum assumptions for researchers interested in applying LME models to their data on these or comparable paradigms. 
-
+Specific details regarding which analyses were applied to each $k$ (child) sample are detailed below for each paradigm. Note that given the iterative fitting procedure that is inherent to the LME approach, the models specified were the simplest possible, as the computational requirements for fitting more complex models would have resulted in simulations running for over 11 months. In the current work we present examples of the simplest case, to provide a basis for comparison, or a set of minimum assumptions for researchers interested in applying LME models to their data on these or comparable paradigms. Therefore, the following results should be interpreted with the caveat that a more complex model may well yield different results in the LME case. 
 
 _Effect Sizes_
-For each task, we report the following information from the observed effect size densities: to assess the best estimate of the effect size of interest and its variability, we report the central tendency and standard deviation observed for our highest N (apart from in one case of bimodality, where we report the two points of highest probability). To determine imprecision in current effect size estimates in the field, we report the Kullback-Leibler Divergence between the distribution observed at each level of N, and the distribution that reflects our best estimate, i.e. the one from our highest N level of (313). This measure quantifies the information lost (in bits), should we use the distribution observed at any level of N as an approximation for our best estimate. To compare outcomes between the standard and LME approaches, we compare the ratio of the range of the effect size distribution found at each level of N, using the difference between the .025 and .975 quantiles as our estimate of the range. Lastly, to provide an estimate of the effect size that would be yielded through a meta-analysis of the published literature, we compute the mean effect size for all analyses that yielded a statistically significant result (p<.05). To determine the impact that increasing sample size would have on the meta-analytically attained effect size, we take the ratio between the meta-analytic mean and our mean observed effect sizes for each N.
+For each task, we report the following information from the observed effect size densities: to assess the best estimate of the effect size of interest and its variability, we report the central tendency and standard deviation observed for our highest $N$ (apart from in one case of bimodality, where we report the two points of highest probability). To determine imprecision in current effect size estimates in the field, we report the Kullback-Leibler Divergence between the distribution observed at each level of N, and the distribution that reflects our best estimate, i.e. the one from our highest $N$ level of (313). This measure quantifies the information lost (in bits), should we use the distribution observed at any level of $N$ as an approximation for our best estimate. To compare outcomes between the standard and LME approaches, we compare the ratio of the range of the effect size distribution found at each level of N, using the difference between the .025 and .975 quantiles as our estimate of the range. Lastly, to provide an estimate of the effect size that would be yielded through a meta-analysis of the published literature, we compute the mean effect size for all analyses that yielded a statistically significant result (p<.05). To determine the impact that increasing sample size would have on the meta-analytically attained effect size, we take the ratio between the meta-analytic mean and our mean observed effect sizes for each N.
 
 _p Values_
-To determine the N required to achieve 90% power to reject the null hypothesis, we report the N for which over 90% of p-values pass the threshold for significance ($\alpha$=.05). To assess the range of p-values that one can expect to observe given $k=1000^2$ experiments across N's, i.e. the confidence for the most likely observed p-value, we report the .025 and .975 quantiles for the observed p-values for each N. To compare the standard and the LME approaches, we then determine whether there is agreement in the N required to achieve greater than 90% statistical power. 
+To determine the $N$ required to achieve 90% power to reject the null hypothesis, we report the $N$ for which over 90% of p-values pass the threshold for significance ($\alpha$=.05). To assess the range of p-values that one can expect to observe given $k=1000^2$ experiments across N's, i.e. the confidence for the most likely observed p-value, we report the .025 and .975 quantiles for the observed p-values for each N. To compare the standard and the LME approaches, we then determine whether there is agreement in the $N$ required to achieve greater than 90% statistical power. As p-values clustered close to 0 in many instances, we applied the probit transform to rescale the values on the range [-$\infty$, $infty$]. This allowed for a clearer visualisation of the spread of the p-value densities.
 
 ## Attentional Blink (AB)
-
-<br>
+\label{sec:ABMeth}
 
 ### Protocol
 
@@ -202,6 +191,7 @@ To facilitate comparison with $\eta_{p}^2$ (which is a generalisation of $r^2$, 
 For this and for all subsequent applications of LME models, the $p$ value for the regressor of interest (in this case 'lag') was attained by applying Wald's chi-square test as implemented using the Anova function from the car package [@foxCompanionAppliedRegression2018] (note: all the results were comparable regardless of whether we used Wald's test or whether we performed a log-likelihood test between the model of interest and a null model, which for the current AB case contained only the two random intercept terms $e_{ij}$ and $e_{i}$). 
 
 ## Multitasking (MT)
+\label{sec:MTMeth}
 
 ### Protocol
 
@@ -212,6 +202,7 @@ The MT protocol was previously reported in [@benderRelationshipResponseSelection
 To ascertain the effectiveness of the multitasking manipulation, the data were modelled using a 2 (task-modality: visual-manual vs auditory-manual) x 2 (task: single vs dual) repeated-measures ANOVA. This analysis was also applied to each $k$ sample; $\eta_{p}^2$ and $p$ are reported for the main effect of task. We also applied an LME model which included fixed effects regressors for task-modality, task and their interaction, and random intercepts for participants $e_{ij}$, and measurement error $e_{i}$. As above, $d$ was computed as the ratio of the estimated fixed effect for the task regressor to the square root of the summed variance of the estimated random effects, and was converted to $r^2$. Again, Wald's chi-square test was applied to attain a $p$ value for the main effect of task.
 
 ## Contextual Cueing (CC)
+\label{sec:CCMeth}
 
 ### Protocol
 
@@ -222,6 +213,7 @@ The CC protocol was the same as that reported by Nydam et al -@nydamCathodalElec
 To ascertain whether participants speeded responses to repeat relative to novel trials over the course of the experiment (i.e. whether participants learned the statistical regularities of the repeated arrays), the data were subject to a block (1:12) x condition (repeat vs novel array) repeated measures ANOVA. Specifically, learning should be evidenced by a significant block x condition interaction. This analysis was applied to each $k$ sample, and we report $\eta_{p}^2$ and $p$ for the block x condition interaction. We also applied LME models, containing fixed effects regressors for block, condition and their interaction, and random intercepts for subjects and general measurement error. We report $r^2$ for the block x condition interaction and the resulting $p$ value from Wald's chi-square test.
 
 ## Serial Response Task (SRT)
+\label{sec:SRTMeth}
 
 ### Protocol
 
@@ -234,8 +226,7 @@ To ascertain whether participants learned the repeating sequences, RTs in the fi
 <br>
 
 #### Visual Statistical Learning (VSL)
-
-<br>
+\label{sec:VSLMeth}
 
 ##### Protocol
 
@@ -249,7 +240,7 @@ To assess whether participants recognised familiar base pairs more than would be
 
 It has recently been shown that the assumptions of the one-sample t-test are not met when data are from an information based measure such as classification accuracy [@allefeldValidPopulationInference2016]. Specifically, because the true value of such a measure can never be below chance (50 % in the case of a 2 alternative-forced-choice), application of the t-test, which carries the assumption that the null distribution can include values above and below 50 %, becomes a fixed effects analysis (see Allefeld et al [-@allefeldValidPopulationInference2016] for a full treatment). Instead, application of the prevalence statistic [@allefeldValidPopulationInference2016] allows for valid second-level inference with information-based measures such as classification accuracy. 
 
-Implementing the prevalence statistic typically involves a two step permutation procedure. First, a null distribution is generated for each participant's accuracies (first level permutations), given their responses and the trials to which they were exposed. This is typically attained by shuffling the trial labels over multiple iterations (e.g. $m$ = 1000), and taking the participant's accuracy under each permutation (with the constraint that $m$ = 1 is the observed data) [@allefeldValidPopulationInference2016]. This yields $m$ accuracies per participant that would be attained given the null hypothesis ($H_0$) was true, where $H_0$ is that the participant is guessing. Secondly, to attain the second-level null distribution, each participant's first level permutations are sampled $z$ times (e.g. $z$ = 1000), with the constraint that $z_{1}$ contains the observed accuracies across participants. This results in $z$ sets of N accuracies as would be expected given the second-level $H_0$. The minimum accuracy is then taken from each of the $z$ sets of permutated accuracies ($PA_{min}$). The proportion for which the observed minimum accuracy ($OA_{min}$) is greater than PA ($p = \frac{1}{i} \sum_{i=1}^z [OA_{min} > PA_{min}{z}]$) is taken as the probability that the observed accuracies are drawn from the distribution defined by $H_0$ (i.e. serves as the $p$ value of the second-level inferential test). 
+Implementing the prevalence statistic typically involves a two step permutation procedure. First, a null distribution is generated for each participant's accuracies (first level permutations), given their responses and the trials to which they were exposed. This is typically attained by shuffling the trial labels over multiple iterations (e.g. $m$ = 1000), and taking the participant's accuracy under each permutation (with the constraint that $m$ = 1 is the observed data) [@allefeldValidPopulationInference2016]. This yields $m$ accuracies per participant that would be attained given the null hypothesis ($H_0$) was true, where $H_0$ is that the participant is guessing. Secondly, to attain the second-level null distribution, each participant's first level permutations are sampled $z$ times (e.g. $z$ = 1000), with the constraint that $z_{1}$ contains the observed accuracies across participants. This results in $z$ sets of $N$ accuracies as would be expected given the second-level $H_0$. The minimum accuracy is then taken from each of the $z$ sets of permutated accuracies ($PA_{min}$). The proportion for which the observed minimum accuracy ($OA_{min}$) is greater than PA ($p = \frac{1}{i} \sum_{i=1}^z [OA_{min} > PA_{min}{z}]$) is taken as the probability that the observed accuracies are drawn from the distribution defined by $H_0$ (i.e. serves as the $p$ value of the second-level inferential test). 
 
 Given that our sampling procedure already entailed $N*j*k$ permutations, and that such a permutation procedure as defined above would require $N*j*k*m*z$ permutations (which in our case is 2$e$+13), we opted to instead apply an analytical definition of the first- and second level distributions for $H_0$. 
 
@@ -262,7 +253,7 @@ Now we can assemble a distribution for this configuration of responses by comput
   (\#eq:FLPrev)
 \end{equation}
 
-To generate the second level null distribution, we then sampled each participant's first level distribution $z$ = 1000 times, to provide $z$ iterations of N accuracies as would be expected under $H_0$. 
+To generate the second level null distribution, we then sampled each participant's first level distribution $z$ = 1000 times, to provide $z$ iterations of $N$ accuracies as would be expected under $H_0$. 
 
 Having calculated the $p$ value for a given set of neutral accuracies, we can compute the proportion of the population expected to show the effect $\gamma$, given the observed $p$ statistic (i.e. an effect size), using the formula defined by Allefeld et al [-@allefeldValidPopulationInference2016]:
 
@@ -273,22 +264,72 @@ Having calculated the $p$ value for a given set of neutral accuracies, we can co
 
 
 # Results
+\label{sec:Results}
 
 ## Attentional Blink
+\label{sec:ABRes}
+```{r, AB_analysis, message=F}
+abfname <- "../data/total_of_313_subs_AB_task_trial_level_data.csv"
+ab_res <- do.AB.analysis(abfname)
+```
 
+An overview for the findings pertaining to the AB are presented in Figure \@ref(fig:ABFX). As expected, accuracy for T2|T1 decreased (by around `r abs(ab_res[[2]][,3]$estimate)`) when T2 was presented at lag 2, relative to lag 7. A one-way ANOVA revealed that the effect of lag was statistically significant (F (`r ab_res[[1]]$DFn`, `r ab_res[[1]]$DFd`) = `r ab_res[[1]]$F`, $\eta_{p}^2$ = `r ab_res[[1]]$pes`, p = `r ab_res[[1]]$p`). Post-hoc t-tests showed that accuracy at each lag differed statistically from accuracy at each of the other lags (all p's $\leq$ `r max(do.call(rbind, lapply(1:6, function(x) cbind(ab_res[[2]][,x]$p.value))))`). Therefore we see that our implementation of the AB paradigm yielded the typically observed effects on the accuracy data.
+
+```{r, AB_results, message=F}
+load("../data/AB/ABstats.RData")
+```
+
+
+```{r, ABFX, out.width='80%', fig.cap='AB Effects. A) accuracy for T1 and T2|T1 by lag. As was expected, accuracy for T2|T1 was poorer at shorter relative to longer lags. B) Observed effect size densities for simulated experiments for select $N$, for the RM-ANOVA and LME analyses. C) KL divergenence when the density for each $N$ is used to approximate the density for N=313. D) The ratio between the observed and meta-analytic effect size was 1 for both RM-ANOVA and LME approaches, across all N. E) Ratio between the effect size densities observed for the RM-ANOVA and LME analyses at each level of N. Effect size densities were comparable between the methods across all levels of N'}
+
+paradigm.fig.pth <- '../images/AB_fx_main.pdf'
+knitr::include_graphics(paradigm.fig.pth)
+
+```
+
+_Effect sizes_ As can be seen in Figure \@ref(fig:ABFX), panel B, increasing $N$ reduced the variability of effect sizes but had little impact on the central tendency. The mean $\eta_{p}^2$ observed for $N_{313}$ was `r res['313', 'stats_fx'][[1]][,1][[1]]`, whereas for $N$ closest to the median sample size for the field (25 & 24 respectively) $\mu\:\eta_{p}^2$ = `r res['25', 'stats_fx'][[1]][,1][[1]]`. In contrast the standard deviations were more varied; $\sigma$ = `r res['313', 'stats_fx'][[1]][,1][[2]]` and `r res['25', 'stats_fx'][[1]][2,1][[1]]` respectively. Interestingly, the pattern of results was comparable for the LME approach. Although, the observed effect sizes were on average lower for the LME models (e.g. $N_{313}\:\mu\:r^2$ = `r res['313', 'stats_fx'][[1]][,2][[1]]`, the variability in observed effect size denisties was comparable between the two approaches at each level of $N$ (Figure \@ref(fig:ABFX), panel E). Given the increasing variability with decreasing N, it is unsurprising that there is a strong negative relationship between sample size and information loss (Figure \@ref(fig:ABFX), panel C). Collectively, these data show that any collection of typical AB experiments will produce a reasonable estimate of the underlying effect size, on average, however, any single experiment will yield an imprecise estimate. Therefore, aggregate effect sizes should be used for power calculations, rather than those from single experiments. The range of possible effect sizes appears rather small with our maximal N, therefore theoretical models for the AB should focus on explaining large, ubiquitous effects. 
+
+_p Values_ All observed p-values were < .05, even the lowest sample size ($N$ = 13). This was the case for both the RM-ANOVA and LME approaches (see Figure \@ref(fig:ABps)). Similarly to the effect size densities, observed p-values were more variable for lower $N$ (e.g. RM-ANOVA: $\sigma\:p: N_{25}$ = `r res['25',"stats_p"][[1]][2][[1]]`, LME: $\sigma\:p: N_{25}$ = `r res['25',"stats_p"][[1]][[2,2]]`) than for higher $N$ (e.g. RM-ANOVA: $\sigma\:p: N_{313}$ = `r res['313',"stats_p"][[1]][2][[1]]`, LME: $\sigma\:p: N_{313}$ = `r res['313',"stats_p"][[1]][[2,2]]`). Unlike the effect size densities, the central tendency of the p-values also decreased with increasing $N$ (e.g. RM-ANOVA: $\mu\:p: N_{25}$ = `r res['25',"stats_p"][[1]][1][[1]]`, RM-ANOVA: $N _{313}$ = `r res['313',"stats_p"][[1]][1][[1]]`) and overall, were lower for the LME than the RM-ANOVA approach (LME: $\mu\:p: N_{25}$ = `r res['25',"stats_p"][[1]][[1,2]]`, $N_{313}$ = `r res['313',"stats_p"][[1]][[1,2]]`). Collectively these data show that reproducibility is sound with the AB, and that the certainty around any attained p-value is not only dependent on the $N$, but also the model employed to conduct the analysis, with the LME approach showing lower p-values. 
+
+
+```{r, ABps, out.width='40%', fig.cap='Probit transformed p-values from the AB analysis, presented for selected N. A) p-values attained from the RM-ANOVA model. B) p-values attained from the LME model. The black dotted vertical line reflects alpha = .05 (probit transformed). Anything to the left of this line reflects a statistically significant result'}
+paradigm.fig.pth <- '../images/AB_ps.pdf'
+knitr::include_graphics(paradigm.fig.pth)
+```
 
 ## Contextual Cueing
+\label{sec:CCRes}
 
 ```{r, CC_interaction, message=F}
 ccfname <- "../data/total_of_313_subs_CC_task_trial_level_data.csv"
 cc_res <- do.CC.analysis(ccfname)
 ```
 
-In accordance with the notion that RTs for repeat displays speed up more than for novel displays (i.e. that participants learn the repeat displays), a significant block x display interaction was found (F (`r cc_res[[1]]$DFn[3]`, `r cc_res[[1]]$DFd[3]`) = `r cc_res[[1]]$F[3]`, $\eta_{p}^2$ = `r cc_res[[1]]$pes[3]`, p = `r cc_res[[1]]$p[3]`). Specifically, while there was no statitically significant difference between repeat and novel displays in the first block (t (`r cc_res[[2]][[1]]$parameter`) = `r cc_res[[2]][[1]]$statistic`, p = `r cc_res[[2]][[1]]$p.value`, $\mu$ difference = `r cc_res[[2]][[1]]$estimate` sec), RT's to repeat displays were on average `r cc_res[[2]][[2]]$estimate` sec faster than RTs to novel displays by block 12 (t (`r cc_res[[2]][[2]]$parameter`) = `r cc_res[[2]][[2]]$statistic`, p = `r cc_res[[2]][[2]]$p.value`). 
+In accordance with the notion that RTs for repeat displays speed up more than for novel displays (i.e. that participants learn the repeat displays), a significant block x display interaction was found (F (`r cc_res[[1]]$DFn[3]`, `r cc_res[[1]]$DFd[3]`) = `r cc_res[[1]]$F[3]`, $\eta_{p}^2$ = `r cc_res[[1]]$pes[3]`, p = `r cc_res[[1]]$p[3]`). Specifically, while there was no statitically significant difference between repeat and novel displays in the first block (t (`r cc_res[[2]][[1]]$parameter`) = `r cc_res[[2]][[1]]$statistic`, p = `r cc_res[[2]][[1]]$p.value`, $\mu$ difference = `r cc_res[[2]][[1]]$estimate` sec), RT's to repeat displays were on average `r cc_res[[2]][[2]]$estimate` sec faster than RTs to novel displays by block 12 (t (`r cc_res[[2]][[2]]$parameter`) = `r cc_res[[2]][[2]]$statistic`, p = `r cc_res[[2]][[2]]$p.value`, see Figure \@ref(fig:CCFX), panel A).
+
+```{r, CC_results, message=F}
+load("../data/CC/CCstats.RData")
+```
+
+```{r, CCFX, out.width='80%', fig.cap='CC Effects. A) RT plotted by block (x-axis) and display type (repeat vs novel). Participants became faster for repeat. B) Observed effect size densities for simulated experiments for select $N$, for the RM-ANOVA and LME analyses. C) KL divergenence when the density for each $N$ is used to approximate the density for N=313. D) The ratio between the observed and meta-analytic effect for both RM-ANOVA and LME approaches, across all N. A value above 1 suggests an inflated estimate of effect size in the literature E) Ratio between the effect size densities observed for the RM-ANOVA and LME analyses at each level of N. Effect size densities were comparable between the methods across all levels of N'}
+
+paradigm.fig.pth <- '../images/CC_fx_main.pdf'
+knitr::include_graphics(paradigm.fig.pth)
+
+```
+
+_Effect sizes_ As can be seen in Figure \@ref(fig:CCFX), panel B, increasing $N$ reduced the variability of effect sizes, and in contrast to the AB, also impacted on central tendency. The mean $\eta_{p}^2$ observed for $N_{max}$ was `r res['313', 'stats_fx'][[1]][,1][[1]]`, whereas for $N$ closest to the median sample size for the field (25 & 24 respectively) was $\mu\:\eta_{p}^2$ = `r res['25', 'stats_fx'][[1]][,1][[1]]`. In contrast the standard deviations were more varied; `r res['313', 'stats_fx'][[1]][,1][[2]]` and `r res['25', 'stats_fx'][[1]][2,1][[1]]` respectively. Interestingly, the pattern of results was different for the LME approach. Mean effect sizes were consistently low across all levels of $N$ (e.g.$N_{25}\:\mu\:r^2$ = `r res['25', 'stats_fx'][[1]][,2][[1]]`, $N_{313}\:\mu\:r^2$ = `r res['313', 'stats_fx'][[1]][,2][[1]]`. Moreover, the variability in observed effect size densities was higher for the RM-ANOVA approach than the LME approach across all levels of $N$ (Figure \@ref(fig:CCFX), panel E). Given the increasing variability and increasing effect size with decreasing N, it is unsurprising that there is a strong negative relationship between sample size and information loss for the RM-ANOVA approach (Figure \@ref(fig:CCFX), panel C). Collectively, these data show that the fixed effect size for the contextual cueing effect may be lower than is reported in the published literature, suggesting a bias towards positive effects in the published literature. 
+
+_p Values_ In contrast to the AB results, 115 participants were required to achieve 90 % power to reject the null hypothesis using the RM-ANOVA approach, assuming the null is false. For the LME appraoch, 90 % power was achieved with 265 participants (see Figure \@ref(fig:CCps)). Also in contrast to the AB results, observed p-values were comparably variable across $N$ (e.g. RM-ANOVA: $\sigma\:p: N_{25}$ = `r res['25',"stats_p"][[1]][2][[1]]`, $N_{313}$ = `r res['313',"stats_p"][[1]][2][[1]]`, LME: $\sigma\:p: N_{25}$ = `r res['25',"stats_p"][[1]][[2,2]]`, $\sigma\:p: N_{313}$ = `r res['313',"stats_p"][[1]][[2,2]]`). The central tendency of the p-values did also decrease to some extent with increasing $N$ (e.g. RM-ANOVA: $\mu\:p: N_{25}$ = `r res['25',"stats_p"][[1]][1][[1]]`, $N_{313}$ = `r res['313',"stats_p"][[1]][1][[1]]`, LME: $\mu\:p: N_{25}$ = `r res['25',"stats_p"][[1]][[1,2]]`, $N_{313}$ = `r res['313',"stats_p"][[1]][[1,2]]`). Collectively these data show that reproducibility is challenging with the contextual cueing paradigm. 
 
 
+```{r, CCps, out.width='40%', fig.cap='Probit transformed p-values from the CC analysis, presented for selected N. A) p-values attained from the RM-ANOVA model. B) p-values attained from the LME model. The black dotted vertical line reflects alpha = .05 (probit transformed). Anything to the left of this line reflects a statistically significant result'}
+paradigm.fig.pth <- '../images/CC_ps.pdf'
+knitr::include_graphics(paradigm.fig.pth)
+```
 
 
-
+\clearpage
 
 # References
+\label{sec:Refref}
