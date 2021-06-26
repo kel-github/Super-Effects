@@ -119,12 +119,20 @@ compute_stats <- function(dat) {
    # for each model produce a density for
    # the effect sizes and for the p-values
 # -----------------------------------------------------------------
+   do_dens <- function(dat, x, dv) {
+     tryCatch(
+      {
+        density(dat[dat$mod == x, dv])
+      },
+        error = function(cond) {
+        NULL
+      }
+     )
+   }
    mods <- unique(dat$mod)
-   dens_fx <- lapply(mods,
-              function(x) density(dat$esz[dat$mod == x & is.finite(dat$esz)]))
+   dens_fx <- lapply(mods, do_dens, dat = dat, dv = "esz")
    names(dens_fx) <- mods
-   dens_p <- lapply(mods,
-                    function(x) density(dat$p[dat$mod == x & is.finite(dat$p)]))
+   dens_p <- lapply(mods, do_dens, dat = dat, dv = "p")
    names(dens_p) <- mods
 
 # -----------------------------------------------------------------
