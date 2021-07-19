@@ -111,7 +111,6 @@ calc_ratios_sing_origin <- function(rat_inputs, res) {
 }
 
 calc_kl_sing_origin <- function(rat_inputs, res) {
-    #### this project on hold
     # calculate ratio between x_1 and y_1_to_j
     # NOTE: this is for the ratio between 95% of 
     # distribution ONLY!
@@ -363,4 +362,100 @@ plot_ratios <- function(rat_inputs) {
              cex.lab = 1,
              cex.axis = 1)
     }
+}
+
+plot_means_for_z_tests <- function(mu_z_inputs){
+  # this function will plot the means and 95% CIs
+  # for two sets of dvs (plotted against N),
+  # with means plotted as dots, and 95% CIs plotted as 
+  # error bars
+  # puts a line at the bottom to denote sig
+  # differences
+  
+  # -- mu_z_inputs: a list comprising of:
+  # ----- datpath: e.g. "../data/
+  # ----- task: e.g. "CC"
+  # ----- x: e.g. "meta" - plot observed and meta analytic means
+  #               "model" - plot observed means for both models
+  # ----- sub_Ns <- names of subject groups (Ns)
+  # ----- mods <- names of models to extract info for
+  #               e.g. c("RM-AN", "LME")
+  # ----- w width of plot in inches
+  # ----- h: height of plot in inches
+  # ----- leg_id: legend? TRUE or FALSE
+  # -----leg_locs: e.g. c(5, 20)
+  # ----- leg_txt: e.g. c("RM-AN", "LME")
+
+  # ----------------------------------------------------
+  # assign variables
+  # ----------------------------------------------------
+  x <- mu_z_inputs$x
+  # ----------------------------------------------------
+  # load data
+  # ----------------------------------------------------
+  load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
+  
+  # ----------------------------------------------------
+  # function to get pooled standard error
+  # ----------------------------------------------------  
+  get_pooled <- function(vars_a, vars_b, n=1000^2){
+    # return 2.5 times pooled standard error of the mean difference
+    (sqrt(((n-1)*vars_a + (n-1)*vars_b) / (n + n - 2)) / sqrt(n))*1.96
+  }
+  
+  if (x == "meta"){
+    ys <- lapply(mods, function(y)
+              data.frame(a = do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[1, y]]))-
+                             do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_sig"][[x]][[1, y]])),
+                         se = get_pooled(do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[2, y]]^2)),
+                                        do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_sig"][[x]][[2, y]]^2)))))
+    names(ys) <- mods
+  
+  }
+  
+  plot(x = sub_Ns,
+       y = t(ys[[mods[[1]]]]["a"]),
+       bty = "n",
+       pch = 20,
+       cex = 1,
+       col = wes_palette("IsleofDogs1")[3],
+       xlim = c(1.5, 7.5),
+               ylim = c(0.4, 1),
+               ylab = expression(italic(paste(mu, "acc", sep = " "))),
+    xlab = expression(italic("lag")),
+                     cex.lab = 1,
+                     cex.axis = 1))
+
+# now if size of y list > 1
+  with(ffx_dat, points(x = c(2,3,5,7),
+                       y = acc[condition == "T2gT1"],
+                       pch = 20,
+                       cex = 1,
+                       col = wes_palette("IsleofDogs1")[4]))
+  # now add error bars
+  with(ffx_dat, arrows(x0 = c(2,3,5,7), 
+                       y0 = acc[condition == "T1"] - se[condition == "T1"],
+                       x1 = c(2,3,5,7),
+                       y1 = acc[condition == "T1"] + se[condition == "T1"],
+                       code = 3,
+                       col = wes_palette("IsleofDogs1")[3],
+                       angle = 90,
+                       length = .05))
+  with(ffx_dat, arrows(x0 = c(2,3,5,7),
+                       y0 = acc[condition == "T2gT1"] - se[condition == "T2gT1"],
+                       x1 = c(2,3,5,7),
+                       y1 = acc[condition == "T2gT1"] + se[condition == "T2gT1"],
+                       code = 3,
+                       col = wes_palette("IsleofDogs1")[4],
+                       angle = 90,
+                       length = .05))
+  
+  leg_cols <- wes_palette("IsleofDogs1")[c(3, 4)]
+  legend(5, .6, legend = c("T1", "T2gT1"),
+         col = leg_cols, pch = 19, bty = "n", cex = 1)
+  
+
+  
+  
+  
 }
