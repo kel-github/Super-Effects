@@ -364,6 +364,125 @@ plot_ratios <- function(rat_inputs) {
     }
 }
 
+# ----------------------------------------------------
+# function to get pooled standard error
+# ----------------------------------------------------
+get_pooled <- function(vars_a, vars_b, n=1000^2){
+  # return 2.5 times pooled standard error of the mean difference
+  (sqrt(((n-1)*vars_a + (n-1)*vars_b) / (n + n - 2)) / sqrt(n))*1.96
+}
+
+plot_mean_vs_meta <- function(mu_vs_meta_inputs){
+  # this function will plot the difference between
+  # the observed and meta-analytic means
+  # with means plotted as dots, and standard error
+  # of the difference plotted as
+  # error bars
+  # puts a line at the bottom to denote sig
+  # differences
+  # plots a separate line for RM-AN & LME
+  
+  # -- mu_z_inputs: a list comprising of:
+  # ----- datpath: e.g. "../data/
+  # ----- task: e.g. "CC"
+  # ----- sub_Ns <- names of subject groups paste(Ns)
+  # ----- mods <- names of models to extract info for
+  #               e.g. c("RM-AN", "LME")
+  # ----- w width of plot in inches
+  # ----- h: height of plot in inches
+  # ----- leg_id: legend? TRUE or FALSE
+  # ----- leg_locs: e.g. c(5, 20)
+  # ----- leg_txt: e.g. c("RM-AN", "LME")
+  # ----- yl: ylims
+  
+  # ----------------------------------------------------
+  # assign variables
+  # ----------------------------------------------------
+  datpath <- mu_z_inputs$datpath
+  task <- mu_z_inputs$task
+  mods <- mu_z_inputs$mods
+  sub_Ns <- mu_z_inputs$sub_Ns
+  yl <- mu_z_inputs$yl
+  leg_locs <- mu_z_inputs$leg_locs
+  leg_id <- mu_z_inputs$leg_id
+  
+  # ----------------------------------------------------
+  # load data
+  # ----------------------------------------------------
+  load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
+  
+  # ----------------------------------------------------
+  # get dvs
+  # ----------------------------------------------------
+  ys <- lapply(mods, function(y)
+    data.frame(a = do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[1, y]]))-
+                 do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_sig"][[x]][[1, y]])),
+               se = get_pooled(do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[2, y]]^2)),
+                               do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_sig"][[x]][[2, y]]^2)))))
+  names(ys) <- mods
+  
+  # ----------------------------------------------------
+  # do plot
+  # ----------------------------------------------------
+  plot(x = 1:length(sub_Ns),
+       y = t(ys[[mods[[1]]]]["a"]),
+       xaxt = "n",
+       bty = "n",
+       pch = 20,
+       cex = 1,
+       col = wes_palette("IsleofDogs1")[6],
+       xlim = c(0, 21),
+       ylim = yl,
+       ylab = expression(italic(paste(mu, "diff", sep = " "))),
+       xlab = expression(italic("N")),
+       cex.lab = 1,
+       cex.axis = 1)
+  axis(side=1, at=1:length(sub_Ns), labels = sub_Ns)
+  
+  points(x = jitter(1:length(sub_Ns)),
+         y = jitter(t(ys[[mods[[2]]]]["a"])),
+         pch = 20,
+         cex = 1,
+         col = wes_palette("IsleofDogs1")[5])
+  
+  arrows(x0 = 1:length(sub_Ns),
+         y0 = t(ys[[mods[[1]]]]["a"]) - t(ys[[mods[[1]]]]["se"]),
+         x1 = 1:length(sub_Ns),
+         y1 = t(ys[[mods[[1]]]]["a"]) + t(ys[[mods[[1]]]]["se"]) ,
+         code = 3,
+         col = wes_palette("IsleofDogs1")[6],
+         angle = 90,
+         length = .05)
+  
+  arrows(x0 = 1:length(sub_Ns),
+         y0 = t(ys[[mods[[2]]]]["a"]) - t(ys[[mods[[2]]]]["se"]),
+         x1 = 1:length(sub_Ns),
+         y1 = t(ys[[mods[[2]]]]["a"]) + t(ys[[mods[[2]]]]["se"]),
+         code = 3,
+         col = wes_palette("IsleofDogs1")[5],
+         angle = 90,
+         length = .05)
+  
+  if (leg_id){
+    leg_cols <- wes_palette("IsleofDogs1")[c(6, 5)]
+    legend(x=leg_locs[1], y=leg_locs[2], legend = mods,
+           col = leg_cols, pch = 19, bty = "n", cex = 1)
+  }
+  abline(h=0, lty=2, col="grey48")
+  
+  # add significance lines
+  # so far got:
+  # ps <- c(.04, .04, .6, .6, .02, .02, .07, .01, .09)
+  # xs = c(1:9)
+  # xs[ps < .05]
+  # diff(xs)
+  # xs[diff(xs) == 1]
+}
+
+# ----------------------------------------------------
+# functions to plot mean differences
+# ----------------------------------------------------
+
 plot_means_for_z_tests <- function(mu_z_inputs){
   # this function will plot the means and 95% CIs
   # for two sets of dvs (plotted against N),
@@ -390,85 +509,29 @@ plot_means_for_z_tests <- function(mu_z_inputs){
   # ----------------------------------------------------
   # assign variables
   # ----------------------------------------------------
+  datpath <- mu_z_inputs$datpath
+  task <- mu_z_inputs$task
   x <- mu_z_inputs$x
   mods <- mu_z_inputs$mods
   sub_Ns <- mu_z_inputs$sub_Ns
   yl <- mu_z_inputs$yl
   leg_locs <- mu_z_inputs$leg_locs
   leg_id <- mu_z_inputs$leg_id
+  
   # ----------------------------------------------------
   # load data
   # ----------------------------------------------------
   load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
 
-  # ----------------------------------------------------
-  # function to get pooled standard error
-  # ----------------------------------------------------
-  get_pooled <- function(vars_a, vars_b, n=1000^2){
-    # return 2.5 times pooled standard error of the mean difference
-    (sqrt(((n-1)*vars_a + (n-1)*vars_b) / (n + n - 2)) / sqrt(n))*1.96
-  }
 
-  if (x == "meta"){
-    ys <- lapply(mods, function(y)
-      # need to double check the pooling of the se
-              data.frame(a = do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[1, y]]))-
-                             do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_sig"][[x]][[1, y]])),
-                         se = get_pooled(do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[2, y]]^2)),
-                                         do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_sig"][[x]][[2, y]]^2)))))
-    names(ys) <- mods
-
-  } else if (x == "model"){
-    
     ys <- data.frame(a = do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[1, "RM-AN"]]))-
                          do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[1, "LME"]])),
                      se = get_pooled(do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[2, "RM-AN"]]^2)),
-                                     do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[2, "LME"]]^2)))
-  }
+                                     do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[2, "LME"]]^2))))
 
-  plot(x = 1:length(sub_Ns),
-       y = t(ys[[mods[[1]]]]["a"]),
-       xaxt = "n",
-       bty = "n",
-       pch = 20,
-       cex = 1,
-       col = wes_palette("IsleofDogs1")[6],
-       xlim = c(0, 21),
-               ylim = yl,
-               ylab = expression(italic(paste(mu))),
-       xlab = expression(italic("N")),
-                         cex.lab = 1,
-                         cex.axis = 1)
-  axis(side=1, at=1:length(sub_Ns), labels = sub_Ns)
+  # 
 
-# now if size of y list > 1
-  if (x == "meta") {
-       points(x = jitter(1:length(sub_Ns)),
-              y = jitter(t(ys[[mods[[2]]]]["a"])),
-              pch = 20,
-              cex = 1,
-             col = wes_palette("IsleofDogs1")[5])
-  }
-  # now add error bars
-  arrows(x0 = 1:length(sub_Ns),
-         y0 = t(ys[[mods[[1]]]]["a"]) - t(ys[[mods[[1]]]]["se"]),
-         x1 = 1:length(sub_Ns),
-         y1 = t(ys[[mods[[1]]]]["a"]) + t(ys[[mods[[1]]]]["se"]) ,
-         code = 3,
-         col = wes_palette("IsleofDogs1")[6],
-         angle = 90,
-         length = .05)
-  
-  if (x == "meta") {
-    arrows(x0 = 1:length(sub_Ns),
-          y0 = t(ys[[mods[[2]]]]["a"]) - t(ys[[mods[[2]]]]["se"]),
-          x1 = 1:length(sub_Ns),
-          y1 = t(ys[[mods[[2]]]]["a"]) + t(ys[[mods[[2]]]]["se"]),
-          code = 3,
-          col = wes_palette("IsleofDogs1")[5],
-          angle = 90,
-          length = .05)
-  }
+
   if (leg_id){
   leg_cols <- wes_palette("IsleofDogs1")[c(6, 5)]
   legend(x=leg_locs[1], y=leg_locs[2], legend = mods,
