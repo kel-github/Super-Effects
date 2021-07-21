@@ -382,7 +382,7 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
   # differences
   # plots a separate line for RM-AN & LME
   
-  # -- mu_z_inputs: a list comprising of:
+  # -- mu_vs_meta_inputs: a list comprising of:
   # ----- datpath: e.g. "../data/
   # ----- task: e.g. "CC"
   # ----- sub_Ns <- names of subject groups paste(Ns)
@@ -394,18 +394,22 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
   # ----- leg_locs: e.g. c(5, 20)
   # ----- leg_txt: e.g. c("RM-AN", "LME")
   # ----- yl: ylims
-  
+  # ----- sig_lines a list (for each model) of a list of 
+  #        min and max of sig lines (pass in NULL if none)
+  # ----- sig_y - where on the y-axis to put sig values line
+  #        should be a value for each model
   # ----------------------------------------------------
   # assign variables
   # ----------------------------------------------------
-  datpath <- mu_z_inputs$datpath
-  task <- mu_z_inputs$task
-  mods <- mu_z_inputs$mods
-  sub_Ns <- mu_z_inputs$sub_Ns
-  yl <- mu_z_inputs$yl
-  leg_locs <- mu_z_inputs$leg_locs
-  leg_id <- mu_z_inputs$leg_id
-  
+  datpath <- mu_vs_meta_inputs$datpath
+  task <- mu_vs_meta_inputs$task
+  mods <- mu_vs_meta_inputs$mods
+  sub_Ns <- mu_vs_meta_inputs$sub_Ns
+  yl <- mu_vs_meta_inputs$yl
+  leg_locs <- mu_vs_meta_inputs$leg_locs
+  leg_id <- mu_vs_meta_inputs$leg_id
+  sig_lines <- mu_vs_meta_inputs$sig_lines
+  sig_y <- mu_vs_meta_inputs$sig_y
   # ----------------------------------------------------
   # load data
   # ----------------------------------------------------
@@ -446,18 +450,18 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
          col = wes_palette("IsleofDogs1")[5])
   
   arrows(x0 = 1:length(sub_Ns),
-         y0 = t(ys[[mods[[1]]]]["a"]) - t(ys[[mods[[1]]]]["se"]),
+         y0 = t(ys[[mods[[1]]]]["a"]) - 1.96*(t(ys[[mods[[1]]]]["se"])),
          x1 = 1:length(sub_Ns),
-         y1 = t(ys[[mods[[1]]]]["a"]) + t(ys[[mods[[1]]]]["se"]) ,
+         y1 = t(ys[[mods[[1]]]]["a"]) + 1.96*(t(ys[[mods[[1]]]]["se"])),
          code = 3,
          col = wes_palette("IsleofDogs1")[6],
          angle = 90,
          length = .05)
   
   arrows(x0 = 1:length(sub_Ns),
-         y0 = t(ys[[mods[[2]]]]["a"]) - t(ys[[mods[[2]]]]["se"]),
+         y0 = t(ys[[mods[[2]]]]["a"]) - (1.96*t(ys[[mods[[2]]]]["se"])),
          x1 = 1:length(sub_Ns),
-         y1 = t(ys[[mods[[2]]]]["a"]) + t(ys[[mods[[2]]]]["se"]),
+         y1 = t(ys[[mods[[2]]]]["a"]) + (1.96*t(ys[[mods[[2]]]]["se"])),
          code = 3,
          col = wes_palette("IsleofDogs1")[5],
          angle = 90,
@@ -469,36 +473,30 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
            col = leg_cols, pch = 19, bty = "n", cex = 1)
   }
   abline(h=0, lty=2, col="grey48")
-  
-  # add significance lines
-  # so far got:
-  # ps <- c(.04, .04, .6, .6, .02, .02, .07, .01, .09)
-  # xs = c(1:9)
-  # xs[ps < .05]
-  # diff(xs)
-  # xs[diff(xs) == 1]
+  # add signifance lines
+  sig_line_cols <- wes_palette("IsleofDogs1")[c(6, 5)]
+  names(sig_line_cols) <- mods
+  names(sig_y) <- mods
+  for (m in mods) {
+    lapply(sig_lines[[m]], function(x) segments(x0 = x[1], y0 = sig_y[m],
+                                                x1 = x[2], 
+                                                col = sig_line_cols[m]))
+  } 
+    
 }
 
 # ----------------------------------------------------
 # functions to plot mean differences
 # ----------------------------------------------------
 
-plot_means_for_z_tests <- function(mu_z_inputs){
+plot_mean_diff_between_mods <- function(mu_z_inputs){
   # this function will plot the means and 95% CIs
-  # for two sets of dvs (plotted against N),
-  # with means plotted as dots, and 95% CIs plotted as
-  # error bars
-  # puts a line at the bottom to denote sig
-  # differences
-
+  # for the diff between mean effect size observations
+  # for the 
   # -- mu_z_inputs: a list comprising of:
   # ----- datpath: e.g. "../data/
   # ----- task: e.g. "CC"
-  # ----- x: e.g. "meta" - plot observed and meta analytic means
-  #               "model" - plot observed means for both models
   # ----- sub_Ns <- names of subject groups paste(Ns)
-  # ----- mods <- names of models to extract info for
-  #               e.g. c("RM-AN", "LME")
   # ----- w width of plot in inches
   # ----- h: height of plot in inches
   # ----- leg_id: legend? TRUE or FALSE
@@ -517,25 +515,48 @@ plot_means_for_z_tests <- function(mu_z_inputs){
   yl <- mu_z_inputs$yl
   leg_locs <- mu_z_inputs$leg_locs
   leg_id <- mu_z_inputs$leg_id
-  
+  sig_lines <- mu_z_inputs$sig_lines
+  sig_y <- mu_z_inputs$sig_y
   # ----------------------------------------------------
   # load data
   # ----------------------------------------------------
   load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
 
-
-    ys <- data.frame(a = do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[1, "RM-AN"]]))-
-                         do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[1, "LME"]])),
-                     se = get_pooled(do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[2, "RM-AN"]]^2)),
-                                     do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[2, "LME"]]^2))))
+  # ----------------------------------------------------
+  # compute ys and std error
+  # ----------------------------------------------------
+  ys <- data.frame(a = do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[1, mods[1]]]))-
+                       do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[1, mods[2]]])),
+                   se = get_pooled(do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[2, mods[1]]]^2)),
+                                   do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[2, mods[2]]]^2))))
 
   # 
-
-
-  if (leg_id){
-  leg_cols <- wes_palette("IsleofDogs1")[c(6, 5)]
-  legend(x=leg_locs[1], y=leg_locs[2], legend = mods,
-         col = leg_cols, pch = 19, bty = "n", cex = 1)
-  }
+  plot(x = 1:length(sub_Ns),
+       y = t(ys[["a"]]),
+       xaxt = "n",
+       bty = "n",
+       pch = 20,
+       cex = 1,
+       col = wes_palette("IsleofDogs1")[6],
+       xlim = c(0, 21),
+       ylim = yl,
+       ylab = expression(italic(paste(mu, "diff", sep = " "))),
+       xlab = expression(italic("N")),
+       cex.lab = 1,
+       cex.axis = 1)
+  axis(side=1, at=1:length(sub_Ns), labels = sub_Ns)
+  
+  arrows(x0 = 1:length(sub_Ns),
+         y0 = t(ys[["a"]]) - (1.96*t(ys[["se"]])),
+         x1 = 1:length(sub_Ns),
+         y1 = t(ys[["a"]]) + (1.96*t(ys[["se"]])),
+         code = 3,
+         col = wes_palette("IsleofDogs1")[6],
+         angle = 90,
+         length = .05)
   abline(h=0, lty=2, col="grey48")
+  
+  segments(x0 = sig_lines[1], y0 = sig_y,
+           x1 = sig_lines[2], 
+           col = wes_palette("IsleofDogs1")[6])
 }
