@@ -15,6 +15,11 @@ do_KL_and_spearmans <- function(kl_inputs, res){
   lapply(kls, function(z) cor.test(x=z, y=as.numeric(kl_inputs$sub_Ns)))
 }
 
+# define z function
+comp_z <- function(mu_x, sd_x, mu_y, sd_y, n=1000^2){
+  (mu_x - mu_y) / sqrt( ((sd_x^2)/n) + ((sd_y^2)/n) )
+}
+
 do_z_tests <- function(z_inputs, res){
   # compute z-tests between each density of interest
   # ----------------------------------------------------  
@@ -26,11 +31,6 @@ do_z_tests <- function(z_inputs, res){
   # -- res: stored results from get_statistics.R
   x <- z_inputs$x
   sub_Ns <- z_inputs$sub_Ns
-  
-  # define z function
-  comp_z <- function(mu_x, sd_x, mu_y, sd_y, n=1000^2){
-    (mu_x - mu_y) / sqrt( (sd_x/n) + (sd_y/n) )
-  }
   
   if (x == "meta"){
     

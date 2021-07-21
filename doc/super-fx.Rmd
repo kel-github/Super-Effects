@@ -102,6 +102,8 @@ ii) it is common to use t-test on accuracies against chance but Allefeld (VSL).
 PUT IN INTRO
 Additionally, given the documented advantages of linear mixed effects models (LME) over repeated-measures ANOVA [@muthAlternativeModelsSmall2016; @bagiellaMixedeffectsModelsPsychophysiology2000; @mccullochRepeatedMeasuresANOVA2005], and that only a conceptual proxy of $\eta_{p}^{2}$ is computable from these models [@brysbaertPowerAnalysisEffect2018; @westfallStatisticalPowerOptimal2014], and c) there exists no data that we know of that quantifies to what extent we can expect comparable outcomes between both methods, we (where relevant) opted to apply both the commonly used statistical model, and a LME model to each $k$ sample
 
+INCLUDE Zoie's survey of the literature
+
 # Methods
 
 \label{sec:Method}
@@ -151,9 +153,9 @@ knitr::include_graphics(samp.fig.pth)
 Specific details regarding which analyses were applied to each $k$ (child) subsample are detailed below for each paradigm. Note that given the iterative fitting procedure that is inherent to the LME approach, the models specified were the simplest possible, as the computational requirements for fitting more complex models would have resulted in simulations running for over 11 months. In the current work we present examples of the simplest case, to provide a basis for comparison, or a set of minimum assumptions for researchers interested in applying LME models to their data on these or comparable paradigms. That being said, application of this model is not without precedent in the literature, given that this simple case is often taken as an analysis choice []. 
 
 _Effect Sizes_
-For each task, we report the following information from the observed effect size densities: to assess the best estimate of the effect size and its variability, given our large dataset, we report the central tendency and the standard deviation observed for our highest $N$ (apart from in one case of bimodality, where we report the two points of highest probability). These values can be used to motivate power calculations for future studies. To determine imprecision in current effect size estimates in the field, we compute the Kullback-Leibler Divergence ($D_{KL}$) between the distribution observed at each level of N, and the distribution that reflects our best estimate, i.e. the one from our highest $N$ level of (313). This measure quantifies the information lost (in bits), should we use the distribution observed at any level of $N$ as an approximation for our best estimate. To quantify the relationship between information loss and $N$, we correlate $D_{KL}$ and $N$ using Spearman's Rho. This value tells us how likely we are to have accurately estimated an effect size, given the $N$.
+For each task, we report the following information from the observed effect size densities: to assess the best estimate of the effect size and its variability, given our large dataset, we report the central tendency and the standard deviation observed for our highest $N$ (apart from in one case of bimodality, where we report the two points of highest probability). These values can be used to motivate power calculations for future studies. To test whether the best estimate differs from what is representative for the field, we next report the summary statistics for the $N$ that is closest to the median sample size from our survey of the literature. We use a two-sample $z$ test to determine if the two observations are statistically different. To determine imprecision in effect size estimates across a range of $N$, we compute the Kullback-Leibler Divergence ($D_{KL}$) between the effect size distributions observed at each level of $N$, and the distribution that reflects our best estimate, i.e. that observed with $N_{313}$. This measure quantifies the information lost (in bits), should we use the distribution observed at any level of $N$ as an approximation for our best estimate. To quantify the relationship between information loss and $N$, we correlate $D_{KL}$ and $N$ using Spearman's Rho. 
 
-To provide an estimate of the effect size that would be yielded through a meta-analysis of the published literature, we compute summary statistics for all analyses that yielded a statistically significant result (p<.05), we then compute z-tests between our observed effect sizes and our estimate of the meta-analytic effect size, for each level of $N$. To compare outcomes between the standard and LME approaches (or in the case of VSL, the t-test and prevalence statistic approches, see below), we perform a z-test between the distributions yielded by each method, at each level of $N$. All resulting p-values are FDR corrected.  
+To provide an estimate of the effect size that would be yielded through a meta-analysis of the published literature, we compute summary statistics for all analyses that yielded a statistically significant result (p<.05), we then compute two-sample $z$-tests between our observed effect sizes and our estimate of the meta-analytic effect size, for each level of $N$. To compare outcomes between the standard and LME approaches (or in the case of VSL, the t-test and prevalence statistic approaches, see below), we perform a $z$-test between the distributions yielded by each method, at each level of $N$. An FDR correction was used to control for multiple comparisons.  
 
 _p Values_
 To determine the $N$ required to achieve 90% power to reject the null hypothesis, we report the $N$ for which over 90% of p-values pass the threshold for significance ($\alpha$=.05). To assess the extent to which the range of p-values that one can expect to observe at a given $N$, i.e. the confidence for the most likely observed p-value, we report the .025 and .975 quantiles for the observed p-values for each N. To compare the standard and the LME approaches, we then determine whether there is agreement in the $N$ required to achieve greater than 90% statistical power. As p-values clustered close to 0 in many instances, we applied the probit transform to rescale the values on the range [-$\infty$, $infty$]. This allowed for a clearer visualisation of the spread of the p-value densities.
@@ -272,6 +274,7 @@ Having calculated the $p$ value for a given set of neutral accuracies, we can co
 
 ## Attentional Blink
 \label{sec:ABRes}
+
 ```{r, AB_analysis, message=F}
 abfname <- "../data/total_of_313_subs_AB_task_trial_level_data.csv"
 ab_res <- do.AB.analysis(abfname)
@@ -291,20 +294,25 @@ knitr::include_graphics(paradigm.fig.pth)
 
 ```
 
-```{r message = F}
+```{r ABinf, message = F}
 # compute inferential stats on AB effect size measures
 kl_inputs <- list(origin = "313", dv = "dens_fx", sub_Ns = paste(round(exp(seq(log(13), log(313), length.out = 20)))))
 AB_KL_corrs <- do_KL_and_spearmans(kl_inputs, res)
 names(AB_KL_corrs) <- c("RM-AN", "LME")
 
+
+
+AB_best_vs_typical <- comp_z(res['313', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`, 
+                             res['313', 'stats_fx'][[1]][2, "RM-AN"]$`RM-AN`,
+                             res['25', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`, 
+                             res['25', 'stats_fx'][[1]][2, "RM-AN"]$`RM-AN`)
+AB_best_vs_typical_p <- 2*pnorm(q=abs(AB_best_vs_typical), lower.tail=FALSE)
 AB_meta <- do_z_tests(z_inputs = list(x = "meta", sub_Ns = kl_inputs$sub_Ns), res)
 AB_model <- do_z_tests(z_inputs = list(x = "model", sub_Ns = kl_inputs$sub_Ns), res)
 
 ```
 
-_Effect sizes_ As can be seen in Figure \@ref(fig:ABFX), panel B, increasing $N$ reduced the variability of effect sizes but had little impact on the central tendency. The mean $\eta_{p}^2$ observed for $N_{313}$ was `r res['313', 'stats_fx'][[1]][,1][[1]]`. There was a strong negative relationship between $D_{KL}$ and $N$ for both the ANOVA ($r_{s}$(`r AB_KL_corrs[["RM-AN"]]$parameter`) = `r AB_KL_corrs[["RM-AN"]]$estimate`, p = `r AB_KL_corrs[["RM-AN"]]$p.value`) and LME approaches ($r_{s}$(`r AB_KL_corrs[["LME"]]$parameter`) = `r AB_KL_corrs[["LME"]]$estimate`, p = `r AB_KL_corrs[["LME"]]$p.value` see Figure \@ref(fig:ABFX), panel C). This suggests significant information loss when using experiments of lower N to produce effect size estimates for the AB. Despite this, given the observed effect size, there were minimal differences between the observed effect size distributions and the estimated meta-analytic effect size, across all levels of $N$ 
-
-whereas for $N$ closest to the median sample size for the field (25 & 24 respectively) $\mu\:\eta_{p}^2$ = `r res['25', 'stats_fx'][[1]][,1][[1]]`. In contrast the standard deviations were more varied; $\sigma$ = `r res['313', 'stats_fx'][[1]][,1][[2]]` and `r res['25', 'stats_fx'][[1]][2,1][[1]]` respectively. Interestingly, the pattern of results was comparable for the LME approach. Although, the observed effect sizes were on average lower for the LME models (e.g. $N_{313}\:\mu\:r^2$ = `r res['313', 'stats_fx'][[1]][,2][[1]]`, the variability in observed effect size denisties was comparable between the two approaches at each level of $N$ (Figure \@ref(fig:ABFX), panel E). Given the increasing variability with decreasing N, it is unsurprising that there is a strong negative relationship between sample size and information loss (Figure \@ref(fig:ABFX), panel C). Collectively, these data show that any collection of typical AB experiments will produce a reasonable estimate of the underlying effect size, on average, however, any single experiment will yield an imprecise estimate. Therefore, aggregate effect sizes should be used for power calculations, rather than those from single experiments. The range of possible effect sizes appears rather small with our maximal N, therefore theoretical models for the AB should focus on explaining large, ubiquitous effects. 
+_Effect sizes_ As can be seen in Figure \@ref(fig:ABFX), panel B, increasing $N$ reduced the variability of effect sizes but had little impact on central tendency. Unsurprisingly, given the many demonstrations of the AB effect in the experimental psychology literature, the best estimate of the effect size (with $N_{313}$) was large (mean $\eta_{p}^2$ = `r res['313', 'stats_fx'][[1]][,1][[1]]`, sd: `r res['313', 'stats_fx'][[1]][,1][[2]]`). This estimate was statistically smaller than that observed for the typical N of the field ($N_{25}$, mean $\eta_{p}^2$ = `r res['25', 'stats_fx'][[1]][,1][[1]]`, sd: `r res['25', 'stats_fx'][[1]][,1][[2]]`, $z$ = `r AB_best_vs_typical`, p < .0001. This suggests that aggregating effect size observations with small $N$ would result in an inflated estimate of the size of the effect of the AB. Indeed, in line with the idea that existing effect size estimates are imprecise, there was a strong negative relationship between $D_{KL}$ and $N$ for both the ANOVA ($r_{s}$(`r AB_KL_corrs[["RM-AN"]]$parameter`) = `r AB_KL_corrs[["RM-AN"]]$estimate`, p = `r AB_KL_corrs[["RM-AN"]]$p.value`) and LME approaches ($r_{s}$(`r AB_KL_corrs[["LME"]]$parameter`) = `r AB_KL_corrs[["LME"]]$estimate`, p = `r AB_KL_corrs[["LME"]]$p.value` see Figure \@ref(fig:ABFX), panel C). This suggests significant information loss when using experiments of lower N to produce effect size estimates for the AB. However, there were minimal differences between the observed effect size distributions and the estimated meta-analytic effect size, across all levels of $N$ (panel D), suggesting that the AB effect is large enough to yield statistically significant results (and presumably publication) across any $N$. Interestingly, $r^2$ estimates yielded from the LME analysis yielded statistically lower effect size estimates across all $N$, relative to $\eta_{p}^2$ (Figure \@ref(fig:ABFX), panel E, all ps < .0001). This may be due to the simpler model structure of the LME resulting in larger residuals, which in turn would reduce the effect size estimate. 
 
 _p Values_ All observed p-values were < .05, even the lowest sample size ($N$ = 13). This was the case for both the RM-ANOVA and LME approaches (see Figure \@ref(fig:ABps)). Similarly to the effect size densities, observed p-values were more variable for lower $N$ (e.g. RM-ANOVA: $\sigma\:p: N_{25}$ = `r res['25',"stats_p"][[1]][2][[1]]`, LME: $\sigma\:p: N_{25}$ = `r res['25',"stats_p"][[1]][[2,2]]`) than for higher $N$ (e.g. RM-ANOVA: $\sigma\:p: N_{313}$ = `r res['313',"stats_p"][[1]][2][[1]]`, LME: $\sigma\:p: N_{313}$ = `r res['313',"stats_p"][[1]][[2,2]]`). Unlike the effect size densities, the central tendency of the p-values also decreased with increasing $N$ (e.g. RM-ANOVA: $\mu\:p: N_{25}$ = `r res['25',"stats_p"][[1]][1][[1]]`, RM-ANOVA: $N _{313}$ = `r res['313',"stats_p"][[1]][1][[1]]`) and overall, were lower for the LME than the RM-ANOVA approach (LME: $\mu\:p: N_{25}$ = `r res['25',"stats_p"][[1]][[1,2]]`, $N_{313}$ = `r res['313',"stats_p"][[1]][[1,2]]`). Collectively these data show that reproducibility is sound with the AB, and that the certainty around any attained p-value is not only dependent on the $N$, but also the model employed to conduct the analysis, with the LME approach showing lower p-values. 
 
@@ -328,6 +336,24 @@ In accordance with the notion that RTs for repeat displays speed up more than fo
 load("../data/CC/CCstats.RData")
 ```
 
+```{r CCinf, message = F}
+# compute inferential stats on AB effect size measures
+
+CC_KL_corrs <- do_KL_and_spearmans(kl_inputs, res)
+names(CC_KL_corrs) <- c("RM-AN", "LME")
+
+
+
+CC_best_vs_typical <- comp_z(res['313', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`, 
+                             res['313', 'stats_fx'][[1]][2, "RM-AN"]$`RM-AN`,
+                             res['25', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`, 
+                             res['25', 'stats_fx'][[1]][2, "RM-AN"]$`RM-AN`)
+CC_best_vs_typical_p <- 2*pnorm(q=abs(CC_best_vs_typical), lower.tail=FALSE)
+CC_meta <- do_z_tests(z_inputs = list(x = "meta", sub_Ns = kl_inputs$sub_Ns), res)
+CC_model <- do_z_tests(z_inputs = list(x = "model", sub_Ns = kl_inputs$sub_Ns), res)
+
+```
+
 ```{r, CCFX, out.width='80%', fig.cap='CC Effects. A) RT plotted by block (x-axis) and display type (repeat vs novel). Participants became faster for repeat. B) Observed effect size densities for simulated experiments for select $N$, for the RM-ANOVA and LME analyses. C) KL divergenence when the density for each $N$ is used to approximate the density for N=313. D) The ratio between the observed and meta-analytic effect for both RM-ANOVA and LME approaches, across all N. A value above 1 suggests an inflated estimate of effect size in the literature E) Ratio between the effect size densities observed for the RM-ANOVA and LME analyses at each level of N. Effect size densities were comparable between the methods across all levels of N'}
 
 paradigm.fig.pth <- '../images/CC_fx_main.pdf'
@@ -344,6 +370,10 @@ _p Values_ In contrast to the AB results, 115 participants were required to achi
 paradigm.fig.pth <- '../images/CC_ps.pdf'
 knitr::include_graphics(paradigm.fig.pth)
 ```
+
+# Discussion
+
+AB Discussion: taking published effect sizes to motivate power calculations will result in an inflated effect size estimate. Increasing N has a strong power/exponential relationship with precision of estimate, regardless of modelling choice. No file drawer effect. LME results in comparable NHST decision making, but simple model structure means a smaller estimate of the effect size.
 
 
 \clearpage

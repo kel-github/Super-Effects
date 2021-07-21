@@ -482,7 +482,6 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
                                                 x1 = x[2], 
                                                 col = sig_line_cols[m]))
   } 
-    
 }
 
 # ----------------------------------------------------
@@ -509,7 +508,6 @@ plot_mean_diff_between_mods <- function(mu_z_inputs){
   # ----------------------------------------------------
   datpath <- mu_z_inputs$datpath
   task <- mu_z_inputs$task
-  x <- mu_z_inputs$x
   mods <- mu_z_inputs$mods
   sub_Ns <- mu_z_inputs$sub_Ns
   yl <- mu_z_inputs$yl

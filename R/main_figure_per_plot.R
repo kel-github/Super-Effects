@@ -33,7 +33,7 @@ h = 2.36 * 2 # height
 # ----------------------------------------------------
 # TASK SETTINGS
 # ----------------------------------------------------
-task = "AB"
+task = "CC"
 load(paste("../data/", task, "/",
             task, "_plot_settings.RData", sep = ""))
 
@@ -45,14 +45,15 @@ pdf(paste("../images/", task, "_", "fx_main", ".pdf", sep = ""),
 par(mfrow = c(2, 3), mar = c(3, 3, 1, 1),
     oma = c(1, 2, 1, 1),
     mgp = c(2, 1, 0), las = 0)
-plot_AB_results(fname)
+#plot_AB_results(fname)
+plot_CC_results(fname)
 fig_label("A", cex = 2)
 plot_dens(fx)
 plot_ratios(kl)
 fig_label("C", cex = 2)
-plot_ratios(sig)
+plot_mean_vs_meta(meta_mu)
 fig_label("D", cex = 2)
-plot_ratios(model_rats)
+plot_mean_diff_between_mods(model_mu_diff)
 fig_label("E", cex = 2)
 dev.off()
 

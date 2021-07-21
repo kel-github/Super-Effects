@@ -1,38 +1,38 @@
-task <- "AB"
+task <- "CC"
 
 # ----------------------------------------------------
 # behavioural data
 # ----------------------------------------------------
-fname <- "../data/total_of_313_subs_AB_task_trial_level_data.csv"
+fname <- "../data/total_of_313_subs_CC_task_trial_level_data.csv"
 sub_Ns <- paste(round(exp(seq(log(13), log(313), length.out = 20))))
 # ----------------------------------------------------
 # density variables
 # ----------------------------------------------------
 fx <- list(datpath = "../data/",
-           task = "AB",
+           task = "CC",
            jmax = 2,
            dv = "dens_fx",
            sel_n = paste(c(25, 59, 136, 313)),
            w = 1.96,
            h = 2.36 * 2,
            xlabs = c(expression(eta[p]^2), expression("r"^2)),
-           xl = c(0, 1),
+           xl = c(0, 0.6),
            max_idx = c(20, 20),
            leg_id = 2,
-           leg_locs = c(0.5, 20),
+           leg_locs = c(0.3, 300),
            figlabel = "B",
            figlabelon = TRUE)
 
 p <- list(datpath = "../data/",
-          task = "AB",
+          task = "CC",
           jmax = 2,
           dv = "dens_p",
           sel_n = paste(c(25, 59, 136, 313)),
           w = 1.96,
           h = 2.36 * 2,
           xlabs = c("p", "p"),
-          xl = c(-60, 0),
-          max_idx = c(20, 20),
+          xl = c(-15, 10),
+          max_idx = c(5, 20),
           leg_id = 1,
           leg_locs = c(-60, 0.4),
           figlabel = "A",
@@ -43,7 +43,7 @@ p <- list(datpath = "../data/",
 # ----------------------------------------------------
 
 kl <- list(datpath = "../data/",
-           task = "AB",
+           task = "CC",
            dv = "dens_fx",
            ratio_type = "KL",
            origin = "313",
@@ -61,7 +61,7 @@ kl <- list(datpath = "../data/",
 # ----------------------------------------------------
            
 model_rats <- list(datpath = "../data/",
-              task = "AB",
+              task = "CC",
               dv = "stats_fx",
               ratio_type = "model",
               origin = "",
@@ -76,10 +76,37 @@ model_rats <- list(datpath = "../data/",
               yl = NULL)
 
 # ----------------------------------------------------
+# meta-analytic vs observed mus
+# ----------------------------------------------------
+meta_mu <- list(datpath = "../data/",
+                task = "CC",
+                mods = c("RM-AN", "LME"),
+                sub_Ns = paste(round(exp(seq(log(13), log(313), length.out = 20)))),
+                yl = c(-0.2, .2),
+                leg_locs = c(2, .2),
+                leg_id = TRUE,
+                sig_lines = list("RM-AN" = list(c(1,19)), "LME" = list(c(1,20))),
+                sig_y = c(-.18, -.15))
+
+# ----------------------------------------------------
+# model mu difference
+# ----------------------------------------------------
+model_mu_diff <- list(datpath = "../data/",
+                      task = "CC",
+                      mods = c("RM-AN", "LME"),
+                      sub_Ns = paste(round(exp(seq(log(13), log(313), length.out = 20)))),
+                      yl = c(-0.1, .2),
+                      leg_locs = NULL,
+                      leg_id = FALSE,
+                      sig_lines = c(1,20),
+                      sig_y = -0.1)
+
+
+# ----------------------------------------------------
 # meta-analytic vs observed fx sz ratio
 # ----------------------------------------------------
 sig <- list(datpath = "../data/",
-            task = "AB",
+            task = "CC",
             dv = "stats_sig",
             ratio_type = "stats_sig",
             origin = "",
@@ -93,6 +120,6 @@ sig <- list(datpath = "../data/",
             mods = c("RM-AN", "LME"),
             yl = c(0, 2))
 
-save(task, fname, fx, p, kl, model_rats, sig, 
+save(task, fname, fx, p, kl, meta_mu, model_mu_diff, model_rats, sig, 
      file = paste("../data/", task, "/",
                   task, "_plot_settings.RData", sep = ""))
