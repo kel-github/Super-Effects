@@ -33,7 +33,7 @@ h = 2.36 * 2 # height
 # ----------------------------------------------------
 # TASK SETTINGS
 # ----------------------------------------------------
-task = "CC"
+task = "SD"
 load(paste("../data/", task, "/",
             task, "_plot_settings.RData", sep = ""))
 
@@ -46,7 +46,8 @@ par(mfrow = c(2, 3), mar = c(3, 3, 1, 1),
     oma = c(1, 2, 1, 1),
     mgp = c(2, 1, 0), las = 0)
 #plot_AB_results(fname)
-plot_CC_results(fname)
+#plot_CC_results(fname)
+plot_MT_results(fname)
 fig_label("A", cex = 2)
 plot_dens(fx)
 plot_ratios(kl)
@@ -59,9 +60,12 @@ dev.off()
 
 pdf(paste("../images/", task, "_", "ps", ".pdf", sep = ""),
           width = w*.5, height = h)
-par(mfrow = c(2, 1), mar = c(4, 3, 0, 0),
+par(mfrow = c(3, 1), mar = c(4, 3, 0, 0),
 oma = c(1, 1, 1, 1),
 mgp = c(2, 1, 0), las = 0)
 plot_dens(p)
 fig_label("B", cex = 2)
+plot_ratios(p_rat)
+abline(h=1, lty = 2, col = "grey48")
+fig_label("C", cex = 2)
 dev.off()

@@ -11,8 +11,10 @@ do_KL_and_spearmans <- function(kl_inputs, res){
   # sub_Ns <- names of subject groups (Ns) - pasted as string
   # -- res: stored results from get_statistics.R
   kls <- calc_kl_sing_origin(kl_inputs, res)
-  kls <- lapply(colnames(kls), function(x) do.call(rbind, kls[,x]))
-  lapply(kls, function(z) cor.test(x=z, y=as.numeric(kl_inputs$sub_Ns)))
+  mods <- colnames(kls)
+  kls <- lapply(mods, function(x) do.call(rbind, kls[,x]))
+  names(kls) <- mods
+  lapply(mods, function(z) cor.test(x=kls[[z]], y=as.numeric(kl_inputs$sub_Ns)))
 }
 
 # define z function

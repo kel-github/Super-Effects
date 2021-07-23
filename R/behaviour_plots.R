@@ -69,6 +69,94 @@ plot_CC_results <- function(fname) {
            col = leg_cols, pch = 19, bty = "n", cex = 1)
 }
 
+plot_MT_results <- function(fname) {
+
+  # ----------------------------------------------------------------------------------------------------
+  # load data and wrangle into tidy form 
+  # ----------------------------------------------------------------------------------------------------
+  
+  dat <- read.csv(fname, header=TRUE)
+  # ----------------------------------------------------------------------------------------------------
+  # Create dataframes 
+  # ----------------------------------------------------------------------------------------------------
+  # Create a summary of the data for ffx and rfx modelling
+  min.RT <- .200 # in sec
+  sd.crit <- 2.5
+  
+  rfx.dat <- dat %>% filter(Overall.Accuracy == 1) %>%
+    select(c('Subj.No', 'Trial.Type.Name', 'Task.1.RT.Sec', 'Task.2.RT.Sec', 'Task.1.Response', 'Task.2.Response'))  %>%
+    pivot_longer(c('Task.1.RT.Sec', 'Task.2.RT.Sec'), names_to = "task", values_to="RT") %>%
+    drop_na()
+  rfx.dat$task[rfx.dat$Trial.Type.Name == 'single_auditory'] = 'sound'
+  rfx.dat$task[rfx.dat$Trial.Type.Name == 'single_visual'] = 'vis'
+  rfx.dat$task[rfx.dat$Trial.Type.Name == 'dual_task' & rfx.dat$task == 'Task.1.RT.Sec'] = 'vis'
+  rfx.dat$task[rfx.dat$Trial.Type.Name == 'dual_task' & rfx.dat$task == 'Task.2.RT.Sec'] = 'sound'
+  
+  rfx.dat <- rfx.dat %>% mutate(trialtype = fct_recode(Trial.Type.Name,
+                                                       'single' = 'single_auditory',
+                                                       'single' = 'single_visual',
+                                                       'dual' = 'dual_task')) 
+  rfx.dat$task.stim <- NA
+  rfx.dat$task.stim[rfx.dat$trialtype == "single"] = rfx.dat$Task.1.Response[rfx.dat$trialtype == "single"]
+  rfx.dat$task.stim[rfx.dat$trialtype == "dual" & rfx.dat$task == "vis"] = rfx.dat$Task.1.Response[rfx.dat$trialtype == "dual" & rfx.dat$task == "vis"]
+  rfx.dat$task.stim[rfx.dat$trialtype == "dual" & rfx.dat$task == "sound"] = rfx.dat$Task.2.Response[rfx.dat$trialtype == "dual" & rfx.dat$task == "sound"]
+  
+  ffx.dat <- rfx.dat %>% select(-c("Trial.Type.Name", "Task.1.Response", "Task.2.Response")) %>%
+    group_by(Subj.No, task, trialtype) %>%
+    filter(RT > min.RT) %>%
+    filter(RT < (mean(RT)+sd.crit*sd(RT))) %>%
+    summarise(RT = mean(RT))
+  names(ffx.dat)[names(ffx.dat) == "Subj.No"] = "sub"
+  
+  grp_sum <- ffx.dat %>% group_by(task, trialtype) %>%
+                         summarise(mu = mean(RT),
+                                   N = length(RT),
+                                   se = sd(RT)/N) %>% 
+                         ungroup()
+  
+  # ---------------------------------------------------------------
+  # plot data
+  # ---------------------------------------------------------------
+  ys <- with(grp_sum, c(mu[task == "sound" & trialtype == "single"], 
+                        mu[task == "vis" & trialtype == "single"],
+                        mu[task == "sound" & trialtype == "dual"],
+                        mu[task == "vis" & trialtype == "dual"]))
+  upper = ys + 1.96*with(grp_sum, c(se[task == "sound" & trialtype == "single"], 
+                                    se[task == "vis" & trialtype == "single"],
+                                    se[task == "sound" & trialtype == "dual"],
+                                    se[task == "vis" & trialtype == "dual"]))
+  lower = ys - 1.96*with(grp_sum, c(se[task == "sound" & trialtype == "single"], 
+                                    se[task == "vis" & trialtype == "single"],
+                                    se[task == "sound" & trialtype == "dual"],
+                                    se[task == "vis" & trialtype == "dual"]))
+  plot(x = c(1,2,3,4),
+       y = ys,
+       bty = "n",
+       pch = 20,
+       cex = 1,
+       col = rep(c(wes_palette("IsleofDogs1")[3], wes_palette("IsleofDogs1")[4]), times = 2),
+       xlim = c(.5, 4.5),
+       ylim = c(0.4, 1.2),
+       ylab = expression(italic(paste(mu, "RT", sep = " "))),
+       xlab = expression(italic("task")),
+       cex.lab = 1,
+       cex.axis = 1,
+       xaxt = "n")
+  axis(side = 1, at = c(1, 2, 3, 4), labels = c("S", "S", "M", "M"))
+  # now add error bars
+  arrows(x0 = c(1,2,3,4), 
+         y0 = lower,
+         x1 = c(1,2,3,4), 
+         y1 = upper,
+         code = 3,
+         col = rep(c(wes_palette("IsleofDogs1")[3], wes_palette("IsleofDogs1")[4]), times = 2),
+         angle = 90,
+         length = .05)
+  leg_cols <- wes_palette("IsleofDogs1")[c(3, 4)]
+  legend(1, 1.18, legend = c("A", "V"),
+         col = leg_cols, pch = 19, bty = "n", cex = 1)
+}
+
 plot_AB_results <- function(fname) {
   # ----------------------------------------------------------------------------------------------------
   # read in data

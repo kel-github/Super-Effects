@@ -38,11 +38,11 @@ source("R_rainclouds.R") # functions for plotting
 # -----------------------------------------------------------------
 # define session variables
 # -----------------------------------------------------------------
-task <- "AB"
-subfol <- "AB"
+task <- "SRT"
+subfol <- "SRT"
 sub_Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
 convert <- "LME"
-rxvnme <- "IMMAB"
+rxvnme <- "SRT"
 
 # -----------------------------------------------------------------
 # relatively constant settings

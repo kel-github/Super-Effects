@@ -1,14 +1,18 @@
-task <- "CC"
+rm(list=ls())
 
+task <- "SD"
+datpath <- "../data/"
+medN <- "25"
+mods <- c("RM-AN", "LME")
 # ----------------------------------------------------
 # behavioural data
 # ----------------------------------------------------
-fname <- "../data/total_of_313_subs_CC_task_trial_level_data.csv"
+fname <- "../data/total_of_313_subs_SingDual_task_trial_level_data.csv"
 sub_Ns <- paste(round(exp(seq(log(13), log(313), length.out = 20))))
 # ----------------------------------------------------
 # density variables
 # ----------------------------------------------------
-fx <- list(datpath = "../data/",
+fx <- list(datpath = datpath,
            task = task,
            jmax = 2,
            dv = "dens_fx",
@@ -16,14 +20,14 @@ fx <- list(datpath = "../data/",
            w = 1.96,
            h = 2.36 * 2,
            xlabs = c(expression(eta[p]^2), expression("r"^2)),
-           xl = c(0, 0.4),
+           xl = c(0, 0.9),
            max_idx = c(20, 20),
-           leg_id = 2,
-           leg_locs = c(0.2, 300),
+           leg_id = 1,
+           leg_locs = c(0.05, 20),
            figlabel = "B",
            figlabelon = TRUE)
 
-p <- list(datpath = "../data/",
+p <- list(datpath = datpath,
           task = task,
           jmax = 2,
           dv = "dens_p",
@@ -31,10 +35,10 @@ p <- list(datpath = "../data/",
           w = 1.96,
           h = 2.36 * 2,
           xlabs = c("p", "p"),
-          xl = c(-35, 10),
+          xl = c(-80, 2),
           max_idx = c(20, 20),
           leg_id = 1,
-          leg_locs = c(-35, 0.4),
+          leg_locs = c(-78, 0.4),
           figlabel = "A",
           figlabelon = TRUE)
 
@@ -42,7 +46,7 @@ p <- list(datpath = "../data/",
 # KL divergence
 # ----------------------------------------------------
 
-kl <- list(datpath = "../data/",
+kl <- list(datpath = datpath,
            task = task,
            dv = "dens_fx",
            ratio_type = "KL",
@@ -52,15 +56,15 @@ kl <- list(datpath = "../data/",
            h = 2.36,
            leg_id = FALSE,
            leg_locs = c(5, 20),
-           leg_txt = c("RM-AN", "LME"),
-           ylabel = expression(italic("KL p||q")),
+           leg_txt = mods,
+           y_label = expression(italic("KL p||q")),
            yl = NULL)
 
 # ----------------------------------------------------
 # fx sz ratio between models
 # ----------------------------------------------------
            
-model_rats <- list(datpath = "../data/",
+model_rats <- list(datpath = datpath,
               task = task,
               dv = "stats_fx",
               ratio_type = "model",
@@ -71,18 +75,18 @@ model_rats <- list(datpath = "../data/",
               leg_id = TRUE,
               leg_locs = c(5, 20),
               leg_txt = "",
-              ylabel = expression(italic("RM-AN / LME")),
-              mods = c("RM-AN", "LME"),
+              ylabel = expression(italic(paste(mods[1], "/", mods[2], sep=" "))),
+              mods = mods,
               yl = NULL)
 
 # ----------------------------------------------------
 # meta-analytic vs observed mus
 # ----------------------------------------------------
-meta_mu <- list(datpath = "../data/",
+meta_mu <- list(datpath = datpath,
                 task = task,
-                mods = c("RM-AN", "LME"),
+                mods = mods,
                 sub_Ns = paste(round(exp(seq(log(13), log(313), length.out = 20)))),
-                yl = c(-0.15, .15),
+                yl = c(-0.2, .2),
                 leg_locs = c(2, .145),
                 leg_id = TRUE,
                 sig_lines = NULL,
@@ -91,21 +95,35 @@ meta_mu <- list(datpath = "../data/",
 # ----------------------------------------------------
 # model mu difference
 # ----------------------------------------------------
-model_mu_diff <- list(datpath = "../data/",
+model_mu_diff <- list(datpath = datpath,
                       task = task,
-                      mods = c("RM-AN", "LME"),
+                      mods = mods,
                       sub_Ns = paste(round(exp(seq(log(13), log(313), length.out = 20)))),
-                      yl = c(-0.05, .2),
+                      yl = c(-0.3, .7),
                       leg_locs = NULL,
                       leg_id = FALSE,
                       sig_lines = c(1,20),
-                      sig_y = -0.1)
+                      sig_y = -0.25)
 
+# ----------------------------------------------------
+# p ratios
+# ----------------------------------------------------
+p_rat <- list(datpath = datpath,
+              task = task,
+              dv = "stats_p",
+              ratio_type = "origin",
+              origin = medN,
+              y_label = expression(italic("q ratio")),
+              sub_Ns = sub_Ns,
+              leg_id = TRUE, 
+              leg_locs = c(1, 0.5),
+              leg_txt = mods,
+              yl = c(0, 1.5))
 
 # ----------------------------------------------------
 # meta-analytic vs observed fx sz ratio
 # ----------------------------------------------------
-sig <- list(datpath = "../data/",
+sig <- list(datpath = datpath,
             task = task,
             dv = "stats_sig",
             ratio_type = "stats_sig",
@@ -115,11 +133,11 @@ sig <- list(datpath = "../data/",
             h = 2.36,
             leg_id = TRUE,
             leg_locs = c(5, 0.5),
-            leg_txt = c("RM-AN", "LME"),
+            leg_txt = mods,
             ylabel = expression(italic("meta / sim")),
-            mods = c("RM-AN", "LME"),
+            mods = mods,
             yl = c(0, 2))
 
-save(task, fname, fx, p, kl, meta_mu, model_mu_diff, model_rats, sig, 
+save(task, fname, fx, p, kl, meta_mu, model_mu_diff, model_rats, sig, p_rat,
      file = paste("../data/", task, "/",
                   task, "_plot_settings.RData", sep = ""))

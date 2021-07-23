@@ -96,6 +96,7 @@ calc_ratios_sing_origin <- function(rat_inputs, res) {
     origin <- rat_inputs$origin
     sub_Ns <- rat_inputs$sub_Ns
     dv <- rat_inputs$dv
+
     # get models from which to return results
     mods <- unique(colnames(res[, dv][[origin]]))
     base <- do.call(cbind, lapply(mods,
@@ -103,18 +104,15 @@ calc_ratios_sing_origin <- function(rat_inputs, res) {
                            abs(diff(res[, dv][[origin]][, x][[3]]))))
     colnames(base) <- mods # just labeling for sanity checks
     ratios4plotting <- do.call(rbind,
-                                lapply(sub_Ns,
-                                function(x)
-                                abs(diff(res[, dv][[x]][[3]])) / base))
+                                lapply(sub_Ns, 
+                                function(x) lapply(mods, function(y)
+                                abs(diff(res[, dv][[x]][,y][[3]]) / base[,y]))))
     rownames(ratios4plotting) <- sub_Ns
     ratios4plotting
 }
 
 calc_kl_sing_origin <- function(rat_inputs, res) {
-    # calculate ratio between x_1 and y_1_to_j
-    # NOTE: this is for the ratio between 95% of 
-    # distribution ONLY!
-    # kwargs
+    # compute kl divergence between density at given N relative to origin density
     # -- rat_inputs: a list comprising of the following fields
     # origin <- e.g. "313"
     # dv <- "stats_fx", "stats_p", "stats_sig"
@@ -262,7 +260,7 @@ plot_ratios <- function(rat_inputs) {
     # -- task: e.g. "CC"
     # -- dv: e.g. "dens_fx", "stats_fx", "stats_p", "stats_sig"
     # -- ratio_type: "origin" or "model" or "KL" or "stats_sig"
-    # -- origin <- e.g. "313" i.e. calc ratio to this one
+    # -- origin <- e.g. "313" i.e. calc ratio to this one 
     # -- sub_Ns <- names of subject groups (Ns)
     # -- w width of plot in inches
     # -- h: height of plot in inches
@@ -280,8 +278,9 @@ plot_ratios <- function(rat_inputs) {
     leg_txt <- rat_inputs$leg_txt
     w <- rat_inputs$w
     h <- rat_inputs$h
-    ylabel <- rat_inputs$ylabel
     yl <- rat_inputs$yl
+    if (ratio_type == "origin") origin <- rat_inputs$origin
+    
     # ----------------------------------------------------
     # load data
     # ----------------------------------------------------
@@ -307,12 +306,12 @@ plot_ratios <- function(rat_inputs) {
     if (ncol(ratios) > 1) {
       if (is.null(yl)){
         nuyl = c(0,
-                 max(cbind(do.call(cbind, ratios[, "RM-AN"]),
-                           do.call(cbind, ratios[, "LME"]))))
+                 max(cbind(do.call(cbind, ratios[, 1]),
+                           do.call(cbind, ratios[, 2]))))
       } else {
         nuyl = yl
       }
-        plot(x = 1:length(rownames(ratios)), y = ratios[, "RM-AN"],
+        plot(x = 1:length(rownames(ratios)), y = ratios[, 1],
              xaxt = "n",
              bty = "n",
              type = "l", lty = 1,
@@ -327,7 +326,7 @@ plot_ratios <- function(rat_inputs) {
              labels = sub_Ns[seq(1, 20, 2)],
              cex.lab = 1,
              cex.axis = 1)
-        lines(x = 1:length(rownames(ratios)), y = ratios[, "LME"],
+        lines(x = 1:length(rownames(ratios)), y = ratios[, 2],
               lwd = 2,
               col = wes_palette("IsleofDogs1")[5])
         # do you want a legend, and if so where to put it?
