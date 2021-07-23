@@ -41,7 +41,7 @@ source("R_rainclouds.R") # functions for plotting
 task <- "SRT"
 subfol <- "SRT"
 sub_Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
-convert <- "LME"
+convert <- c("RM-AN","LME")
 rxvnme <- "SRT"
 
 # -----------------------------------------------------------------
@@ -93,7 +93,7 @@ get_data <- function(fstem, n, j, datpath, rxvnme) {
 
 d2r <- function(dat, m) {
   # apply d2r transform for data in dat corresponding to model m
-  dat %>% filter(mod == m) %>%
+  dat %>% filter(mod %in% m) %>%
     group_by(n) %>%
     mutate(esz = (esz / (sqrt((esz^2) + 4)))^2) %>% # Cohen 1988 equation 2.2.6
     ungroup()
