@@ -1,13 +1,13 @@
 rm(list=ls())
 
-task <- "SD"
+task <- "SRT"
 datpath <- "../data/"
-medN <- "25"
-mods <- c("RM-AN", "LME")
+medN <- "36"
+mods <- c("t", "LME")
 # ----------------------------------------------------
 # behavioural data
 # ----------------------------------------------------
-fname <- "../data/total_of_313_subs_SingDual_task_trial_level_data.csv"
+fname <- "../data/total_of_313_subs_SRT_task_trial_level_data.csv"
 sub_Ns <- paste(round(exp(seq(log(13), log(313), length.out = 20))))
 # ----------------------------------------------------
 # density variables
@@ -20,7 +20,7 @@ fx <- list(datpath = datpath,
            w = 1.96,
            h = 2.36 * 2,
            xlabs = c(expression(eta[p]^2), expression("r"^2)),
-           xl = c(0, 0.9),
+           xl = c(0, 1),
            max_idx = c(20, 20),
            leg_id = 1,
            leg_locs = c(0.05, 20),
@@ -31,14 +31,14 @@ p <- list(datpath = datpath,
           task = task,
           jmax = 2,
           dv = "dens_p",
-          sel_n = paste(c(25, 59, 136, 313)),
+          sel_n = paste(c(25, 36, 50, 69)),
           w = 1.96,
           h = 2.36 * 2,
           xlabs = c("p", "p"),
-          xl = c(-80, 2),
-          max_idx = c(20, 20),
+          xl = c(-50, 2),
+          max_idx = c(11, 11),
           leg_id = 1,
-          leg_locs = c(-78, 0.4),
+          leg_locs = c(-48, 0.5),
           figlabel = "A",
           figlabelon = TRUE)
 
@@ -86,8 +86,8 @@ meta_mu <- list(datpath = datpath,
                 task = task,
                 mods = mods,
                 sub_Ns = paste(round(exp(seq(log(13), log(313), length.out = 20)))),
-                yl = c(-0.2, .2),
-                leg_locs = c(2, .145),
+                yl = c(-0.1, .1),
+                leg_locs = c(2, -.05),
                 leg_id = TRUE,
                 sig_lines = NULL,
                 sig_y = NULL)
@@ -99,11 +99,11 @@ model_mu_diff <- list(datpath = datpath,
                       task = task,
                       mods = mods,
                       sub_Ns = paste(round(exp(seq(log(13), log(313), length.out = 20)))),
-                      yl = c(-0.3, .7),
+                      yl = c(-0.3, .9),
                       leg_locs = NULL,
                       leg_id = FALSE,
-                      sig_lines = c(1,20),
-                      sig_y = -0.25)
+                      sig_lines = NULL,
+                      sig_y = NULL)
 
 # ----------------------------------------------------
 # p ratios

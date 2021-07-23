@@ -473,13 +473,15 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
   }
   abline(h=0, lty=2, col="grey48")
   # add signifance lines
-  sig_line_cols <- wes_palette("IsleofDogs1")[c(6, 5)]
-  names(sig_line_cols) <- mods
-  names(sig_y) <- mods
-  for (m in mods) {
-    lapply(sig_lines[[m]], function(x) segments(x0 = x[1], y0 = sig_y[m],
-                                                x1 = x[2], 
-                                                col = sig_line_cols[m]))
+  if (!is.null(sig_y)){
+    sig_line_cols <- wes_palette("IsleofDogs1")[c(6, 5)]
+    names(sig_line_cols) <- mods
+    names(sig_y) <- mods
+    for (m in mods) {
+      lapply(sig_lines[[m]], function(x) segments(x0 = x[1], y0 = sig_y[m],
+                                                  x1 = x[2], 
+                                                  col = sig_line_cols[m]))
+    }
   } 
 }
 
@@ -553,7 +555,9 @@ plot_mean_diff_between_mods <- function(mu_z_inputs){
          length = .05)
   abline(h=0, lty=2, col="grey48")
   
+  if (!is.null(sig_y)){
   segments(x0 = sig_lines[1], y0 = sig_y,
            x1 = sig_lines[2], 
            col = wes_palette("IsleofDogs1")[6])
+  }
 }

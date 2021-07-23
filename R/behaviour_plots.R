@@ -1,3 +1,65 @@
+plot_SRT_results <- function(fname) {
+  ## plot the random vs seq block effect for mean RTs
+  # -----------------------------------------------------
+  # read in data
+  # -----------------------------------------------------
+  dat <- read.csv(fname, header = TRUE)
+  # -----------------------------------------------------
+  # Create dataframes
+  # ------------------------------------------------------
+  min.RT <- 200 # in msec
+  sd.crit <- 2.5
+  
+  ffx.dat <- dat %>% filter(Block.No > 2) %>%
+    group_by(Subj.No, Block.No.Names) %>%
+    filter(Accuracy == 1) %>%
+    filter(RT.ms > min.RT) %>%
+    filter(RT.ms < (mean(RT.ms) + sd.crit*sd(RT.ms))) %>%
+    summarise(RT=mean(RT.ms))
+  names(ffx.dat)[names(ffx.dat) == "Block.No.Names"] <- "trialtype"
+  
+  grp_dat <- ffx.dat %>% group_by(trialtype) %>%
+                         mutate(RT = RT/1000) %>%
+                         summarise(mu = mean(RT),
+                                   N = length(RT),
+                                   se = sd(RT)/sqrt(N)) %>%
+                         ungroup()
+  
+  # ---------------------------------------------------------------
+  # plot data
+  # ---------------------------------------------------------------
+  with(grp_dat, plot(x = c(1,2),
+                     y = mu,
+                     bty = "n",
+                     pch = 20,
+                     cex = 1,
+                     col = c(wes_palette("IsleofDogs1")[3], wes_palette("IsleofDogs1")[4]),
+                     ylim = c(.2, .450),
+                     xlim = c(0.5, 2.5),
+                     ylab = expression(italic(paste(mu, "RT", sep = " "))),
+                     xlab = expression(italic("block")),
+                     cex.lab = 1,
+                     cex.axis = 1,
+                     xaxt = "n"))
+  axis(side = 1, at = c(1, 2), labels = c("Ran", "Rep"))
+  
+  with(grp_dat, arrows(x0 = c(1,2), 
+                       y0 = c(mu[trialtype == "Random Block"] - (1.96*se[trialtype == "Random Block"]),
+                              mu[trialtype == "Sequence Block"] - (1.96*se[trialtype == "Sequence Block"])),  
+                       x1 = c(1,2), 
+                       y1 = c(mu[trialtype == "Random Block"] + (1.96*se[trialtype == "Random Block"]),
+                              mu[trialtype == "Sequence Block"] + (1.96*se[trialtype == "Sequence Block"])),
+                       code = 3,
+                       col = c(wes_palette("IsleofDogs1")[3], wes_palette("IsleofDogs1")[4]),
+                       angle = 90,
+                       length = .025))
+  
+  # leg_cols <- wes_palette("IsleofDogs1")[c(3, 4)]
+  # legend(2, 1000, legend = c("rand", "rep"),
+  #        col = leg_cols, pch = 19, bty = "n", cex = 1)
+}
+
+
 plot_CC_results <- function(fname) {
   ## plot the trial type x block interaction for mean RTs
   # -----------------------------------------------------
@@ -153,7 +215,7 @@ plot_MT_results <- function(fname) {
          angle = 90,
          length = .05)
   leg_cols <- wes_palette("IsleofDogs1")[c(3, 4)]
-  legend(1, 1.18, legend = c("A", "V"),
+  legend(3, .65, legend = c("A", "V"),
          col = leg_cols, pch = 19, bty = "n", cex = 1)
 }
 

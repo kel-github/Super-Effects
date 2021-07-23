@@ -41,7 +41,7 @@ source("R_rainclouds.R") # functions for plotting
 task <- "SRT"
 subfol <- "SRT"
 sub_Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
-convert <- c("RM-AN","LME")
+convert <- c("RM-AN")
 rxvnme <- "SRT"
 
 # -----------------------------------------------------------------
@@ -93,7 +93,7 @@ get_data <- function(fstem, n, j, datpath, rxvnme) {
 
 d2r <- function(dat, m) {
   # apply d2r transform for data in dat corresponding to model m
-  dat %>% filter(mod %in% m) %>%
+  dat %>% filter(mod == m) %>%
     group_by(n) %>%
     mutate(esz = (esz / (sqrt((esz^2) + 4)))^2) %>% # Cohen 1988 equation 2.2.6
     ungroup()
@@ -109,7 +109,7 @@ data_proc <- function(fstem, n, j, datpath, rxvnme, convert) {
   dat <- rbind(dat %>% filter(mod != convert),
                d2r(dat, convert)) %>%
                mutate(p = qnorm(p))
-  dat
+  dat %>% ungroup()
 }
 
 compute_stats <- function(dat) {
@@ -179,21 +179,27 @@ stats_4_subs <- function(fstem, n, j, datpath, rxvnme, convert) {
   # compute stats
   # return the list of results
   # for use in application over each level of subject
-  dat <- data_proc(fstem, n, j, datpath, rxvnme, convert)
+  if (rxvnme != "SRT"){
+    dat <- data_proc(fstem, n, j, datpath, rxvnme, convert)
+  } else { # this is a bit of a hatchet job because I boxed myself into a corner of only being able
+           # to do a d2r convert for one model at a time
+    dat <- rbind(data_proc(fstem, n, j, datpath, rxvnme, "RM-AN") %>% filter(mod == "RM-AN"),
+                 data_proc(fstem, n, j, datpath, rxvnme, "LME") %>% filter(mod == "LME"))
+  }
   compute_stats(dat)
 }
 
 # ------------------------------------------------------------
 # run the code across each subject group
 # ------------------------------------------------------------
-res <- lapply(sub.Ns, stats_4_subs,
+res <- lapply(sub_Ns, stats_4_subs,
                       fstem = fstem,
                       j = j,
                       datpath = datpath,
                       rxvnme = rxvnme,
                       convert = convert)
 
-names(res) <- paste(sub.Ns)
+names(res) <- paste(sub_Ns)
 res <- do.call(rbind, res) # makes it neater for reffing
 
 # ------------------------------------------------------------
