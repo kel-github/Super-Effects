@@ -56,6 +56,10 @@ opts_chunk$set(fig.align = 'center', cache = FALSE, warning = FALSE,
   message = TRUE, echo = FALSE)
 options(digits = 3, width = 88, knitr.graphics.auto_pdf = TRUE,
         knitr.kable.NA = '')
+knit_hooks$set(inline = function(x) {
+  x <- sprintf("%1.2f", x)
+  paste(x, collapse = ", ")
+})
 ```
 
 ```{r loadpackagesandfunctions, echo=FALSE, message=F, warning=F}
@@ -97,7 +101,7 @@ For example, theories in the experimental psychological sciences have tended onl
 
 Using a large dataset we will address this gap. Data on x-tasks. We will apply a simulation analysis to determine x, y and z.
 
-Moreover, we will address two pertinrent analytical gaps: i) A further development is the recent use of linear mixed effects models, and the recommendation that we use them instead of
+Moreover, we will address two pertinent analytical gaps: i) A further development is the recent use of linear mixed effects models, and the recommendation that we use them instead of
 ii) it is common to use t-test on accuracies against chance but Allefeld (VSL).
 
 PUT IN INTRO
@@ -159,7 +163,7 @@ For each task, we report the following information from the observed effect size
 To provide an estimate of the effect size that would be yielded through a meta-analysis of the published literature, we compute summary statistics for all analyses that yielded a statistically significant result (p<.05), we then present the difference between our observed effect sizes and our estimate of the meta-analytic effect size, for each level of $N$. To compare outcomes between the standard and LME approaches (or in the case of VSL, the t-test and prevalence statistic approaches, see below), we present the difference of the means from the distributions yielded by each method, at each level of $N$. 
 
 _p Values_
-To determine the $N$ required to achieve 90% power to reject the null hypothesis, we report the $N$ for which over 90% of p-values pass the threshold for significance ($\alpha$=.05). To assess the extent to which the range of p-values that one can expect to observe at some given $N$, i.e. the confidence for the most likely observed p-value, we report the .025 and .975 quantiles ($q$) for the observed p-values for the $N$ that is typical of the field, and the ratio of that range ($q$ .975 - .025) to the range observed at the remaining levels of $N$. To compare the standard and the LME approaches, we then determine whether there is agreement in the $N$ required to achieve greater than 90% statistical power. As p-values clustered close to 0 in many instances, we applied the probit transform to rescale the values on the range [-$\infty$, $infty$]. This allowed for a clearer visualisation of the spread of p-values at each level of $N$.
+To determine the $N$ required to achieve 90% power to reject the null hypothesis, we report the $N$ for which over 90% of p-values pass the threshold for significance ($\alpha$=.05). To compare the standard and the LME approaches, we then determine whether there is agreement in the $N$ required to achieve greater than 90% statistical power. To assess the range of p-values that one can expect to observe at some given $N$, i.e. the confidence for the most likely observed p-value, or certainty on the certainty of the test outcome, we computed the difference between the the .025 and .975 quantiles ($q$) of the observed p-values, we then computed the ratio between that range and that observed for the median $N$ for the field $N$ ($\frac{q_{N}}{q_{medianN}}$). Values below 1 suggest that the certainty over the p-value is lower for the median $N$ for the field, relative to the simulated $N$. As p-values clustered close to 0 in many instances, we applied the probit transform to rescale the values on the range [-$\infty$, $infty$]. This allowed for a clearer visualisation of the spread of p-values at each level of $N$.
 
 ## Attentional Blink (AB)
 \label{sec:ABMeth}
@@ -281,14 +285,14 @@ abfname <- "../data/total_of_313_subs_AB_task_trial_level_data.csv"
 ab_res <- do.AB.analysis(abfname)
 ```
 
-An overview for the findings pertaining to the AB are presented in Figure \@ref(fig:ABFX). As expected, accuracy for T2|T1 decreased (by around `r abs(ab_res[[2]][,3]$estimate)`) when T2 was presented at lag 2, relative to lag 7. A one-way ANOVA revealed that the effect of lag was statistically significant (F (`r ab_res[[1]]$DFn`, `r ab_res[[1]]$DFd`) = `r ab_res[[1]]$F`, $\eta_{p}^2$ = `r ab_res[[1]]$pes`, p = `r ab_res[[1]]$p`). Post-hoc t-tests showed that accuracy at each lag differed statistically from accuracy at each of the other lags (all p's $\leq$ `r max(do.call(rbind, lapply(1:6, function(x) cbind(ab_res[[2]][,x]$p.value))))`). Therefore we see that our implementation of the AB paradigm yielded the typically observed effects on the accuracy data.
+An overview for the findings for the AB task are presented in Figure \@ref(fig:ABFX). As expected, accuracy for T2|T1 decreased (by around p = `r abs(ab_res[[2]][,3]$estimate)`) when T2 was presented at lag 2, relative to lag 7. A one-way ANOVA revealed that the effect of lag was statistically significant (F (`r ab_res[[1]]$DFn`, `r ab_res[[1]]$DFd`) = `r ab_res[[1]]$F`, $\eta_{p}^2$ = `r ab_res[[1]]$pes`, p = `r ab_res[[1]]$p`). Post-hoc t-tests showed that accuracy at each lag differed statistically from accuracy at each of the other lags (all p's $\leq$ `r max(do.call(rbind, lapply(1:6, function(x) cbind(ab_res[[2]][,x]$p.value))))`), with lower accuracy values at the shorter relative to the longer lags. Therefore we see that our implementation of the AB paradigm yielded the typically observed effects on the accuracy data.
 
 ```{r, AB_results, message=F}
 load("../data/AB/ABstats.RData")
 ```
 
 
-```{r, ABFX, out.width='80%', fig.cap='AB Effects. A) accuracy for T1 and T2|T1 by lag. As was expected, accuracy for T2|T1 was poorer at shorter relative to longer lags. B) Observed effect size densities for simulated experiments for select $N$, for the RM-ANOVA and LME analyses. C) KL divergenence when the density for each $N$ is used to approximate the density for N=313. D) The ratio between the observed and meta-analytic effect size was 1 for both RM-ANOVA and LME approaches, across all N. E) Ratio between the effect size densities observed for the RM-ANOVA and LME analyses at each level of N. Effect size densities were comparable between the methods across all levels of N'}
+```{r, ABFX, out.width='80%', fig.cap='AB Effects. A) accuracy for T1 and T2|T1 by lag. As was expected, accuracy for T2|T1 was poorer at shorter relative to longer lags. B) Observed effect size densities for simulated experiments for select $N$, for the RM-ANOVA and LME analyses. C) KL divergenence when the density for each $N$ is used to approximate the density for N=313. D) The difference between the observed and meta-analytic effect size was very close to 0 for both RM-ANOVA and LME approaches, across all N. E) Difference between the mean effect size observed for the RM-ANOVA and LME analyses at each level of N. The effect size derived from the RM-ANOVA method was higher across all levels of N'}
 
 paradigm.fig.pth <- '../images/AB_fx_main.pdf'
 knitr::include_graphics(paradigm.fig.pth)
@@ -308,14 +312,14 @@ AB_best_vs_typical <- comp_z(res['313', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`,
                              res['25', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`, 
                              res['25', 'stats_fx'][[1]][2, "RM-AN"]$`RM-AN`)
 AB_best_vs_typical_p <- 2*pnorm(q=abs(AB_best_vs_typical), lower.tail=FALSE)
-AB_meta <- do_z_tests(z_inputs = list(x = "meta", sub_Ns = kl_inputs$sub_Ns), res)
-AB_model <- do_z_tests(z_inputs = list(x = "model", sub_Ns = kl_inputs$sub_Ns), res)
+#AB_meta <- do_z_tests(z_inputs = list(x = "meta", sub_Ns = kl_inputs$sub_Ns), res)
+#AB_model <- do_z_tests(z_inputs = list(x = "model", sub_Ns = kl_inputs$sub_Ns), res)
 
 ```
 
-_Effect sizes_ As can be seen in Figure \@ref(fig:ABFX), panel B, increasing $N$ reduced the variability of effect sizes but had lower impact on central tendency. Unsurprisingly, given the many demonstrations of the AB effect in the experimental psychology literature, the best estimate of the effect size (with $N_{313}$) was large (mean $\eta_{p}^2$ = `r res['313', 'stats_fx'][[1]][,1][[1]]`, sd: `r res['313', 'stats_fx'][[1]][,1][[2]]`). Despite that, this estimate was statistically smaller than that observed for the typical N of the field ($N_{25}$, mean $\eta_{p}^2$ = `r res['25', 'stats_fx'][[1]][,1][[1]]`, sd: `r res['25', 'stats_fx'][[1]][,1][[2]]`, $z$ = `r AB_best_vs_typical`, p < .0001). This suggests that aggregating effect size observations with small $N$ would result in an inflated estimate of the size of the effect of the AB. Indeed, in line with the idea that existing effect size estimates are imprecise, there was a strong negative relationship between $D_{KL}$ and $N$ for both the ANOVA ($r_{s}$(`r AB_KL_corrs[["RM-AN"]]$parameter`) = `r AB_KL_corrs[["RM-AN"]]$estimate`, p = `r AB_KL_corrs[["RM-AN"]]$p.value`) and LME approaches ($r_{s}$(`r AB_KL_corrs[["LME"]]$parameter`) = `r AB_KL_corrs[["LME"]]$estimate`, p = `r AB_KL_corrs[["LME"]]$p.value` see Figure \@ref(fig:ABFX), panel C). This suggests significant information loss when using experiments of lower N to produce effect size estimates for the AB. However, there were minimal differences between the observed effect size distributions and the estimated meta-analytic effect size, across all levels of $N$ (panel D), suggesting that the AB effect is large enough to yield statistically significant results (and presumably publication) across all levels of $N$. Interestingly, $r^2$ estimates yielded from the LME analysis yielded statistically lower effect size estimates across all $N$, relative to $\eta_{p}^2$ (Figure \@ref(fig:ABFX), panel E, all ps < .0001). This may be due to the simpler model structure of the LME resulting in larger random effects terms, which in turn would reduce the effect size estimate. 
+_Effect sizes_ As can be seen in Figure \@ref(fig:ABFX), panel B, increasing $N$ both reduced the central tendency and the reduced the variability of observed effect sizes. Unsurprisingly, given the many demonstrations of the AB effect in the experimental psychology literature, the best estimate of the effect size (with $N_{313}$) was large (mean $\eta_{p}^2$ = `r res['313', 'stats_fx'][[1]][,1][[1]]`, sd: `r res['313', 'stats_fx'][[1]][,1][[2]]`). Despite that, this estimate was statistically smaller than that observed for the typical N of the field ($N_{25}$, mean $\eta_{p}^2$ = `r res['25', 'stats_fx'][[1]][,1][[1]]`, sd: `r res['25', 'stats_fx'][[1]][,1][[2]]`, $z$ = `r AB_best_vs_typical`, p < .0001). This suggests that aggregating effect size observations with small $N$ would result in an inflated estimate of the size of the effect of the AB. In line with the idea that existing effect size estimates suffer some imprecision, there was a strong negative relationship between $D_{KL}$ and $N$ for both the ANOVA ($r_{s}$(`r AB_KL_corrs[["RM-AN"]]$parameter`) = `r AB_KL_corrs[["RM-AN"]]$estimate`, p = `r AB_KL_corrs[["RM-AN"]]$p.value`) and LME approaches ($r_{s}$(`r AB_KL_corrs[["LME"]]$parameter`) = `r AB_KL_corrs[["LME"]]$estimate`, p = `r AB_KL_corrs[["LME"]]$p.value` see Figure \@ref(fig:ABFX), panel C). This suggests significant information loss when using experiments of lower N to produce effect size estimates for the AB. However, owing to the large effect under study, there were minimal differences between the observed effect size distributions and the estimated meta-analytic effect size, across all levels of $N$ (panel D), suggesting that the AB effect is large enough to yield statistically significant results (and presumably publication) across all levels of $N$. Interestingly, $r^2$ estimates from the LME analysis yielded statistically lower effect size estimates across all $N$, relative to $\eta_{p}^2$ (Figure \@ref(fig:ABFX), panel E, all ps < .0001). This may be due to the simpler model structure of the LME resulting in larger random effects terms, which in turn would reduce the effect size estimate. We return to this in the discussion.
 
-_p Values_ All observed p-values were < .05, even the lowest sample size ($N$ = 13). This was the case for both the RM-ANOVA and LME approaches (see Figure \@ref(fig:ABps)), showing that both approaches would lead to the same decision-outcomes. Similarly to the effect size densities, observed p-values were more variable for lower $N$ (e.g. RM-ANOVA: $\sigma\:p: N_{25}$ = `r res['25',"stats_p"][[1]][2][[1]]`, LME: $\sigma\:p: N_{25}$ = `r res['25',"stats_p"][[1]][[2,2]]`) than for higher $N$ (e.g. RM-ANOVA: $\sigma\:p: N_{313}$ = `r res['313',"stats_p"][[1]][2][[1]]`, LME: $\sigma\:p: N_{313}$ = `r res['313',"stats_p"][[1]][[2,2]]`). Indeed, as can be seen from Figure \@ref(fig:ABps), panel C, uncertainty is reduced by around 20 % at the higher levels of $N$. Unlike the effect size densities, the central tendency of the p-values also decreased with increasing $N$ (e.g. RM-ANOVA: $\mu\:p: N_{25}$ = `r res['25',"stats_p"][[1]][1][[1]]`, RM-ANOVA: $N _{313}$ = `r res['313',"stats_p"][[1]][1][[1]]`) and overall, were lower for the LME than the RM-ANOVA approach (LME: $\mu\:p: N_{25}$ = `r res['25',"stats_p"][[1]][[1,2]]`, $N_{313}$ = `r res['313',"stats_p"][[1]][[1,2]]`). Collectively these data show that reproducibility is sound with the AB, and that the certainty around any attained p-value is not only dependent on the $N$, but also the model employed to conduct the analysis, with the LME approach showing lower p-values. 
+_p Values_ All observed p-values were < .05, even the lowest sample size ($N$ = 13). This was the case for both the RM-ANOVA and LME approaches (see Figure \@ref(fig:ABps), panels A and B), showing that both approaches would lead to the same decision-outcomes. Interestingly, p-values were lower overall for the LME approach. therefore use of these models would result in higher certainty that the null hypothesis is unlikely to be true. As can be seen in panel C, certainty around $p$ for the median $N$ for the field ($N_{25}$) is lower than $N_{313}$ by a ratio of `r abs(diff(res['313',"stats_p"][[1]][[3,1]]))/abs(diff(res['25',"stats_p"][[1]][[3,1]]))` for RM-ANOVA. The result was comparable for the LME approach. Collectively these data show that reproducibility is sound with the AB. 
 
 
 ```{r, ABps, out.width='40%', fig.cap='Probit transformed p-values from the AB analysis, presented for selected N. A) p-values attained from the RM-ANOVA model. B) p-values attained from the LME model. The black dotted vertical line reflects alpha = .05 (probit transformed). Anything to the left of this line reflects a statistically significant result, C) Ratio between the range of p-values observed for each level of N, relative to the median N (25) for the field'}
@@ -330,8 +334,45 @@ mtfname <- "../data/total_of_313_subs_SingDual_task_trial_level_data.csv"
 mt_res <- do.MT.analysis(mtfname)
 ```
 
-As was anticipated, performing a MT slowed performance relative to ST conditions (see Figure ). RTs were on average `r abs(mt_res[[2]]$me_MT$estimate[[1]])` (95% CI[`r abs(mt_res[[2]]$me_MT$conf.int[1])`, `r abs(mt_res[[2]]$me_MT$conf.int[2])`] seconds (s) slower on MT trials (F(`r mt_res[[1]]$DFn[mt_res[[1]]$Effect == "trialtype"]`, `r mt_res[[1]]$DFd[mt_res[[1]]$Effect == "trialtype"]`) = `r mt_res[[1]]$F[mt_res[[1]]$Effect == "trialtype"]`,  $\eta_{p}^2$ = `r mt_res[[1]]$pes[mt_res[[1]]$Effect == "trialtype"]`, p<.0001). There was also a significant task modality (sound or visual) x task (ST vs MT) interaction  (F(`r mt_res[[1]]$DFn[mt_res[[1]]$Effect == "task:trialtype"]`, `r mt_res[[1]]$DFd[mt_res[[1]]$Effect == "task:trialtype"]`) = `r mt_res[[1]]$F[mt_res[[1]]$Effect == "task:trialtype"]`,  $\eta_{p}^2$ = `r mt_res[[1]]$pes[mt_res[[1]]$Effect == "task:trialtype"]`, p<.0001), which the MT cost being larger on sound relative to visual tasks by on average `r abs(mt_res[[2]]$interaction$estimate[[1]])` (95% CI[`r abs(mt_res[[2]]$interaction$conf.int[1])`, `r abs(mt_res[[2]]$interaction$conf.int[2])`] s. This latter finding is typical in the multitasking literature (hazeltineModalityPairingEffects2006, garnerTransferabilityTrainingBenefits2015a), but is not pertinent to the focus of the current work which seeks to quantify the size of the main effect of multitasking cost.
+As was anticipated, performing a MT slowed performance relative to ST conditions (see Figure ). RTs were on average `r abs(mt_res[[2]]$me_MT$estimate[[1]])` (95% CI[`r abs(mt_res[[2]]$me_MT$conf.int[1])`, `r abs(mt_res[[2]]$me_MT$conf.int[2])`] seconds (s) slower on MT trials (F(`r mt_res[[1]]$DFn[mt_res[[1]]$Effect == "trialtype"]`, `r mt_res[[1]]$DFd[mt_res[[1]]$Effect == "trialtype"]`) = `r mt_res[[1]]$F[mt_res[[1]]$Effect == "trialtype"]`,  $\eta_{p}^2$ = `r mt_res[[1]]$pes[mt_res[[1]]$Effect == "trialtype"]`, p<.0001). There was also a significant task modality (sound or visual) x task (ST vs MT) interaction  (F(`r mt_res[[1]]$DFn[mt_res[[1]]$Effect == "task:trialtype"]`, `r mt_res[[1]]$DFd[mt_res[[1]]$Effect == "task:trialtype"]`) = `r mt_res[[1]]$F[mt_res[[1]]$Effect == "task:trialtype"]`,  $\eta_{p}^2$ = `r mt_res[[1]]$pes[mt_res[[1]]$Effect == "task:trialtype"]`, p<.0001), which the MT cost being larger on sound relative to visual tasks by on average `r abs(mt_res[[2]]$interaction$estimate[[1]])` (95% CI[`r abs(mt_res[[2]]$interaction$conf.int[1])`, `r abs(mt_res[[2]]$interaction$conf.int[2])`] s. This latter finding is typical in the multitasking literature (@hazeltineModalityPairingEffects2006, @garnerTransferabilityTrainingBenefits2015a), but is not pertinent to the focus of the current work which seeks to quantify the size of the main effect of multitasking cost.
 
+
+```{r, MT_results, message=F}
+load("../data/SD/SDstats.RData")
+```
+
+
+```{r, MTFX, out.width='80%', fig.cap='SD Effects. A) Group mean RTs for multitasking condition for each task modality. As was expected, RTs were slower for multitasking relative to single-task conditions. B) Observed effect size densities for simulated experiments for select $N$, for the RM-ANOVA and LME analyses. C) KL divergenence when the density for each $N$ is used to approximate the density for N=313. D) The difference between the observed and meta-analytic effect size was very close to 0 for the RM-ANOVA approach, and more variable for the LME approaches, across all N. E) Difference between the mean effect size observed for the RM-ANOVA and LME analyses at each level of N. The effect size derived from the RM-ANOVA method was higher across all levels of N, S = single-task, M = multi-task, A = auditory manual task, V = visual manual task, RM-An = repeated measures ANOVA, LME = linear-mixed effects'}
+
+paradigm.fig.pth <- '../images/SD_fx_main.pdf'
+knitr::include_graphics(paradigm.fig.pth)
+
+```
+
+```{r MTinf, message = F}
+# compute inferential stats on AB effect size measures
+kl_inputs <- list(origin = "313", dv = "dens_fx", sub_Ns = paste(round(exp(seq(log(13), log(313), length.out = 20)))))
+MT_KL_corrs <- do_KL_and_spearmans(kl_inputs, res)
+names(MT_KL_corrs) <- c("RM-AN", "LME")
+
+
+
+MT_best_vs_typical <- comp_z(res['313', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`, 
+                             res['313', 'stats_fx'][[1]][2, "RM-AN"]$`RM-AN`,
+                             res['25', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`, 
+                             res['25', 'stats_fx'][[1]][2, "RM-AN"]$`RM-AN`)
+MT_best_vs_typical_p <- 2*pnorm(q=abs(MT_best_vs_typical), lower.tail=FALSE)
+```
+
+
+_Effect sizes_ In a similar manner to the AB findings, the effect size results for the MT paradigm show that increasing $N$ reduced both the central tendency and the variability of observed effect sizes for the ANOVA approach (see Figure \@ref(fig:MTFX)). Again, unsurprisingly, the best estimate of the effect size (with $N_{313}$) was large (mean $\eta_{p}^2$ = `r res['313', 'stats_fx'][[1]][,1][[1]]`, sd: `r res['313', 'stats_fx'][[1]][,1][[2]]`). Despite that, this estimate was statistically smaller than that observed for the typical N of the field ($N_{25}$, mean $\eta_{p}^2$ = `r res['25', 'stats_fx'][[1]][,1][[1]]`, sd: `r res['25', 'stats_fx'][[1]][,1][[2]]`, $z$ = `r MT_best_vs_typical`, p < .0001). Therefore aggregating effect size observations with small $N$ would result in an inflated estimate of the effect size for multitasking. Again, there was a strong negative relationship between $D_{KL}$ and $N$ for both the ANOVA ($r_{s}$(`r MT_KL_corrs[["RM-AN"]]$parameter`) = `r MT_KL_corrs[["RM-AN"]]$estimate`, p = `r MT_KL_corrs[["RM-AN"]]$p.value`) and LME approaches ($r_{s}$(`r MT_KL_corrs[["LME"]]$parameter`) = `r MT_KL_corrs[["LME"]]$estimate`, p = `r MT_KL_corrs[["LME"]]$p.value` see Figure \@ref(fig:MTFX), panel C), showing significant information loss when using experiments of lower N to produce effect size estimates for multitasking. Again, given the strnegth of the effect, there were no differences between the observed effect size distributions and the estimated meta-analytic effect size, across all levels of $N$ (panel D). Once again, $r^2$ estimates from the LME analysis yielded statistically lower effect size estimates across all $N$, relative to $\eta_{p}^2$ (Figure \@ref(fig:MTFX), panel E, all ps < .0001). This, in conjunction with the AB results, suggests a systematic difference in the computation of effect sizes for these models, that may need to be accounted for when making comparisons in the broader literature. 
+
+_p Values_ As with the AB, all observed p-values were < .05, even the lowest sample size ($N$ = 13). This was the case for both the RM-ANOVA and LME approaches (see Figure \@ref(fig:ABps), panels A and B), showing that both approaches would lead to the same decision-outcomes. Interestingly, p-values were lower overall for the LME approach. therefore use of these models would result in higher certainty that the null hypothesis is unlikely to be true. As can be seen in panel C, certainty around $p$ for the median $N$ for the field ($N_{25}$) is lower than $N_{313}$ with a ratio of `r abs(diff(res['313',"stats_p"][[1]][[3,1]]))/abs(diff(res['25',"stats_p"][[1]][[3,1]]))` for the ANOVA approach. The result was comparable for the LME approach. 
+
+```{r, MTps, out.width='40%', fig.cap='Probit transformed p-values from the MT analysis, presented for selected N. A) p-values attained from the ANOVA model. B) p-values attained from the LME model. The black dotted vertical line reflects alpha = .05 (probit transformed). Anything to the left of this line reflects a statistically significant result, C) Ratio between the range of p-values observed for each level of N, relative to the median N (25) for the field'}
+paradigm.fig.pth <- '../images/SD_ps.pdf'
+knitr::include_graphics(paradigm.fig.pth)
+```
 
 ## Contextual Cueing
 \label{sec:CCRes}
@@ -342,6 +383,7 @@ cc_res <- do.CC.analysis(ccfname)
 ```
 
 In accordance with the notion that RTs for repeat displays speed up more than for novel displays (i.e. that participants learn the repeat displays), a significant block x display interaction was found (F (`r cc_res[[1]]$DFn[3]`, `r cc_res[[1]]$DFd[3]`) = `r cc_res[[1]]$F[3]`, $\eta_{p}^2$ = `r cc_res[[1]]$pes[3]`, p = `r cc_res[[1]]$p[3]`). Specifically, while there was no statitically significant difference between repeat and novel displays in the first block (t (`r cc_res[[2]][[1]]$parameter`) = `r cc_res[[2]][[1]]$statistic`, p = `r cc_res[[2]][[1]]$p.value`, $\mu$ difference = `r cc_res[[2]][[1]]$estimate` sec), RT's to repeat displays were on average `r cc_res[[2]][[2]]$estimate` sec faster than RTs to novel displays by block 12 (t (`r cc_res[[2]][[2]]$parameter`) = `r cc_res[[2]][[2]]$statistic`, p = `r cc_res[[2]][[2]]$p.value`, see Figure \@ref(fig:CCFX), panel A).
+
 
 ```{r, CC_results, message=F}
 load("../data/CC/CCstats.RData")
@@ -360,24 +402,22 @@ CC_best_vs_typical <- comp_z(res['313', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`,
                              res['25', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`, 
                              res['25', 'stats_fx'][[1]][2, "RM-AN"]$`RM-AN`)
 CC_best_vs_typical_p <- 2*pnorm(q=abs(CC_best_vs_typical), lower.tail=FALSE)
-CC_meta <- do_z_tests(z_inputs = list(x = "meta", sub_Ns = kl_inputs$sub_Ns), res)
-CC_model <- do_z_tests(z_inputs = list(x = "model", sub_Ns = kl_inputs$sub_Ns), res)
 
 ```
 
-```{r, CCFX, out.width='80%', fig.cap='CC Effects. A) RT plotted by block (x-axis) and display type (repeat vs novel). Participants became faster for repeat. B) Observed effect size densities for simulated experiments for select $N$, for the RM-ANOVA and LME analyses. C) KL divergenence when the density for each $N$ is used to approximate the density for N=313. D) The ratio between the observed and meta-analytic effect for both RM-ANOVA and LME approaches, across all N. A value above 1 suggests an inflated estimate of effect size in the literature E) Ratio between the effect size densities observed for the RM-ANOVA and LME analyses at each level of N. Effect size densities were comparable between the methods across all levels of N'}
+```{r, CCFX, out.width='80%', fig.cap='CC Effects. A) Group mean RT plotted by block (x-axis) and display type (repeat vs novel). Participants became faster for repeat. B) Observed effect size densities for simulated experiments for select $N$, for the RM-ANOVA and LME analyses. C) KL divergenence when the density for each $N$ is used to approximate the density for $N$_{313}. D) The difference between the observed and meta-analytic effect for both RM-ANOVA and LME approaches, across all N. A value below 0 suggests an inflated estimate of effect size in the literature. E) Difference between the mean effect size observed for the RM-ANOVA and LME analyses at each level of N'}
 
 paradigm.fig.pth <- '../images/CC_fx_main.pdf'
 knitr::include_graphics(paradigm.fig.pth)
 
 ```
 
-_Effect sizes_ As can be seen in Figure \@ref(fig:CCFX), panel B, increasing $N$ reduced the variability of effect sizes, and in contrast to the AB, also impacted on central tendency. The mean $\eta_{p}^2$ observed for $N_{max}$ was `r res['313', 'stats_fx'][[1]][,1][[1]]`, whereas for $N$ closest to the median sample size for the field (25 & 24 respectively) was $\mu\:\eta_{p}^2$ = `r res['25', 'stats_fx'][[1]][,1][[1]]`. In contrast the standard deviations were more varied; `r res['313', 'stats_fx'][[1]][,1][[2]]` and `r res['25', 'stats_fx'][[1]][2,1][[1]]` respectively. Interestingly, the pattern of results was different for the LME approach. Mean effect sizes were consistently low across all levels of $N$ (e.g.$N_{25}\:\mu\:r^2$ = `r res['25', 'stats_fx'][[1]][,2][[1]]`, $N_{313}\:\mu\:r^2$ = `r res['313', 'stats_fx'][[1]][,2][[1]]`. Moreover, the variability in observed effect size densities was higher for the RM-ANOVA approach than the LME approach across all levels of $N$ (Figure \@ref(fig:CCFX), panel E). Given the increasing variability and increasing effect size with decreasing N, it is unsurprising that there is a strong negative relationship between sample size and information loss for the RM-ANOVA approach (Figure \@ref(fig:CCFX), panel C). Collectively, these data show that the fixed effect size for the contextual cueing effect may be lower than is reported in the published literature, suggesting a bias towards positive effects in the published literature. 
+_Effect sizes_ As can be seen in Figure \@ref(fig:CCFX), panel B, increasing $N$ reduced the central tendency of the effect size distributions, to a greater extent than was observed for the AB and MT data. Also in contrast to the AB and MT data, the best estimate of the effect size was small ($N_{313}$ mean $\eta_{p}^2$ = `r res['313', 'stats_fx'][[1]][,1][[1]]`, sd: `r res['313', 'stats_fx'][[1]][,1][[2]]`), suggesting that the key manipulation only accounts for around 1% of the variability in the sample data. Moreover, this estimate was statistically smaller than that observed for the typical N of the field ($N_{25}$, mean $\eta_{p}^2$ = `r res['25', 'stats_fx'][[1]][,1][[1]]`, sd: `r res['25', 'stats_fx'][[1]][,1][[2]]`, $z$ = `r CC_best_vs_typical`, p < .0001). This suggests that effect size estimates from the published literature would result in a misinformed estimate of the true effect size. Again, there was a strong negative relationship between $D_{KL}$ and $N$ for both the ANOVA ($r_{s}$(`r CC_KL_corrs[["RM-AN"]]$parameter`) = `r CC_KL_corrs[["RM-AN"]]$estimate`, p = `r CC_KL_corrs[["RM-AN"]]$p.value`) and LME approaches ($r_{s}$(`r CC_KL_corrs[["LME"]]$parameter`) = `r CC_KL_corrs[["LME"]]$estimate`, p = `r CC_KL_corrs[["LME"]]$p.value` see Figure \@ref(fig:CCFX), panel C). This suggests significant information loss when using experiments of lower N to produce effect size estimates for CC. Interestingly, the LME approach resulted in consistent low effect size estimates over all levels of $N$, therefore, the overall information to be gained by increasing $N$ is lower, relative to the ANOVA approach. Given the small effect size observed, our estimate of the meta-analytic effect size was consistently larger than the observed effect size, up until $N_{97}$. This difference was present, but smaller for the LME approach. This suggests that there may be a filedrawer problem in the CC literature. Although $r^2$ estimates from the LME analysis yielded lower effect size estimates relative to $\eta_{p}^2$ for lower $N$ values, this difference reduced at an exponential rate, moving towards convergence at $N_{313}$  (Figure \@ref(fig:CCFX), panel E). Thus, when effect sizes are small, and $N$ is sufficiently large, both modelling approaches will yield a comparable effect size estimate. We return to this observation in the discussion.
 
-_p Values_ In contrast to the AB results, 115 participants were required to achieve 90 % power to reject the null hypothesis using the RM-ANOVA approach, assuming the null is false. For the LME appraoch, 90 % power was achieved with 265 participants (see Figure \@ref(fig:CCps)). Also in contrast to the AB results, observed p-values were comparably variable across $N$ (e.g. RM-ANOVA: $\sigma\:p: N_{25}$ = `r res['25',"stats_p"][[1]][2][[1]]`, $N_{313}$ = `r res['313',"stats_p"][[1]][2][[1]]`, LME: $\sigma\:p: N_{25}$ = `r res['25',"stats_p"][[1]][[2,2]]`, $\sigma\:p: N_{313}$ = `r res['313',"stats_p"][[1]][[2,2]]`). The central tendency of the p-values did also decrease to some extent with increasing $N$ (e.g. RM-ANOVA: $\mu\:p: N_{25}$ = `r res['25',"stats_p"][[1]][1][[1]]`, $N_{313}$ = `r res['313',"stats_p"][[1]][1][[1]]`, LME: $\mu\:p: N_{25}$ = `r res['25',"stats_p"][[1]][[1,2]]`, $N_{313}$ = `r res['313',"stats_p"][[1]][[1,2]]`). Collectively these data show that reproducibility is challenging with the contextual cueing paradigm. 
+_p Values_ In contrast to the AB and MT results, 115 participants were required to achieve 90 % power to reject the null hypothesis using the ANOVA approach, assuming the null is false. For the LME appraoch, 90 % power was achieved with 265 participants (see Figure \@ref(fig:CCps)). This time, $p$-values were lower for the ANOVA approach, therefore use of LME models results in lower certainty that the null hypothesis is unlikely to be true. As can be seen in panel C, and in contrast to the AB and MT data, uncertainty around $p$ for the median $N$ for the field ($N_{25}$) is lower than $N_{313}$ with a ratio of `r abs(diff(res['313',"stats_p"][[1]][[3,1]]))/abs(diff(res['25',"stats_p"][[1]][[3,1]]))` for the ANOVA approach. This was not the case for the LME approach, where uncertainty was lower for $N_{313}$ relative to $N_{25}$ (ratio: `r abs(diff(res['313',"stats_p"][[1]][[3,2]]))/abs(diff(res['25',"stats_p"][[1]][[3,2]]))`). From panel C, it can be seen that $N_{25}$ actually yields the lowest uncertainty in $p$-values, relative to every other simulated $N$. We return to this result in the discussion.
 
 
-```{r, CCps, out.width='40%', fig.cap='Probit transformed p-values from the CC analysis, presented for selected N. A) p-values attained from the RM-ANOVA model. B) p-values attained from the LME model. The black dotted vertical line reflects alpha = .05 (probit transformed). Anything to the left of this line reflects a statistically significant result'}
+```{r, CCps, out.width='40%', fig.cap='Probit transformed p-values from the CC analysis, presented for selected N. A) p-values attained from the RM-ANOVA model. B) p-values attained from the LME model. The black dotted vertical line reflects alpha = .05 (probit transformed). Anything to the left of this line reflects a statistically significant result. C) Ratio between the range of p-values observed for each level of N, relative to the median N (25) for the field'}
 paradigm.fig.pth <- '../images/CC_ps.pdf'
 knitr::include_graphics(paradigm.fig.pth)
 ```
@@ -385,14 +425,49 @@ knitr::include_graphics(paradigm.fig.pth)
 
 ## SRT
 
-```{r, MT_F, message=F}
+```{r, SRT_F, message=F}
 srtfname <- "../data/total_of_313_subs_SRT_task_trial_level_data.csv"
 srt_res <- do.SRT.analysis(srtfname)
 ```
 
-In line with the notion that participants learn the repeating sequence, RTs from the final 2 test blocks were statistically lower for the repeat relative to the novel condition (t(`r srt_res[[1]]$parameter[[1]]`) = `r srt_res[[1]]$statistic[[1]]`, $r^2$ = `r srt_res[[3]]`, p< .0001), by ~ `r srt_res[[1]]$estimate*1000` s (95% CI [`r srt_res[[1]]$conf.int[[1]]`, `r srt_res[[1]]$conf.int[[2]]`]).
+In line with the notion that participants learn the repeating sequence, RTs from the final 2 test blocks were statistically lower for the repeat relative to the random condition (t(`r srt_res[[1]]$parameter[[1]]`) = `r srt_res[[1]]$statistic[[1]]`, $r^2$ = `r srt_res[[3]]`, p< .0001), by ~ `r srt_res[[1]]$estimate*1000` s (95% CI [`r srt_res[[1]]$conf.int[[1]]`, `r srt_res[[1]]$conf.int[[2]]`]). This is in accordance with the standard findings in the SRT literature.
+
+```{r, SRT_results, message=F}
+load("../data/SRT/SRTstats.RData")
+```
+
+```{r SRTinf, message = F}
+# compute inferential stats on AB effect size measures
+
+SRT_KL_corrs <- do_KL_and_spearmans(kl_inputs, res)
+names(SRT_KL_corrs) <- c("RM-AN", "LME")
 
 
+
+SRT_best_vs_typical <- comp_z(res['313', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`, 
+                             res['313', 'stats_fx'][[1]][2, "RM-AN"]$`RM-AN`,
+                             res['25', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`, 
+                             res['25', 'stats_fx'][[1]][2, "RM-AN"]$`RM-AN`)
+SRT_best_vs_typical_p <- 2*pnorm(q=abs(CC_best_vs_typical), lower.tail=FALSE)
+
+```
+
+```{r, SRTFX, out.width='80%', fig.cap='SRT Effects. A) Group mean RT plotted by block (x-axis) and block type (random vs repeat). Participants became faster for repeat trials. B) Observed effect size densities for simulated experiments for select $N$, for the t-test and LME analyses. C) KL divergenence when the density for each $N$ is used to approximate the density for $N$_{313}. Note, the KL divergence from the LME approach is plotted as points, given its close convergence to what was observed for the effect sizes yielded from the t-test approach. D) The difference between the observed and meta-analytic effect for both t-test and LME approaches, across all N. A value below 0 suggests an inflated estimate of effect size in the literature. E) Difference between the mean effect size observed for the t-test and LME approaches at each level of N'}
+
+paradigm.fig.pth <- '../images/SRT_fx_main.pdf'
+knitr::include_graphics(paradigm.fig.pth)
+
+```
+
+_Effect sizes_ As can be seen in Figure \@ref(fig:SRTFX), panel B, the effect size densities yielded from the $t$ and LME approaches formed bimodal distributions at lower $N$ (see $N_{25}$, panel B), apparently converging on a trimodal distribution at higher $N$ (see densities for remaining $N$ on panel B). This suggests that the SRT task may actually tap multiple latent sources of variance, suggesting that the key manipulation modulates the function of more than one underlying mechanism. The points of highest probability for the trimodal distribution observed for $N_{313}$ were $r^2$ = .23, .18, and .28 (from highest $p$ to lowest). A different pattern was found for the typical N of the field ($N_{36}$), with the points of highest probability being either smaller ($r^2$ = .04, .08) or larger ($r^2$ = .29) than what was observed for $N_{313}$. This suggests that the current literature likely under or over-estimates the size of the effects that underlie responses to the SRT task. Again, there was a strong negative relationship between $D_{KL}$ and $N$ for both the ANOVA ($r_{s}$(`r SRT_KL_corrs[["RM-AN"]]$parameter`) = `r SRT_KL_corrs[["RM-AN"]]$estimate`, p = `r SRT_KL_corrs[["RM-AN"]]$p.value`) and LME approaches ($r_{s}$(`r SRT_KL_corrs[["LME"]]$parameter`) = `r SRT_KL_corrs[["LME"]]$estimate`, p = `r SRT_KL_corrs[["LME"]]$p.value` see Figure \@ref(fig:SRTFX), panel C). This shows significant information loss when using experiments of lower N to produce effect size estimates for SRT. Perhaps given the varied likely effect sizes observed, our estimate of the meta-analytic effect size was larger than the observed effect size, up until $N_{50}$. This difference was not present for the LME approach. This suggests that there may be unpublished SRT studies for N up to 50. Although $r^2$ estimates from the LME analysis yielded lower effect size estimates relative to those yielded from the $t$-statistic approach, this difference was consistently small, with a trend towards a reduction in difference at higher levels of $N$ (Figure \@ref(fig:SRTFX), panel E). This data opens the possibility that there is a mild filedrawer effect in the SRT literature, and shows for the first time to our knowledge that it is unlikely that a single effect underlies the influence of the manipulated variables on behaviour. We return to this point in the discussion.
+
+_p Values_ For the SRT data, 13 participants was sufficient to achieve 90 % power to reject the null hypothesis using both analysis approaches (see Figure \@ref(fig:SRTps)). In line with what was observed for the AB and MT data, $p$-values were lower for the LME approach, therefore use of LME models results in higher certainty that the null hypothesis is unlikely to be true. As can be seen in panel C, and comparably to the CC data, uncertainty around $p$ for the median $N$ for the field ($N_{36}$) is lower than $N_{313}$ with a ratio of `r abs(diff(res['313',"stats_p"][[1]][[3,1]]))/abs(diff(res['36',"stats_p"][[1]][[3,1]]))` for the ANOVA approach. This was not the case for the LME approach, where uncertainty was lower for $N_{313}$ relative to $N_{25}$ (ratio: `r abs(diff(res['136',"stats_p"][[1]][[3,2]]))/abs(diff(res['36',"stats_p"][[1]][[3,2]]))`).
+
+
+```{r, SRTps, out.width='40%', fig.cap='Probit transformed p-values from the SRT analysis, presented for selected N. A) p-values attained from the t-test model. B) p-values attained from the LME model. The black dotted vertical line reflects alpha = .05 (probit transformed). Anything to the left of this line reflects a statistically significant result. C) Ratio between the range of p-values observed for each level of N, relative to the median N (36) for the field'}
+paradigm.fig.pth <- '../images/SRT_ps.pdf'
+knitr::include_graphics(paradigm.fig.pth)
+```
 
 # Discussion
 

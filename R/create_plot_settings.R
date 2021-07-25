@@ -1,9 +1,9 @@
 rm(list=ls())
 
-task <- "SRT"
+task <- "SD"
 datpath <- "../data/"
-medN <- "36"
-mods <- c("t", "LME")
+medN <- "25"
+mods <- c("RM-AN", "LME")
 # ----------------------------------------------------
 # behavioural data
 # ----------------------------------------------------
@@ -86,7 +86,7 @@ meta_mu <- list(datpath = datpath,
                 task = task,
                 mods = mods,
                 sub_Ns = paste(round(exp(seq(log(13), log(313), length.out = 20)))),
-                yl = c(-0.1, .1),
+                yl = c(-0.5, .5),
                 leg_locs = c(2, -.05),
                 leg_id = TRUE,
                 sig_lines = NULL,

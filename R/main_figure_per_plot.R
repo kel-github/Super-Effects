@@ -33,7 +33,7 @@ h = 2.36 * 2 # height
 # ----------------------------------------------------
 # TASK SETTINGS
 # ----------------------------------------------------
-task = "SD"
+task = "CC"
 load(paste("../data/", task, "/",
             task, "_plot_settings.RData", sep = ""))
 
@@ -46,8 +46,8 @@ par(mfrow = c(2, 3), mar = c(3, 3, 1, 1),
     oma = c(1, 2, 1, 1),
     mgp = c(2, 1, 0), las = 0)
 #plot_AB_results(fname)
-#plot_CC_results(fname)
-plot_MT_results(fname)
+plot_CC_results(fname)
+#plot_MT_results(fname)
 #plot_SRT_results(fname)
 fig_label("A", cex = 2)
 plot_dens(fx)
