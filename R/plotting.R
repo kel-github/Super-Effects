@@ -43,7 +43,7 @@ plot_dens <- function(inputs4plot) {
     load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
 
     for (j in 1:jmax) {
-        plot(res[sel_n[1], ][[dv]][[j]],
+        plot(res[sel_n[length(sel_n)], ][[dv]][[j]],
              col = wes_palette("IsleofDogs1")[1],
              lwd = 3,
              ylim = c(0,
@@ -54,10 +54,10 @@ plot_dens <- function(inputs4plot) {
              bty = "n",
              cex.lab = 1,
              cex.axis = 1)
-        polygon(res[sel_n[1], ][[dv]][[j]],
-                col = adjustcolor(wes_palette("IsleofDogs1")[1],
+        polygon(res[sel_n[length(sel_n)], ][[dv]][[j]],
+                col = adjustcolor(wes_palette("IsleofDogs1")[length(sel_n)],
                 alpha.f = 0.5))
-    for (i in c(2:length(sel_n))) {
+    for (i in c((length(sel_n)-1):1)) {
         lines(res[sel_n[i], ][[dv]][[j]],
               col = wes_palette("IsleofDogs1")[i], lwd = 2)
         polygon(res[sel_n[i], ][[dv]][[j]],
@@ -279,7 +279,7 @@ plot_ratios <- function(rat_inputs) {
     w <- rat_inputs$w
     h <- rat_inputs$h
     yl <- rat_inputs$yl
-    if (ratio_type == "origin") origin <- rat_inputs$origin
+    if (ratio_type == "origin" | ratio_type == "KL") origin <- rat_inputs$origin
     
     # ----------------------------------------------------
     # load data
@@ -293,7 +293,7 @@ plot_ratios <- function(rat_inputs) {
         ratios <- calc_ratios_sing_origin(rat_inputs, res)
     } else if (ratio_type == "model") {
         ratios <- calc_ratios_by_model(rat_inputs, res)
-    } else if (ratio_type == "KL"){
+    } else if (ratio_type == "KL") {
         ratios <- calc_kl_sing_origin(rat_inputs, res)
     } else if (ratio_type == "stats_sig") {
         ratios <- calc_meta_vs_model(rat_inputs, res)
@@ -326,9 +326,14 @@ plot_ratios <- function(rat_inputs) {
              labels = sub_Ns[seq(1, 20, 2)],
              cex.lab = 1,
              cex.axis = 1)
+        if (task == "SRT" & ratio_type == "KL"){
+          points(x = seq_len(length(rownames(ratios))), y = ratios[, 2],
+                 pch = 19, col = wes_palette("IsleofDogs1")[5])
+        } else {
         lines(x = 1:length(rownames(ratios)), y = ratios[, 2],
               lwd = 2,
               col = wes_palette("IsleofDogs1")[5])
+        }
         # do you want a legend, and if so where to put it?
         if (leg_id) {
             leg_cols <- wes_palette("IsleofDogs1")[c(6, 5)]
@@ -417,13 +422,20 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
   # ----------------------------------------------------
   # get dvs
   # ----------------------------------------------------
+  if (task == "SRT"){
+    # just rename the models to get the dvs, will reset prior to plotting
+    ol_mods <- mods
+    mods <- c("RM-AN", "LME")
+  }
   ys <- lapply(mods, function(y)
     data.frame(a = do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[1, y]]))-
-                 do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_sig"][[x]][[1, y]])),
+                   do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_sig"][[x]][[1, y]])),
                se = get_pooled(do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[2, y]]^2)),
                                do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_sig"][[x]][[2, y]]^2)))))
-  names(ys) <- mods
   
+  if (task == "SRT") mods <- ol_mods
+  names(ys) <- mods
+
   # ----------------------------------------------------
   # do plot
   # ----------------------------------------------------
@@ -482,17 +494,17 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
                                                   x1 = x[2], 
                                                   col = sig_line_cols[m]))
     }
-  } 
+  }
 }
 
 # ----------------------------------------------------
 # functions to plot mean differences
 # ----------------------------------------------------
 
-plot_mean_diff_between_mods <- function(mu_z_inputs){
+plot_mean_diff_between_mods <- function(mu_z_inputs) {
   # this function will plot the means and 95% CIs
   # for the diff between mean effect size observations
-  # for the 
+  # between the two model choices
   # -- mu_z_inputs: a list comprising of:
   # ----- datpath: e.g. "../data/
   # ----- task: e.g. "CC"
@@ -524,11 +536,16 @@ plot_mean_diff_between_mods <- function(mu_z_inputs){
   # ----------------------------------------------------
   # compute ys and std error
   # ----------------------------------------------------
+  if (task == "SRT"){
+    ol_mods <- mods
+    mods <- c("RM-AN", "LME")
+  }
   ys <- data.frame(a = do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[1, mods[1]]]))-
                        do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[1, mods[2]]])),
                    se = get_pooled(do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[2, mods[1]]]^2)),
                                    do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[2, mods[2]]]^2))))
-
+  
+  if(task == "SRT") mods <- ol_mods
   # 
   plot(x = 1:length(sub_Ns),
        y = t(ys[["a"]]),
@@ -536,28 +553,28 @@ plot_mean_diff_between_mods <- function(mu_z_inputs){
        bty = "n",
        pch = 20,
        cex = 1,
-       col = wes_palette("IsleofDogs1")[6],
+       col = wes_palette("IsleofDogs1")[2],
        xlim = c(0, 21),
        ylim = yl,
        ylab = expression(italic(paste(mu, "diff", sep = " "))),
        xlab = expression(italic("N")),
        cex.lab = 1,
        cex.axis = 1)
-  axis(side=1, at=1:length(sub_Ns), labels = sub_Ns)
-  
+  axis(side = 1, at = 1:length(sub_Ns), labels = sub_Ns)
+
   arrows(x0 = 1:length(sub_Ns),
          y0 = t(ys[["a"]]) - (1.96*t(ys[["se"]])),
          x1 = 1:length(sub_Ns),
          y1 = t(ys[["a"]]) + (1.96*t(ys[["se"]])),
          code = 3,
-         col = wes_palette("IsleofDogs1")[6],
+         col = wes_palette("IsleofDogs1")[2],
          angle = 90,
          length = .05)
   abline(h=0, lty=2, col="grey48")
-  
+
   if (!is.null(sig_y)){
   segments(x0 = sig_lines[1], y0 = sig_y,
-           x1 = sig_lines[2], 
-           col = wes_palette("IsleofDogs1")[6])
+           x1 = sig_lines[2],
+           col = wes_palette("IsleofDogs1")[2])
   }
 }
