@@ -578,3 +578,83 @@ plot_mean_diff_between_mods <- function(mu_z_inputs) {
            col = wes_palette("IsleofDogs1")[2])
   }
 }
+
+plot_qq_med_vs_best <- function(qq_inputs){
+  # this function will plot the qq plot between the
+  # median for the field and for the best estimate
+  # -- qq_inputs: a list comprising of:
+  # ----- datpath: e.g. "../data/
+  # ----- task: e.g. "CC"
+  # ----- sub_Ns <- names of subject groups paste(Ns)
+  # ----- median_N <- median N for the field e.g. 25
+  # ----- w width of plot in inches
+  # ----- h: height of plot in inches
+  # ----- leg_id: legend? TRUE or FALSE
+  # ----- leg_txt: e.g. c("RM-AN", "LME")
+  # ----- yl: ylims
+  
+  datpath <- qq_inputs$datpath
+  task <- qq_inputs$task
+  mods <- qq_inputs$mods
+  sub_Ns <- qq_inputs$sub_Ns
+  median_N <- paste(qq_inputs$median_N)
+  # yl <- mu_z_inputs$yl
+  leg_locs <- qq_inputs$leg_locs
+  leg_id <- qq_inputs$leg_id
+  leg_txt <- qq_inputs$leg_txt
+
+  # sig_y <- mu_z_inputs$sig_y
+  # ----------------------------------------------------
+  # load data and assign variables
+  # ----------------------------------------------------
+  load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
+  medNdens <- res[,"dens_fx"][[median_N]]
+  maxNdens <- res[,"dens_fx"][['313']]
+  
+  # ----------------------------------------------------
+  # generate some data on which to plot 
+  # ----------------------------------------------------
+  x = 1000
+  get_data_from_d <- function(d, x){
+    probs = seq(0, 1, by = 1/1000)
+    pdf <- approxfun(d)
+    y = pdf(runif(x, min = 0, max = 1))
+    data_frame(y = quantile(y[!is.na(y)], probs))
+  }
+  medN <- lapply(names(medNdens), function(z) get_data_from_d(medNdens[[z]], x))
+  names(medN) <- names(medNdens)
+  maxN <- lapply(names(maxNdens), function(z) get_data_from_d(maxNdens[[z]], x))
+  names(maxN) <- names(maxNdens)
+  # ----------------------------------------------------
+  # # plot qq's
+  # # ----------------------------------------------------
+
+  # plot max vs median for RM-AN 
+  plot(x = medN$`RM-AN`$y,
+       y = maxN$`RM-AN`$y,
+       xaxt = "n",
+       yaxt = "n",
+       bty = "n",
+       pch = 20,
+       cex = 1,
+       col = wes_palette("IsleofDogs1")[6],
+       ylab = expression(italic("N"[313])),
+       xlab = expression(italic("N"[25])),
+       cex.lab = 1,
+       cex.axis = 1)
+  abline(0, max(maxN$`RM-AN`$y)/max(medN$`RM-AN`$y), lty=2, col="grey48")
+  axis(1, at=c(0, max(medN$`RM-AN`$y)), labels=c(0,1))
+  axis(2, at=c(0, max(maxN$`RM-AN`$y)), labels=c(0,1))
+  
+  # add LME approach
+  points(x = medN$LME$y,
+         y = maxN$LME$y,
+         col = wes_palette("IsleofDogs1")[5])
+  
+  if (leg_id){
+    leg_cols <- wes_palette("IsleofDogs1")[c(6, 5)]
+    leg_locs = c(min(medN$`RM-AN`$y), max(maxN$`RM-AN`$y))
+    legend(x=leg_locs[1], y=leg_locs[2], legend = leg_txt,
+           col = leg_cols, pch = 19, bty = "n", cex = 1)
+  }
+} 
