@@ -353,7 +353,6 @@ knitr::include_graphics(paradigm.fig.pth)
 ```
 
 ```{r MTinf, message = F}
-# compute inferential stats on AB effect size measures
 kl_inputs <- list(origin = "313", dv = "dens_fx", sub_Ns = paste(round(exp(seq(log(13), log(313), length.out = 20)))))
 MT_KL_corrs <- do_KL_and_spearmans(kl_inputs, res)
 names(MT_KL_corrs) <- c("RM-AN", "LME")

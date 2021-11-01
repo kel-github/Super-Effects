@@ -38,11 +38,11 @@ source("R_rainclouds.R") # functions for plotting
 # -----------------------------------------------------------------
 # define session variables
 # -----------------------------------------------------------------
-task <- "SRT"
-subfol <- "SRT"
+task <- "VSL"
+subfol <- "VSL"
 sub_Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
 convert <- c("RM-AN")
-rxvnme <- "SRT"
+rxvnme <- "VSL"
 
 # -----------------------------------------------------------------
 # relatively constant settings
@@ -179,20 +179,25 @@ stats_4_subs <- function(fstem, n, j, datpath, rxvnme, convert) {
   # compute stats
   # return the list of results
   # for use in application over each level of subject
-  if (rxvnme != "SRT"){
-    dat <- data_proc(fstem, n, j, datpath, rxvnme, convert)
-  } else { # this is a bit of a hatchet job because I boxed myself into a corner of only being able
-           # to do a d2r convert for one model at a time
-    dat <- rbind(data_proc(fstem, n, j, datpath, rxvnme, "RM-AN") %>% filter(mod == "RM-AN"),
-                 data_proc(fstem, n, j, datpath, rxvnme, "LME") %>% filter(mod == "LME"))
-  }
-  compute_stats(dat)
+    if (rxvnme != "SRT"){
+      dat <- data_proc(fstem, n, j, datpath, rxvnme, convert)
+    } else { # this is a bit of a hatchet job because I boxed myself into a corner of only being able
+      # to do a d2r convert for one model at a time
+      dat <- rbind(data_proc(fstem, n, j, datpath, rxvnme, "RM-AN") %>% filter(mod == "RM-AN"),
+                   data_proc(fstem, n, j, datpath, rxvnme, "LME") %>% filter(mod == "LME"))
+    }
+    compute_stats(dat)
 }
 
+do_stats_4_subs <- function(fstem, n, j, datpath, rxvnme, convert) {
+  # do stats_4_subs with a tryCatch added
+  return(tryCatch( stats_4_subs(fstem, n, j, datpath, rxvnme, convert),   
+          error=function(e)  NULL))
+}
 # ------------------------------------------------------------
 # run the code across each subject group
 # ------------------------------------------------------------
-res <- lapply(sub_Ns, stats_4_subs,
+res <- lapply(sub_Ns, do_stats_4_subs,
                       fstem = fstem,
                       j = j,
                       datpath = datpath,
