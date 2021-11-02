@@ -51,7 +51,8 @@ fstem <- "_N-%d_parent-%d.RData"
 N <- sub_Ns
 j <- 1000
 if (task == "VSL"){
-  j <- 1:200
+  j <- 1:1000
+# #  j <- j[-66]
   j <- j[-c(66,119,152)]
 }
 datpath <- "../data/"
@@ -145,9 +146,10 @@ compute_stats <- function(dat) {
 # -----------------------------------------------------------------
    get_stats <- function(y) {
      mu <- mean(y)
+     med <- median(y)
      sd <- sd(y)
      qs <- quantile(y, probs = c(.025, .975))
-     list(mu, sd, qs)
+     list(mu, med, sd, qs)
    }
    stats_fx <- sapply(mods,
               function(x) get_stats(dat$esz[dat$mod == x & is.finite(dat$esz)]))

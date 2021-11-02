@@ -910,10 +910,18 @@ unzp <- function(datpath, rxvnme, rxvsub, task, j, subN) {
   } else {
     fnums <- j
   }
-  lapply(fnums, function(y) unzip(paste(datpath, rxvnme, sep=""), 
-                                file=paste(rxvsub, "/", task, sprintf("_N-%d_parent-%d.RData", subN, y ), sep=""),
-                                exdir=datpath))
   
+  print_and_unzip <- function(y, datpath, rxvnme, sep = ""){
+    
+    tryCatch({unzip(paste(datpath, rxvnme, sep=""), 
+              file=paste(rxvsub, "/", task, sprintf("_N-%d_parent-%d.RData", subN, y ), sep=""),
+              exdir=datpath)
+      },
+      warning = function(cond){
+        message(paste(rxvsub, "/", task, sprintf("_N-%d_parent-%d.RData", subN, y ), sep=""))
+      })
+  }
+  lapply(fnums, function(x) print_and_unzip(x, datpath=datpath, rxvnme = rxvnme))
 }
 
 d2r <- function(d, model_name){
