@@ -905,7 +905,12 @@ unzp <- function(datpath, rxvnme, rxvsub, task, j, subN) {
   # e.g. "CC" or "imm_CC"
   # :: j = total number of permutations/parent sets
   # :: subs = the sub Ns used in the perms
-  lapply(1:j, function(y) unzip(paste(datpath, rxvnme, sep=""), 
+  if (length(j) == 1){
+    fnums <- 1:j
+  } else {
+    fnums <- j
+  }
+  lapply(fnums, function(y) unzip(paste(datpath, rxvnme, sep=""), 
                                 file=paste(rxvsub, "/", task, sprintf("_N-%d_parent-%d.RData", subN, y ), sep=""),
                                 exdir=datpath))
   

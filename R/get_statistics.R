@@ -28,8 +28,8 @@ source("R_rainclouds.R") # functions for plotting
 # CC
 # convert = LME
 
-# SRT
-# 
+# SRT & VSL
+# have both coded in
 
 # SD
 # convert = LME
@@ -50,6 +50,10 @@ rxvnme <- "VSL"
 fstem <- "_N-%d_parent-%d.RData"
 N <- sub_Ns
 j <- 1000
+if (task == "VSL"){
+  j <- 1:200
+  j <- j[-c(66,119,152)]
+}
 datpath <- "../data/"
 fname_add <- NULL # string or NULL
 
@@ -179,7 +183,7 @@ stats_4_subs <- function(fstem, n, j, datpath, rxvnme, convert) {
   # compute stats
   # return the list of results
   # for use in application over each level of subject
-    if (rxvnme != "SRT"){
+    if (rxvnme != "SRT" | rxvnme != "VSL"){
       dat <- data_proc(fstem, n, j, datpath, rxvnme, convert)
     } else { # this is a bit of a hatchet job because I boxed myself into a corner of only being able
       # to do a d2r convert for one model at a time
@@ -189,15 +193,10 @@ stats_4_subs <- function(fstem, n, j, datpath, rxvnme, convert) {
     compute_stats(dat)
 }
 
-do_stats_4_subs <- function(fstem, n, j, datpath, rxvnme, convert) {
-  # do stats_4_subs with a tryCatch added
-  return(tryCatch( stats_4_subs(fstem, n, j, datpath, rxvnme, convert),   
-          error=function(e)  NULL))
-}
 # ------------------------------------------------------------
 # run the code across each subject group
 # ------------------------------------------------------------
-res <- lapply(sub_Ns, do_stats_4_subs,
+res <- lapply(sub_Ns, stats_4_subs,
                       fstem = fstem,
                       j = j,
                       datpath = datpath,
