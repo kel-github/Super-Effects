@@ -34,7 +34,8 @@ source("R_rainclouds.R") # functions for plotting
 # SD
 # convert = LME
 
-
+# VSL
+# convert RM-AN (prev = % of pop)
 # -----------------------------------------------------------------
 # define session variables
 # -----------------------------------------------------------------
@@ -55,6 +56,7 @@ if (task == "VSL"){
 # #  j <- j[-66]
   j <- j[-c(66,119,152)]
 }
+
 datpath <- "../data/"
 fname_add <- NULL # string or NULL
 
@@ -149,7 +151,7 @@ compute_stats <- function(dat) {
      med <- median(y)
      sd <- sd(y)
      qs <- quantile(y, probs = c(.025, .975))
-     list(mu, med, sd, qs)
+     list(mu=mu, med=med, sd=sd, qs=qs)
    }
    stats_fx <- sapply(mods,
               function(x) get_stats(dat$esz[dat$mod == x & is.finite(dat$esz)]))
@@ -185,7 +187,7 @@ stats_4_subs <- function(fstem, n, j, datpath, rxvnme, convert) {
   # compute stats
   # return the list of results
   # for use in application over each level of subject
-    if (rxvnme != "SRT" | rxvnme != "VSL"){
+    if (rxvnme != "SRT" ){
       dat <- data_proc(fstem, n, j, datpath, rxvnme, convert)
     } else { # this is a bit of a hatchet job because I boxed myself into a corner of only being able
       # to do a d2r convert for one model at a time

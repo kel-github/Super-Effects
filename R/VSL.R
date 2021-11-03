@@ -22,7 +22,7 @@ args <- commandArgs(trailingOnly=TRUE)
 n.inner <- 1000
 n.outer <- 1000
 i.outer <- NA
-cores <- 1
+cores <- 4
 sub.Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
 
 if (length(args) == 0) {

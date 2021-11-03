@@ -141,7 +141,6 @@ calc_kl_sing_origin <- function(rat_inputs, res) {
         p <- pf(x)
         q <- qf(x)
         kl <- p * log2(p / q)
-        kl <- kl[is.finite(kl)]
         sum(kl, na.rm = T)
     }
     kl4plotting <- lapply(sub_Ns, function(x)
@@ -156,103 +155,103 @@ calc_kl_sing_origin <- function(rat_inputs, res) {
     kl4plotting
 }
 
-calc_ratios_by_model <- function(rat_inputs, res){
-    # calculate ratio between x_1_to_j and y_1_to_j
-    # NOTE: this is for the ratio between 95% of
-    # distribution ONLY!
-    # Gives mod_a - mod_b
-    # kwargs
-    # -- rat_inputs: a list comprising of the following fields
-    # -- dv: "stats_fx", "stats_p", "stats_sig"
-    # -- sub_Ns: names of subject groups (Ns)
-    # -- mods: names of the two models to compare e.g c("RM-AN", "LME")
-    dv <- rat_inputs$dv
-    sub_Ns <- rat_inputs$sub_Ns
-    mods <- rat_inputs$mods
-    r4p <- do.call(rbind,
-                   lapply(sub_Ns,
-                     function(x) abs(diff(res[, dv][[x]][3, mods[1]][[1]])) /
-                                 abs(diff(res[, dv][[x]][3, mods[2]][[1]]))))
-    colnames(r4p) <- "ratio"
-    rownames(r4p) <- sub_Ns
-    r4p
-}
+# calc_ratios_by_model <- function(rat_inputs, res){
+#     # calculate ratio between x_1_to_j and y_1_to_j
+#     # NOTE: this is for the ratio between 95% of
+#     # distribution ONLY!
+#     # Gives mod_a - mod_b
+#     # kwargs
+#     # -- rat_inputs: a list comprising of the following fields
+#     # -- dv: "stats_fx", "stats_p", "stats_sig"
+#     # -- sub_Ns: names of subject groups (Ns)
+#     # -- mods: names of the two models to compare e.g c("RM-AN", "LME")
+#     dv <- rat_inputs$dv
+#     sub_Ns <- rat_inputs$sub_Ns
+#     mods <- rat_inputs$mods
+#     r4p <- do.call(rbind,
+#                    lapply(sub_Ns,
+#                      function(x) abs(diff(res[, dv][[x]]["qs", mods[1]][[1]])) /
+#                                  abs(diff(res[, dv][[x]]["qs", mods[2]][[1]]))))
+#     colnames(r4p) <- "ratio"
+#     rownames(r4p) <- sub_Ns
+#     r4p
+# }
 
-calc_meta_vs_model <- function(rat_inputs, res){
-    # calculate ratio between the mu's for the sig and
-    # the sim distributions
-    sub_Ns <- rat_inputs$sub_Ns
-    mods <- rat_inputs$mods
-    dv <- rat_inputs$dv
-    ratios4plotting <- do.call(rbind, lapply(sub_Ns, function(y)
-                                lapply( mods, function(x)
-                                res[, dv][[y]][, x][[1]] /
-                                res[, "stats_fx"][[y]][, x][[1]])))
-    colnames(ratios4plotting) <- mods
-    rownames(ratios4plotting) <- sub_Ns
-    ratios4plotting
-}
+# calc_meta_vs_model <- function(rat_inputs, res){
+#     # calculate ratio between the mu's for the sig and
+#     # the sim distributions
+#     sub_Ns <- rat_inputs$sub_Ns
+#     mods <- rat_inputs$mods
+#     dv <- rat_inputs$dv
+#     ratios4plotting <- do.call(rbind, lapply(sub_Ns, function(y)
+#                                 lapply( mods, function(x)
+#                                 res[, dv][[y]][, x][[1]] /
+#                                 res[, "stats_fx"][[y]][, x][[1]])))
+#     colnames(ratios4plotting) <- mods
+#     rownames(ratios4plotting) <- sub_Ns
+#     ratios4plotting
+# }
 
-plot_diagonal <- function(rat_inputs) {
-    # plot x vs y, draw a dotted line on
-    # the diagonal
-    # kwargs
-    # -- rat_inputs: a list comprising of
-    # -- datpath e.g. "../data/
-    # -- task: e.g. "CC"
-    # -- dvs: e.g. c("stats_fx", "stats_sig")
-    # -- sub_Ns <- names of subject groups (Ns)
-    # -- w width of plot in inches
-    # -- h: height of plot in inches
-    # -- axl: axis labels - e.g. c("sim", "M-A")
-    datpath <- rat_inputs$datpath
-    task <- rat_inputs$task
-    dvs <- rat_inputs$dvs
-    sub_Ns <- rat_inputs$sub_Ns
-    mods <- rat_inputs$mods
-    w <- rat_inputs$w
-    h <- rat_inputs$h
-    axl <- rat_inputs$axl
-
-    # ----------------------------------------------------
-    # load data
-    # ----------------------------------------------------
-    load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
-    # ----------------------------------------------------
-    # get xs and ys
-    # ----------------------------------------------------
-    xys <- do.call(rbind, lapply(sub_Ns, function(j)
-                          lapply(mods, function(z)
-                             data.frame(x = res[, dvs[1]][[j]][, z][[1]],
-                                        y = res[, dvs[2]][[j]][, z][[1]]))))
-    colnames(xys) <- mods
-    rownames(xys) <- sub_Ns
-    xyls <- list (do.call(rbind, xys[, mods[1]]),
-                  do.call(rbind, xys[, mods[2]]))
-    names(xyls) <- mods
-    # ----------------------------------------------------
-    # now plot the things
-    # ----------------------------------------------------
-    plot(x = xyls[[mods[1]]][, "x"],
-         y = xyls[[mods[1]]][, "y"],
-         bty = "n",
-         type = "l", lty = 1,
-         lwd = 2,
-         col = wes_palette("IsleofDogs1")[6],
-         ylim = c(0,
-                  max(do.call(rbind, xyls))),
-         xlim = c(0,
-                  max(do.call(rbind, xyls))),
-         xlab = axl[1],
-         ylab = axl[2],
-         cex.lab = 1,
-         cex.axis = 1)
-         lines(x = xyls[[mods[2]]][, "x"],
-               y = xyls[[mods[2]]][, "y"],
-               lwd = 2,
-               col = wes_palette("IsleofDogs1")[5])
-         abline(a = 0, b = 1, lty = 2, col = "grey48")
-}
+# plot_diagonal <- function(rat_inputs) {
+#     # plot x vs y, draw a dotted line on
+#     # the diagonal
+#     # kwargs
+#     # -- rat_inputs: a list comprising of
+#     # -- datpath e.g. "../data/
+#     # -- task: e.g. "CC"
+#     # -- dvs: e.g. c("stats_fx", "stats_sig")
+#     # -- sub_Ns <- names of subject groups (Ns)
+#     # -- w width of plot in inches
+#     # -- h: height of plot in inches
+#     # -- axl: axis labels - e.g. c("sim", "M-A")
+#     datpath <- rat_inputs$datpath
+#     task <- rat_inputs$task
+#     dvs <- rat_inputs$dvs
+#     sub_Ns <- rat_inputs$sub_Ns
+#     mods <- rat_inputs$mods
+#     w <- rat_inputs$w
+#     h <- rat_inputs$h
+#     axl <- rat_inputs$axl
+# 
+#     # ----------------------------------------------------
+#     # load data
+#     # ----------------------------------------------------
+#     load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
+#     # ----------------------------------------------------
+#     # get xs and ys
+#     # ----------------------------------------------------
+#     xys <- do.call(rbind, lapply(sub_Ns, function(j)
+#                           lapply(mods, function(z)
+#                              data.frame(x = res[, dvs[1]][[j]][, z][[1]],
+#                                         y = res[, dvs[2]][[j]][, z][[1]]))))
+#     colnames(xys) <- mods
+#     rownames(xys) <- sub_Ns
+#     xyls <- list (do.call(rbind, xys[, mods[1]]),
+#                   do.call(rbind, xys[, mods[2]]))
+#     names(xyls) <- mods
+#     # ----------------------------------------------------
+#     # now plot the things
+#     # ----------------------------------------------------
+#     plot(x = xyls[[mods[1]]][, "x"],
+#          y = xyls[[mods[1]]][, "y"],
+#          bty = "n",
+#          type = "l", lty = 1,
+#          lwd = 2,
+#          col = wes_palette("IsleofDogs1")[6],
+#          ylim = c(0,
+#                   max(do.call(rbind, xyls))),
+#          xlim = c(0,
+#                   max(do.call(rbind, xyls))),
+#          xlab = axl[1],
+#          ylab = axl[2],
+#          cex.lab = 1,
+#          cex.axis = 1)
+#          lines(x = xyls[[mods[2]]][, "x"],
+#                y = xyls[[mods[2]]][, "y"],
+#                lwd = 2,
+#                col = wes_palette("IsleofDogs1")[5])
+#          abline(a = 0, b = 1, lty = 2, col = "grey48")
+# }
 
 plot_ratios <- function(rat_inputs) {
     # plot ratio between x and y
@@ -430,10 +429,10 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
     mods <- c("RM-AN", "LME")
   } 
   ys <- lapply(mods, function(y)
-    data.frame(a = do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[1, y]]))-
-                   do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_sig"][[x]][[1, y]])),
-               se = get_pooled(do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[2, y]]^2)),
-                               do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_sig"][[x]][[2, y]]^2)))))
+    data.frame(a = do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][["mu", y]]))-
+                   do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_sig"][[x]][["mu", y]])),
+               se = get_pooled(do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][["sd", y]]^2)),
+                               do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_sig"][[x]][["sd", y]]^2)))))
   
   if (task == "SRT" | task == "VSL") mods <- ol_mods
   
@@ -543,10 +542,10 @@ plot_mean_diff_between_mods <- function(mu_z_inputs) {
     ol_mods <- mods
     mods <- c("RM-AN", "LME")
   }
-  ys <- data.frame(a = do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[1, mods[1]]]))-
-                       do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[1, mods[2]]])),
-                   se = get_pooled(do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[2, mods[1]]]^2)),
-                                   do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[2, mods[2]]]^2))))
+  ys <- data.frame(a = do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][["mu", mods[1]]]))-
+                       do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][["mu", mods[2]]])),
+                   se = get_pooled(do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][["sd", mods[1]]]^2)),
+                                   do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][["sd", mods[2]]]^2))))
   
   if(task == "SRT") mods <- ol_mods
   # 
