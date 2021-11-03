@@ -5,13 +5,13 @@ rm(list = ls())
 # -----------------------------------------------------------------
 # load packages and source function files
 # -----------------------------------------------------------------
-library(tidyverse) # for data wrangling
 library(wesanderson) # palette for some sweet figure colours
 library(cowplot)
 library(lme4) # for mixed effects modelling
 library(ggridges)
 library(car)
 library(parallel)
+library(tidyverse) # for data wrangling
 source("efilids_functions.R") # custom functions written for this project
 source("plotting.R") # functions for plotting density and p value info
 source("behaviour_plots.R") # functions for plotting task specific behaviours
@@ -23,6 +23,7 @@ source("fig_label.R")
 # CC med = 23
 # SRT med = 39
 # SD med = 24
+# VSL med = 
 # ----------------------------------------------------
 # CONSTANT SETTINGS
 # ----------------------------------------------------
@@ -33,7 +34,7 @@ h = 2.36 * 2 # height
 # ----------------------------------------------------
 # TASK SETTINGS
 # ----------------------------------------------------
-task = "SRT"
+task = "VSL"
 load(paste("../data/", task, "/",
             task, "_plot_settings.RData", sep = ""))
 
@@ -48,7 +49,8 @@ par(mfrow = c(2, 3), mar = c(3, 3, 1, 1),
 #plot_AB_results(fname)
 #plot_CC_results(fname)
 #plot_MT_results(fname)
-plot_SRT_results(fname)
+#plot_SRT_results(fname)
+plot_VSL_results(fname)
 fig_label("A", cex = 2)
 plot_dens(fx)
 plot_qq_med_vs_best(qq_inputs)

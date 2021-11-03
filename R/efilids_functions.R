@@ -88,8 +88,12 @@ get.os.cohens.d <- function(sum.data, dv){
 
 run.os.t.test.sim <- function(data, dv = "acc"){
   
+  # first label subs
+  data$sub <- rep(1:(length(data$sub)/max(data$Trial.No)), each = max(data$Trial.No))
+  # get acc per sub
   sum.data = data %>% group_by(sub) %>%
     summarise(acc=mean(Response==Target.Order))
+  # do tests
   out = data.frame( p    = get.os.t.test(sum.data, dv),
                     d    = get.os.cohens.d(sum.data, dv))
   out
@@ -265,8 +269,10 @@ run.prev.test <- function(data, alpha=.05, k=1000, Np=1000){
 get.ps.vsl <- function(data) {
   # run t-test and prevalence test for VSL data
   t <- run.os.t.test.sim(data)
-  prev <- run.prev.test(data)
+  #prev <- run.prev.test(data)
 
+  ##### tmp variable as re-running without prev test
+  prev <- data.frame(p = NA, d = NA)
   # COLLATE OUTPUT VARIABLES
   # ----------------------------------------------------------------------------
   out <- list()

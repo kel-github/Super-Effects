@@ -286,3 +286,43 @@ plot_AB_results <- function(fname) {
   legend(5, .6, legend = c("T1", "T2gT1"),
          col = leg_cols, pch = 19, bty = "n", cex = 1)
 }
+
+plot_VSL_results <- function(fname){
+  
+  # ----------------------------------------------------------------------------------------------------
+  # read in data and wrangle
+  # ----------------------------------------------------------------------------------------------------  
+  dat <- read.csv(fname, header=TRUE) 
+  
+  
+  # data frame contains TRUE ordering
+  prev.dat <- dat %>% select(Subj.No, Trial.No, Response, Target.Order, Accuracy)
+  prev.dat$Response <- as.factor(prev.dat$Response)
+  prev.dat$Target.Order <- as.factor(prev.dat$Target.Order)
+  
+  prev.dat <- prev.dat %>% mutate(Response = recode(Response,
+                                                    "122" = "Novel",
+                                                    "109" = "Repeat"),
+                                  Target.Order = recode(Target.Order,
+                                                        "1" = "Novel",
+                                                        "2" = "Repeat")) %>%
+                          group_by(Subj.No) %>%
+                          summarise(acc = mean(Response==Target.Order)) %>%
+                          ungroup() 
+  
+  
+  with(prev.dat, hist(x = acc, freq=FALSE, breaks = 20,
+                      bty = "n", 
+                      col = wes_palette("IsleofDogs1")[3],
+                      xlim = c(0, 1),
+                      ylab = expression(italic(paste("d"))),
+                      xlab = expression(italic("acc")),
+                      cex.lab = 1,
+                      cex.axis = 1,
+                      xaxt = "n",
+                      yaxt = "n",
+                      main = ""))
+  axis(side=1, at = c(0, .5, 1), labels = c("0", ".5", "1"))
+  axis(side=2, at = c(0, 4), labels = c("0", "4"))
+  abline(v = 0.5, lty = 2, col = "grey48")
+}

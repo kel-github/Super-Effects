@@ -140,7 +140,9 @@ calc_kl_sing_origin <- function(rat_inputs, res) {
         # -- x: values of x
         p <- pf(x)
         q <- qf(x)
-        sum(p * log2(p / q), na.rm = T)
+        kl <- p * log2(p / q)
+        kl <- kl[is.finite(kl)]
+        sum(kl, na.rm = T)
     }
     kl4plotting <- lapply(sub_Ns, function(x)
                                   lapply(1:length(mods),
@@ -422,18 +424,19 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
   # ----------------------------------------------------
   # get dvs
   # ----------------------------------------------------
-  if (task == "SRT"){
+  if (task == "SRT" | task == "VSL"){
     # just rename the models to get the dvs, will reset prior to plotting
     ol_mods <- mods
     mods <- c("RM-AN", "LME")
-  }
+  } 
   ys <- lapply(mods, function(y)
     data.frame(a = do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[1, y]]))-
                    do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_sig"][[x]][[1, y]])),
                se = get_pooled(do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][[2, y]]^2)),
                                do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_sig"][[x]][[2, y]]^2)))))
   
-  if (task == "SRT") mods <- ol_mods
+  if (task == "SRT" | task == "VSL") mods <- ol_mods
+  
   names(ys) <- mods
 
   # ----------------------------------------------------

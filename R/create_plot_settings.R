@@ -1,13 +1,13 @@
 rm(list=ls())
 
-task <- "SRT"
+task <- "VSL"
 datpath <- "../data/"
-medN <- "36"
-mods <- c("t", "LME")
+medN <- "25"
+mods <- c("t", "p")
 # ----------------------------------------------------
 # behavioural data
 # ----------------------------------------------------
-fname <- "../data/total_of_313_subs_SRT_task_trial_level_data.csv"
+fname <- "../data/total_of_313_subs_VSL_task_trial_level_data.csv"
 sub_Ns <- paste(round(exp(seq(log(13), log(313), length.out = 20))))
 # ----------------------------------------------------
 # density variables
@@ -19,7 +19,7 @@ fx <- list(datpath = datpath,
            sel_n = paste(c(25, 59, 136, 313)),
            w = 1.96,
            h = 2.36 * 2,
-           xlabs = c(expression(eta[p]^2), expression("r"^2)),
+           xlabs = c(expression("r^2"), expression("r"^2)),
            xl = c(0, 1),
            max_idx = c(20, 20),
            leg_id = 2,
@@ -35,8 +35,8 @@ p <- list(datpath = datpath,
           w = 1.96,
           h = 2.36 * 2,
           xlabs = c("p", "p"),
-          xl = c(-50, 2),
-          max_idx = c(5, 20),
+          xl = c(-15, 2),
+          max_idx = c(20, 20),
           leg_id = 1,
           leg_locs = c(-45, 0.25),
           figlabel = "A",
