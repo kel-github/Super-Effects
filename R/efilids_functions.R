@@ -377,30 +377,34 @@ get.ps.CC <- function(data){
           get_anova_table(anova_test(data=data%>%ungroup(), dv=RT, wid=sub, within=c(block,trialtype), effect.size="pes", type=1))
   })
 
-  # RUN LME VERSION
+  # RUN LME VERSION 
+  # Notes: this is commented out as I wound up ditching the LME side of the analyses
+  # However, I kept the infrastructure so that I could send the main effect of 
+  # trial type to the 'lme' structure, to save both for the analyses
   # -----------------------------------------------------------------------------
-  mod <- lmer( RT ~ block*trialtype + (1|sub), data=data )
-  lme.an <- Anova(mod)
-  
-  # get effect size for random effects
-  lme.peta <- (summary(mod)$coefficients["block11:trialtype1", "Estimate"]-summary(mod)$coefficients["block1:trialtype1", "Estimate"])/
-    sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
+  # mod <- lmer( RT ~ block*trialtype + (1|sub), data=data )
+  # lme.an <- Anova(mod)
+  # 
+  # # get effect size for random effects
+  # lme.peta <- (summary(mod)$coefficients["block11:trialtype1", "Estimate"]-summary(mod)$coefficients["block1:trialtype1", "Estimate"])/
+  #   sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
   
   # COLLATE OUTPUT VARIABLES
   # -----------------------------------------------------------------------------
   out <- list()
   
   # p 
-  p <- c(an$p[an$Effect == 'block:trialtype'], lme.an['block:trialtype','Pr(>Chisq)'])
+  p <- c(an$p[an$Effect == 'block:trialtype'], an$p[an$Effect == 'trialtype'])
   out$p <- p
   
-  peta <- c(an$pes[an$Effect == 'block:trialtype'], lme.peta) 
+  peta <- c(an$pes[an$Effect == 'block:trialtype'], an$pes[an$Effect == 'trialtype']) 
   out$esz <- peta
-  
   # get residuals from lme model
-  df = as.data.frame(VarCorr(mod))
-  out$esub = c(NA, df$sdcor[df$grp=="sub"])
-  out$eRes = c(NA, df$sdcor[df$grp=="Residual"])
+  #df = as.data.frame(VarCorr(mod))
+  # out$esub = c(NA, df$sdcor[df$grp=="sub"])
+  # out$eRes = c(NA, df$sdcor[df$grp=="Residual"])
+  out$esub = c(NA, NA)
+  out$eRes = c(NA, NA)
   out
 }
 

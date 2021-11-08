@@ -73,14 +73,14 @@ subs  <- unique(ffx.dat$Subj.No)
 # ----------------------------------------------------------------------------------------------------
 # run simulations, getting p values from t.tests, and cohen's d values, and save results to a list, using immediate sampling
 # ----------------------------------------------------------------------------------------------------
-# fstem <- paste(outpath, "/imm_CC_N-%d_parent-%d.RData", sep="")
-# lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1,
-#                                      j=n.outer, outer_index=i.outer,
-#                                      cores=cores,
-#                                      f=get.ps.CC,
-#                                      fstem=fstem,
-#                                      samp="imm",
-#                                      seeds=seeds))
+fstem <- paste(outpath, "/imm_CC_N-%d_parent-%d.RData", sep="")
+lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1,
+                                     j=n.outer, outer_index=i.outer,
+                                     cores=cores,
+                                     f=get.ps.CC,
+                                     fstem=fstem,
+                                     samp="imm",
+                                     seeds=seeds))
 
 # # ----------------------------------------------------------------------------------------------------
 # # run simulations, getting p values from t.tests, and cohen's d values, and save results to a list, using intermediate sampling
