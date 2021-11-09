@@ -19,11 +19,11 @@ fx <- list(datpath = datpath,
            sel_n = paste(c(25, 59, 136, 313)),
            w = 1.96,
            h = 2.36 * 2,
-           xlabs = c(expression("r^2"), expression("r"^2)),
-           xl = c(0, 1),
+           xlabs = c(expression("d"), expression("p")),
+           xl = c(-.5, 3, -0.1, 1.1),
            max_idx = c(20, 20),
-           leg_id = 2,
-           leg_locs = c(0.4, 20),
+           leg_id = 1,
+           leg_locs = c(1.5, 6),
            figlabel = "B",
            figlabelon = TRUE)
 
@@ -54,11 +54,12 @@ kl <- list(datpath = datpath,
            sub_Ns = sub_Ns,
            w = 1.96,
            h = 2.36,
-           leg_id = FALSE,
-           leg_locs = c(5, 20),
+           leg_id = TRUE,
+           leg_locs = c(2, 29),
            leg_txt = mods,
            y_label = expression(italic("KL p||q")),
-           yl = NULL)
+           yl = NULL,
+           xvals = c(-0.5, 1.5, 0, 1))
 
 # ----------------------------------------------------
 # fx sz ratio between models

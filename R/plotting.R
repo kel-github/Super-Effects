@@ -31,36 +31,41 @@ plot_dens <- function(inputs4plot) {
     h <- inputs4plot$h
     xlabs <- inputs4plot$xlabs
     xl <- inputs4plot$xl
+    if (length(xl) == 2){
+      xl <- matrix(c(xl, xl), ncol = 2)
+    } else {
+      xl <- matrix(xl, ncol = 2)
+    }
     max_idx <- inputs4plot$max_idx
     leg_id <- inputs4plot$leg_id
     leg_locs <- inputs4plot$leg_locs
     figlabel <- inputs4plot$figlabel
     figlabelon <- inputs4plot$figlabelon
-
+    mods <- c("RM-AN", "LME")
     # ----------------------------------------------------
     # load data
     # ----------------------------------------------------
     load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
 
     for (j in 1:jmax) {
-        plot(res[sel_n[length(sel_n)], ][[dv]][[j]],
+        plot(res[sel_n[length(sel_n)], ][[dv]][[mods[j]]],
              col = wes_palette("IsleofDogs1")[1],
              lwd = 3,
              ylim = c(0,
-                      max(res[max_idx[j], ][[dv]][[j]]["y"]$y)),
-             xlim = xl,
+                      max(res[max_idx[j], ][[dv]][[mods[j]]]["y"]$y)),
+             xlim = xl[,j],
              main = " ", ylab = "density",
              xlab = xlabs[j],
              bty = "n",
              cex.lab = 1,
              cex.axis = 1)
-        polygon(res[sel_n[length(sel_n)], ][[dv]][[j]],
+        polygon(res[sel_n[length(sel_n)], ][[dv]][[mods[j]]],
                 col = adjustcolor(wes_palette("IsleofDogs1")[length(sel_n)],
                 alpha.f = 0.5))
     for (i in c((length(sel_n)-1):1)) {
-        lines(res[sel_n[i], ][[dv]][[j]],
+        lines(res[sel_n[i], ][[dv]][[mods[j]]],
               col = wes_palette("IsleofDogs1")[i], lwd = 2)
-        polygon(res[sel_n[i], ][[dv]][[j]],
+        polygon(res[sel_n[i], ][[dv]][[mods[j]]],
               col = adjustcolor(wes_palette("IsleofDogs1")[i],
               alpha.f = 0.5))
     }
@@ -121,6 +126,7 @@ calc_kl_sing_origin <- function(rat_inputs, res) {
     origin <- rat_inputs$origin
     sub_Ns <- rat_inputs$sub_Ns
     dv <- rat_inputs$dv
+    xvals <- rat_inputs$xvals
     mods <- unique(unique(colnames(res[, "stats_fx"][[origin]])))
     # first calculate the approximating function for the all the densities
     d_funcs <- lapply(sub_Ns, function(j)
@@ -129,8 +135,18 @@ calc_kl_sing_origin <- function(rat_inputs, res) {
                                 y=res[ , dv][[j]][[z]]$y/length(res[ , dv][[j]][[z]]$y),
                                 rule = 1)))
     names(d_funcs) <- sub_Ns
+    for (i in sub_Ns) names(d_funcs[[i]]) <- mods
     # then select a series of bin widths, or xs
-    xvals <- seq(0, 1, by = .001)
+    if (is.null(xvals)) {
+      xvals <- list(seq(0, 1, by = .001), seq(0,1, by = .001))
+
+    } else { 
+      xvals <- matrix(xvals, ncol = 2)
+      sa <- seq(xvals[1,1], xvals[2,1], by = diff(xvals[,1])/1000)
+      sb <- seq(xvals[1,2], xvals[2,2], by = diff(xvals[,2])/1000)
+      xvals <- list(sa, sb)
+    }
+    names(xvals) <- c("RM-AN", "LME")
     # cos our effect sizes are positive correlations
     # do the same for the second distribution
     # calculate the KL divergence between the two
@@ -138,17 +154,17 @@ calc_kl_sing_origin <- function(rat_inputs, res) {
         # -- pf: function for p - P IS THE P DIST
         # -- pq: function for q - Q IS THE APPROXIMATING DIST
         # -- x: values of x
-        p <- pf(x)
-        q <- qf(x)
+        p <- pf(x)+(rnorm(length(x), 0, 1e-06)^2)
+        q <- qf(x)+(rnorm(length(x), 0, 1e-06)^2)
         kl <- p * log2(p / q)
         sum(kl, na.rm = T)
     }
     kl4plotting <- lapply(sub_Ns, function(x)
-                                  lapply(1:length(mods),
+                                  lapply(mods,
                                          function(y)
                                          kl_func(pf = d_funcs[[origin]][[y]],
                                                  qf = d_funcs[[x]][[y]],
-                                                 x = xvals)))
+                                                 x = xvals[[y]])))
     kl4plotting <- do.call(rbind, kl4plotting)
     colnames(kl4plotting) <- mods
     rownames(kl4plotting) <- sub_Ns
@@ -307,12 +323,12 @@ plot_ratios <- function(rat_inputs) {
     if (ncol(ratios) > 1) {
       if (is.null(yl)){
         nuyl = c(0,
-                 max(cbind(do.call(cbind, ratios[, 1]),
-                           do.call(cbind, ratios[, 2]))))
+                 max(cbind(do.call(cbind, ratios[, "RM-AN"]),
+                           do.call(cbind, ratios[, "LME"]))))
       } else {
         nuyl = yl
       }
-        plot(x = 1:length(rownames(ratios)), y = ratios[, 1],
+        plot(x = 1:length(rownames(ratios)), y = ratios[, "RM-AN"],
              xaxt = "n",
              bty = "n",
              type = "l", lty = 1,
@@ -328,10 +344,10 @@ plot_ratios <- function(rat_inputs) {
              cex.lab = 1,
              cex.axis = 1)
         if (task == "SRT" & ratio_type == "KL"){
-          points(x = seq_len(length(rownames(ratios))), y = ratios[, 2],
+          points(x = seq_len(length(rownames(ratios))), y = ratios[, "LME"],
                  pch = 19, col = wes_palette("IsleofDogs1")[5])
         } else {
-        lines(x = 1:length(rownames(ratios)), y = ratios[, 2],
+        lines(x = 1:length(rownames(ratios)), y = ratios[, "LME"],
               lwd = 2,
               col = wes_palette("IsleofDogs1")[5])
         }

@@ -39,11 +39,11 @@ source("R_rainclouds.R") # functions for plotting
 # -----------------------------------------------------------------
 # define session variables
 # -----------------------------------------------------------------
-task <- "SRT"
-subfol <- "SRT"
+task <- "VSL"
+subfol <- "VSL"
 sub_Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
 convert <- NA
-rxvnme <- "SRT"
+rxvnme <- "VSL"
 
 # -----------------------------------------------------------------
 # relatively constant settings
@@ -116,9 +116,9 @@ data_proc <- function(fstem, n, j, datpath, rxvnme, convert) {
   
   if (!is.na(convert)){
   dat <- rbind(dat %>% filter(mod != convert),
-               d2r(dat, convert)) %>%
-               mutate(p = qnorm(p))
+               d2r(dat, convert)) 
   }
+  dat <- dat %>% mutate(p = qnorm(p))
   dat %>% ungroup()
 }
 

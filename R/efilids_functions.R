@@ -71,7 +71,7 @@ get.os.t.test <- function(sum.data, dv){
   #  t.idx = data[eval(iv)] == x
   #  t = t.test(t.dat[t.idx == TRUE], alt = "greater", mu = 0.5)
   t = t.test(t.dat, alt = "greater", mu = 0.5)
-  t$p.value
+  t
 }
 
 get.os.cohens.d <- function(sum.data, dv){
@@ -89,13 +89,18 @@ get.os.cohens.d <- function(sum.data, dv){
 run.os.t.test.sim <- function(data, dv = "acc"){
   
   # first label subs
+  u <- length(unique(data$sub))
   data$sub <- rep(1:(length(data$sub)/max(data$Trial.No)), each = max(data$Trial.No))
   # get acc per sub
   sum.data = data %>% group_by(sub) %>%
     summarise(acc=mean(Response==Target.Order))
   # do tests
-  out = data.frame( p    = get.os.t.test(sum.data, dv),
-                    d    = get.os.cohens.d(sum.data, dv))
+  t = get.os.t.test(sum.data, dv)
+  out = data.frame( p    = t$p.value,
+                    df   = t$parameter,
+                    t    = t$statistic,
+                    d    = get.os.cohens.d(sum.data, dv),
+                    u    = u)
   out
 }
 
@@ -288,6 +293,9 @@ get.ps.vsl <- function(data) {
   # get residuals from lme model
   out$esub = c(NA, NA)
   out$eRes = c(NA, NA)
+  out$df = c(t$df, NA)
+  out$t = c(t$t, NA)
+  out$u = c(t$u, NA)
   out
 }
 
@@ -648,12 +656,22 @@ run.models <- function(in.data, subs, N, f, samp){
   f <- eval(f) # get the function
   tmp.fx = f(inner_join(idx, in.data, by="sub"))
   
-  out = data.frame( n    = c(N, N),
-                    p    = tmp.fx$p,
-                    esz  = tmp.fx$esz,
-                    esub = tmp.fx$esub,
-                    eRes = tmp.fx$eRes,
-                    mod = c("RM-AN", "LME") )
+  if (length(tmp.fx) > 4){
+    out = data.frame( n    = c(N, N),
+                      p    = tmp.fx$p,
+                      esz  = tmp.fx$esz,
+                      df = tmp.fx$df,
+                      t = tmp.fx$t,
+                      u = tmp.fx$u,
+                      mod = c("RM-AN", "LME") )
+  } else {
+    out = data.frame( n    = c(N, N),
+                      p    = tmp.fx$p,
+                      esz  = tmp.fx$esz,
+                      esub = tmp.fx$esub,
+                      eRes = tmp.fx$eRes,
+                      mod = c("RM-AN", "LME") )
+  }
   
   out
 }
@@ -920,15 +938,19 @@ unzp <- function(datpath, rxvnme, rxvsub, task, j, subN) {
   } else {
     fnums <- j
   }
+  # amended to get exact filenames for each sub num
+  tmp = unzip(zipfile=paste(datpath, rxvnme, sep=""), list = TRUE)
+  tmp = tmp$Name[!is.na(str_extract(tmp$Name, paste("N-", subN, sep = "")))]
+  fnums = tmp
   
   print_and_unzip <- function(y, datpath, rxvnme, sep = ""){
     
     tryCatch({unzip(paste(datpath, rxvnme, sep=""), 
-              file=paste(rxvsub, "/", task, sprintf("_N-%d_parent-%d.RData", subN, y ), sep=""),
+              file=y,
               exdir=datpath)
       },
       warning = function(cond){
-        message(paste(rxvsub, "/", task, sprintf("_N-%d_parent-%d.RData", subN, y ), sep=""))
+        message(paste(y))
       })
   }
   lapply(fnums, function(x) print_and_unzip(x, datpath=datpath, rxvnme = rxvnme))
