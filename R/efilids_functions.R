@@ -233,13 +233,17 @@ prev.test <- function(samp.data, alpha, k, NfL) {
   # sort out this one 
   neut_m <- min(unlist(lapply(unique(samp.data$sub), function(x) with(samp.data[samp.data$sub == x, ], mean(Response==Target.Order)))))
   # now compute the probability of the minimum value (equation 24 of 10.1016/j.neuroimage.2016.07.040)
-  puGN <- sum(unlist(replicate(k, min(gen.slvl(flvldists)))) >= neut_m)/k
+  puGN <- sum(c(neut_m, unlist(replicate(k-1, min(gen.slvl(flvldists))))) >= neut_m)/k
   # probability uncorrected of global null (puGN)
   # the above gives the statement of existance, next step is to evaluate against the prevalence null
   # if this is below alpha, then we would say its significant
+  # so puGN is the probability that the random perms are greater than the minimum true accuracy
+  # the more that are, the less likely there is an effect
   
   ####### attain upper bound on the gamma null that can be rejected (see equation 20 of 10.1016/j.neuroimage.2016.07.040)
   gamma_zero = (alpha^(1/nsubs) - puGN^(1/nsubs)) / (1 - puGN^(1/nsubs))
+  # if gamma_zero = - inf, it means that all the perms were greater than the min accuracy
+  # thus, the prevalence should be 0 in this case
   if (puGN > alpha) gamma_zero = 0 # not significant so not defined with a prevalence value
   
   ####### the below completes step 5a in the algorithm section of 10.1016/j.neuroimage.2016.07.040
@@ -255,7 +259,7 @@ prev.test <- function(samp.data, alpha, k, NfL) {
   #   gamma_zero <- max(null_gammas[sigMN])
   # }
   
-  results <- data.frame(d=gamma_zero,
+  results <- data.frame(d = gamma_zero,
                         p = puGN)
   results
 }
@@ -274,7 +278,7 @@ run.prev.test <- function(data, alpha=.05, k=1000, Np=1000){
 get.ps.vsl <- function(data) {
   # run t-test and prevalence test for VSL data
   t <- run.os.t.test.sim(data)
-  #prev <- run.prev.test(data)
+  prev <- run.prev.test(data)
 
   ##### tmp variable as re-running without prev test
   prev <- data.frame(p = NA, d = NA)

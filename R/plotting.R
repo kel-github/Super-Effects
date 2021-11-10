@@ -106,12 +106,12 @@ calc_ratios_sing_origin <- function(rat_inputs, res) {
     mods <- unique(colnames(res[, dv][[origin]]))
     base <- do.call(cbind, lapply(mods,
                            function(x)
-                           abs(diff(res[, dv][[origin]][, x][[3]]))))
+                           abs(diff(res[, dv][[origin]][, x][["qs"]]))))
     colnames(base) <- mods # just labeling for sanity checks
     ratios4plotting <- do.call(rbind,
                                 lapply(sub_Ns, 
                                 function(x) lapply(mods, function(y)
-                                abs(diff(res[, dv][[x]][,y][[3]]) / base[,y]))))
+                                abs(diff(res[, dv][[x]][,y][["med"]]) / base[,y]))))
     rownames(ratios4plotting) <- sub_Ns
     ratios4plotting
 }

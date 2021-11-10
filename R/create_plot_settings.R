@@ -23,7 +23,7 @@ fx <- list(datpath = datpath,
            xl = c(-.5, 3, -0.1, 1.1),
            max_idx = c(20, 20),
            leg_id = 1,
-           leg_locs = c(1.5, 6),
+           leg_locs = c(1, 6),
            figlabel = "B",
            figlabelon = TRUE)
 
@@ -88,7 +88,7 @@ meta_mu <- list(datpath = datpath,
                 mods = mods,
                 sub_Ns = paste(round(exp(seq(log(13), log(313), length.out = 20)))),
                 yl = c(-0.5, .5),
-                leg_locs = c(2, -.05),
+                leg_locs = c(2, .3),
                 leg_id = TRUE,
                 sig_lines = NULL,
                 sig_y = NULL)
