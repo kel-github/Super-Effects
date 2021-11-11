@@ -41,6 +41,21 @@ load(paste("../data/", task, "/",
 # ----------------------------------------------------
 # plotting
 # ----------------------------------------------------
+# use this for plots containing only one test
+# i.e. AB, SD & SRT
+pdf(paste("../images/", task, "_", "fx_main", ".pdf", sep = ""),
+    width = w, height = h)
+plot.mat = matrix(c(1, 1, 1, 2, 2, 2,
+                    3, 3, 4, 4, 5, 5),
+                  nrow = 2, byrow = T)
+layout(plot.mat)
+layout.show(n = 5)
+
+plot_AB_results(fname)
+fig_label("A", cex = 2)
+
+
+
 pdf(paste("../images/", task, "_", "fx_main", ".pdf", sep = ""),
           width = w, height = h)
 par(mfrow = c(2, 3), mar = c(3, 3, 1, 1),

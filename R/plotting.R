@@ -111,8 +111,9 @@ calc_ratios_sing_origin <- function(rat_inputs, res) {
     ratios4plotting <- do.call(rbind,
                                 lapply(sub_Ns, 
                                 function(x) lapply(mods, function(y)
-                                abs(diff(res[, dv][[x]][,y][["med"]]) / base[,y]))))
+                                abs(diff(res[, dv][[x]][,y][["qs"]]) / base[,y]))))
     rownames(ratios4plotting) <- sub_Ns
+    colnames(ratios4plotting) <- mods
     ratios4plotting
 }
 
@@ -154,8 +155,8 @@ calc_kl_sing_origin <- function(rat_inputs, res) {
         # -- pf: function for p - P IS THE P DIST
         # -- pq: function for q - Q IS THE APPROXIMATING DIST
         # -- x: values of x
-        p <- pf(x)+(rnorm(length(x), 0, 1e-06)^2)
-        q <- qf(x)+(rnorm(length(x), 0, 1e-06)^2)
+        p <- pf(x) +(rnorm(length(x), 0, 1e-06)^2)
+        q <- qf(x) +(rnorm(length(x), 0, 1e-06)^2)
         kl <- p * log2(p / q)
         sum(kl, na.rm = T)
     }

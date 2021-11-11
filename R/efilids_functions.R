@@ -233,7 +233,8 @@ prev.test <- function(samp.data, alpha, k, NfL) {
   # sort out this one 
   neut_m <- min(unlist(lapply(unique(samp.data$sub), function(x) with(samp.data[samp.data$sub == x, ], mean(Response==Target.Order)))))
   # now compute the probability of the minimum value (equation 24 of 10.1016/j.neuroimage.2016.07.040)
-  puGN <- sum(c(neut_m, unlist(replicate(k-1, min(gen.slvl(flvldists))))) >= neut_m)/k
+  puGN <- sum(c(neut_m, unlist(replicate(k, min(gen.slvl(flvldists))))) >= neut_m)/(k+1)
+  # puGN <- sum(unlist(replicate(k, min(gen.slvl(flvldists)))) >= neut_m)/k
   # probability uncorrected of global null (puGN)
   # the above gives the statement of existance, next step is to evaluate against the prevalence null
   # if this is below alpha, then we would say its significant
@@ -281,7 +282,7 @@ get.ps.vsl <- function(data) {
   prev <- run.prev.test(data)
 
   ##### tmp variable as re-running without prev test
-  prev <- data.frame(p = NA, d = NA)
+  #prev <- data.frame(p = NA, d = NA)
   # COLLATE OUTPUT VARIABLES
   # ----------------------------------------------------------------------------
   out <- list()
@@ -297,9 +298,9 @@ get.ps.vsl <- function(data) {
   # get residuals from lme model
   out$esub = c(NA, NA)
   out$eRes = c(NA, NA)
-  out$df = c(t$df, NA)
-  out$t = c(t$t, NA)
-  out$u = c(t$u, NA)
+  # out$df = c(t$df, NA)
+  # out$t = c(t$t, NA)
+  # out$u = c(t$u, NA)
   out
 }
 

@@ -21,7 +21,7 @@ fx <- list(datpath = datpath,
            h = 2.36 * 2,
            xlabs = c(expression("d"), expression("p")),
            xl = c(-.5, 3, -0.1, 1.1),
-           max_idx = c(20, 20),
+           max_idx = c(20, 1),
            leg_id = 1,
            leg_locs = c(1, 6),
            figlabel = "B",
@@ -35,10 +35,10 @@ p <- list(datpath = datpath,
           w = 1.96,
           h = 2.36 * 2,
           xlabs = c("p", "p"),
-          xl = c(-15, 2),
+          xl = c(-15, 2, -5, 0),
           max_idx = c(20, 20),
-          leg_id = 1,
-          leg_locs = c(-45, 0.25),
+          leg_id = 2,
+          leg_locs = c(-5, 6),
           figlabel = "A",
           figlabelon = TRUE)
 
@@ -55,10 +55,10 @@ kl <- list(datpath = datpath,
            w = 1.96,
            h = 2.36,
            leg_id = TRUE,
-           leg_locs = c(2, 29),
+           leg_locs = c(2, 85),
            leg_txt = mods,
            y_label = expression(italic("KL p||q")),
-           yl = NULL,
+           yl = c(0,100),
            xvals = c(-0.5, 1.5, 0, 1))
 
 # ----------------------------------------------------
@@ -117,9 +117,9 @@ p_rat <- list(datpath = datpath,
               y_label = expression(italic("q ratio")),
               sub_Ns = sub_Ns,
               leg_id = TRUE,
-              leg_locs = c(1, 0.75),
+              leg_locs = c(1, 0.95),
               leg_txt = mods,
-              yl = c(0, 2))
+              yl = c(0, 2.5))
 
 # ----------------------------------------------------
 # meta-analytic vs observed fx sz ratio
