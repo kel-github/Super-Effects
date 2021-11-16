@@ -1,0 +1,69 @@
+rm(list = ls())
+# -----------------------------------------------------------------
+# load packages and source function files
+# -----------------------------------------------------------------
+
+library(tidyverse) # for data wrangling
+library(wesanderson) # palette for some sweet figure colours
+library(cowplot)
+library(lme4) # for mixed effects modelling
+library(ggridges)
+library(car)
+library(parallel)
+source("efilids_functions.R") # custom functions written for this project
+source("R_rainclouds.R") # functions for plotting
+# -----------------------------------------------------------------
+# define session variables
+# -----------------------------------------------------------------
+task <- "VSL"
+subfol <- "VSL"
+sub_Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
+convert <- NA
+rxvnme <- "VSL"
+svnme <- 'tmp'
+
+fstem <- "_N-%d_parent-%d.RData"
+N <- sub_Ns
+j <- 1000
+
+datpath <- "../data/"
+fname_add <- NULL # string or NULL
+
+# -----------------------------------------------------------------
+# define functions
+# -----------------------------------------------------------------
+get_data <- function(f, datpath, rxvnme, svnme){
+  unzip(paste(datpath, rxvnme, "/", rxvnme, ".zip", sep=""),
+        files = f, exdir = paste(datpath, svnme, sep = ""))
+  load(paste(datpath, svnme, "/", f, sep=""))
+  out
+}
+
+sv_data <- function(f, sv_path, rxvnme, dat){
+  out = dat
+  save(out, file=paste(datpath, sv_path, "/", f, sep=""))
+}
+
+data_proc <- function(f, datpath, rxvnme, svnme, k=1000) {
+  # see get.data for input arg info
+  # : -- convert = model name for which conversion is required
+  
+  # do data preprocessing, largely for passing 
+  # dat into the plotting or the stats function
+  dat <- get_data(f, datpath, rxvnme, svnme)
+  
+  dat$esz[dat$mod == "LME" & dat$p == 0] <- 0
+  p <- dat$p[dat$mod == "LME"]
+  p <- ((p*k)+1)/(k+1)
+  dat$p[dat$mod == "LME"] <- p
+  
+  sv_data(f, svnme, rxvnme, dat)
+}
+
+# -----------------------------------------------------------------
+# get list of files to extract
+# -----------------------------------------------------------------
+fs <- unzip(paste(datpath, "VSL/VSL.zip", sep=""), list = TRUE)
+fs <- fs$Name[2:length(fs$Name)] # this will become 2:end
+lapply(fs, data_proc, datpath = datpath, rxvnme = rxvnme, svnme = svnme)
+

@@ -58,7 +58,7 @@ if (task == "VSL"){
 }
 
 datpath <- "../data/"
-fname_add <- NULL # string or NULL
+fname_add <- NULL #"IMM" #NULL # string or NULL
 
 # -----------------------------------------------------------------
 # define functions
@@ -118,6 +118,15 @@ data_proc <- function(fstem, n, j, datpath, rxvnme, convert) {
   dat <- rbind(dat %>% filter(mod != convert),
                d2r(dat, convert)) 
   }
+  
+  if (rxvnme == "VSL"){
+    k = 1000
+    dat$esz[dat$mod == "LME" & dat$p == 0.0] <- 0.0
+    p <- dat$p[dat$mod == "LME"]
+    p <- ((p*k)+1)/(k+1)
+    dat$p[dat$mod == "LME"] <- p
+  }
+  
   dat <- dat %>% mutate(p = qnorm(p))
   dat %>% ungroup()
 }
