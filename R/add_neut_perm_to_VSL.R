@@ -44,7 +44,7 @@ sv_data <- function(f, sv_path, rxvnme, dat){
   save(out, file=paste(datpath, sv_path, "/", f, sep=""))
 }
 
-data_proc <- function(f, datpath, rxvnme, svnme, k=1000) {
+data_proc <- function(f, datpath, rxvnme, svnme, k=1000, alpha = 0.05) {
   # see get.data for input arg info
   # : -- convert = model name for which conversion is required
   
@@ -52,10 +52,23 @@ data_proc <- function(f, datpath, rxvnme, svnme, k=1000) {
   # dat into the plotting or the stats function
   dat <- get_data(f, datpath, rxvnme, svnme)
   
-  dat$esz[dat$mod == "LME" & dat$p == 0] <- 0
-  p <- dat$p[dat$mod == "LME"]
+  idx <- dat$mod == "LME"
+  n <- dat$n[1]
+  
+  # recalc ps
+  p <- dat[idx, "p"]
   p <- ((p*k)+1)/(k+1)
-  dat$p[dat$mod == "LME"] <- p
+  
+  # recalc gamma
+  esz <- dat[idx, "esz"]
+  esz = (alpha^(1/n) - p^(1/n)) / (1 - p^(1/n))
+  # if gamma_zero = - inf, it means that all the perms were greater than the min accuracy
+  # thus, the prevalence should be 0 in this case
+  esz[p > alpha] = 0
+  
+  # now put back
+  dat$esz[idx] <- esz
+  dat$p[idx] <- p
   
   sv_data(f, svnme, rxvnme, dat)
 }

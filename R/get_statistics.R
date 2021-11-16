@@ -42,6 +42,7 @@ source("R_rainclouds.R") # functions for plotting
 task <- "VSL"
 subfol <- "VSL"
 sub_Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
+sub_Ns <- sub_Ns[c(19,20)]
 convert <- NA
 rxvnme <- "VSL"
 
@@ -117,14 +118,6 @@ data_proc <- function(fstem, n, j, datpath, rxvnme, convert) {
   if (!is.na(convert)){
   dat <- rbind(dat %>% filter(mod != convert),
                d2r(dat, convert)) 
-  }
-  
-  if (rxvnme == "VSL"){
-    k = 1000
-    dat$esz[dat$mod == "LME" & dat$p == 0.0] <- 0.0
-    p <- dat$p[dat$mod == "LME"]
-    p <- ((p*k)+1)/(k+1)
-    dat$p[dat$mod == "LME"] <- p
   }
   
   dat <- dat %>% mutate(p = qnorm(p))
