@@ -265,7 +265,7 @@ prev.test <- function(samp.data, alpha, k, NfL) {
   results
 }
 
-run.prev.test <- function(data, alpha=.05, k=1000, Np=1000){
+run.prev.test <- function(data, alpha=.05, k=1000000, Np=1000){
   # data = the input data for that N and sample
   # N = the desired sample size
   # subs = the list of subjects

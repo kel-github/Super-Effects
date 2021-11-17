@@ -79,4 +79,3 @@ data_proc <- function(f, datpath, rxvnme, svnme, k=1000, alpha = 0.05) {
 fs <- unzip(paste(datpath, "VSL/VSL.zip", sep=""), list = TRUE)
 fs <- fs$Name[2:length(fs$Name)] # this will become 2:end
 lapply(fs, data_proc, datpath = datpath, rxvnme = rxvnme, svnme = svnme)
-
