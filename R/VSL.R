@@ -19,8 +19,8 @@ source("efilids_functions.R") # custom functions written for this project
 
 args <- commandArgs(trailingOnly=TRUE)
 
-n.inner <- 1
-n.outer <- 1
+n.inner <- 1000
+n.outer <- 1000
 i.outer <- NA
 cores <- 4
 sub.Ns <- round(exp(seq(log(13), log(313), length.out = 20)))

@@ -39,12 +39,12 @@ source("R_rainclouds.R") # functions for plotting
 # -----------------------------------------------------------------
 # define session variables
 # -----------------------------------------------------------------
-task <- "VSL"
-subfol <- "VSL"
+task <- "AB"
+subfol <- "AB"
 sub_Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
 sub_Ns <- sub_Ns[c(19,20)]
 convert <- NA
-rxvnme <- "VSL"
+rxvnme <- "AB"
 
 # -----------------------------------------------------------------
 # relatively constant settings
@@ -205,7 +205,7 @@ stats_4_subs <- function(fstem, n, j, datpath, rxvnme, convert) {
 # ------------------------------------------------------------
 # run the code across each subject group
 # ------------------------------------------------------------
-res <- lapply(sub_Ns, stats_4_subs,
+res <- lapply(13, stats_4_subs,
                       fstem = fstem,
                       j = j,
                       datpath = datpath,

@@ -945,7 +945,7 @@ unzp <- function(datpath, rxvnme, rxvsub, task, j, subN) {
   }
   # amended to get exact filenames for each sub num
   tmp = unzip(zipfile=paste(datpath, rxvnme, sep=""), list = TRUE)
-  tmp = tmp$Name[!is.na(str_extract(tmp$Name, paste("N-", subN, sep = "")))]
+  tmp = tmp$Name[!is.na(str_extract(tmp$Name, paste("N-", subN, "_", sep = "")))]
   fnums = tmp
   
   print_and_unzip <- function(y, datpath, rxvnme, sep = ""){

@@ -297,6 +297,7 @@ plot_ratios <- function(rat_inputs) {
     w <- rat_inputs$w
     h <- rat_inputs$h
     yl <- rat_inputs$yl
+    mods <- rat_inputs$mods # model ratios to plot
     if (ratio_type == "origin" | ratio_type == "KL") origin <- rat_inputs$origin
     
     # ----------------------------------------------------
@@ -320,8 +321,11 @@ plot_ratios <- function(rat_inputs) {
     # ----------------------------------------------------
     # plot ratios
     # ----------------------------------------------------
+    mnmes <- colnames(ratios)
+    ratios <- matrix(unlist(ratios), ncol=length(ratios)/length(sub_Ns)) 
+    colnames(ratios) <- mnmes
 
-    if (ncol(ratios) > 1) {
+    if (length(mods) > 1) {
       if (is.null(yl)){
         nuyl = c(0,
                  max(cbind(do.call(cbind, ratios[, "RM-AN"]),
@@ -361,14 +365,14 @@ plot_ratios <- function(rat_inputs) {
         if (ratio_type == "stats_sig"){
             abline(h=1, lty=2, col="grey48")
         }
-    } else if (ncol(ratios) == 1) {
+    } else if (ncol(ratios) == 1 | length(mods == 1)) {
         if (is.null(yl)){
           nuyl = c(0, 
-                   max(ratios[,"ratio"])+0.5)
+                   max(ratios[,1]+0.5))
         } else {
           nuyl = yl
         }
-        plot(x = 1:length(rownames(ratios)), y = ratios[,"ratio"], 
+        plot(x = 1:length(sub_Ns), y = ratios[, 1], 
              xaxt = "n",
              bty = "n",
              type = "l", lty = 1,
@@ -440,11 +444,14 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
   # ----------------------------------------------------
   # get dvs
   # ----------------------------------------------------
-  if (task == "SRT" | task == "VSL"){
+  if (task == "VSL"){
     # just rename the models to get the dvs, will reset prior to plotting
     ol_mods <- mods
     mods <- c("RM-AN", "LME")
-  } 
+  } else if (task == "SRT"){
+    ol_mods <- mods
+    mods <- c("RM-AN")
+  }
   ys <- lapply(mods, function(y)
     data.frame(a = do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][["mu", y]]))-
                    do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_sig"][[x]][["mu", y]])),
@@ -452,7 +459,6 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
                                do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_sig"][[x]][["sd", y]]^2)))))
   
   if (task == "SRT" | task == "VSL") mods <- ol_mods
-  
   names(ys) <- mods
 
   # ----------------------------------------------------
@@ -620,6 +626,7 @@ plot_qq_med_vs_best <- function(qq_inputs){
   leg_locs <- qq_inputs$leg_locs
   leg_id <- qq_inputs$leg_id
   leg_txt <- qq_inputs$leg_txt
+  modn <- qq_inputs$modn
 
   # sig_y <- mu_z_inputs$sig_y
   # ----------------------------------------------------
@@ -681,15 +688,17 @@ plot_qq_med_vs_best <- function(qq_inputs){
   axis(1, at=xl, labels=xl)
   axis(2, at=yl, labels=yl)
   
-  # add LME approach
+  if (modn > 1){
+ # add LME approach
   points(x = medYs[['LME']],
          y = maxYs[['LME']],
          col = wes_palette("IsleofDogs1")[5])
-  
-  if (leg_id){
+
+  if (leg_id) {
     leg_cols <- wes_palette("IsleofDogs1")[c(6, 5)]
     leg_locs = leg_locs
-    legend(x=leg_locs[1], y=leg_locs[2], legend = leg_txt,
+    legend(x = leg_locs[1], y = leg_locs[2], legend = leg_txt,
            col = leg_cols, pch = 19, bty = "n", cex = 1)
+    }
   }
 } 

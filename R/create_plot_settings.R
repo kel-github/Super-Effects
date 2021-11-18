@@ -150,11 +150,10 @@ qq_inputs <- list(datpath = datpath,
                   leg_locs = c(0.01, .9),
                   leg_txt = mods,
                   xl = c(0, 1),
-                  yl = c(0, 1))
+                  yl = c(0, 1),
+                  mods = c("RM-AN", "LME"))
 
 save(task, fname, fx, p, kl, meta_mu, model_mu_diff, model_rats, sig, p_rat,
      qq_inputs,
      file = paste("../data/", task, "/",
                   task, "_plot_settings.RData", sep = ""))
-
-
