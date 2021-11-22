@@ -18,42 +18,21 @@ plot_SRT_results <- function(fname) {
     summarise(RT=mean(RT.ms))
   names(ffx.dat)[names(ffx.dat) == "Block.No.Names"] <- "trialtype"
   
-  grp_dat <- ffx.dat %>% group_by(trialtype) %>%
-                         mutate(RT = RT/1000) %>%
-                         summarise(mu = mean(RT),
-                                   N = length(RT),
-                                   se = sd(RT)/sqrt(N)) %>%
-                         ungroup()
+  ffx.dat$RT <- ffx.dat$RT/1000
   
   # ---------------------------------------------------------------
   # plot data
   # ---------------------------------------------------------------
-  with(grp_dat, plot(x = c(1,2),
-                     y = mu,
-                     bty = "n",
-                     pch = 20,
-                     cex = 1,
-                     col = c(wes_palette("IsleofDogs1")[3], wes_palette("IsleofDogs1")[4]),
-                     ylim = c(.2, .450),
-                     xlim = c(0.5, 2.5),
-                     ylab = expression(italic(paste(mu, "RT", sep = " "))),
-                     xlab = expression(italic("block")),
-                     cex.lab = 1,
-                     cex.axis = 1,
-                     xaxt = "n"))
-  axis(side = 1, at = c(1, 2), labels = c("Ran", "Rep"))
-  
-  with(grp_dat, arrows(x0 = c(1,2), 
-                       y0 = c(mu[trialtype == "Random Block"] - (1.96*se[trialtype == "Random Block"]),
-                              mu[trialtype == "Sequence Block"] - (1.96*se[trialtype == "Sequence Block"])),  
-                       x1 = c(1,2), 
-                       y1 = c(mu[trialtype == "Random Block"] + (1.96*se[trialtype == "Random Block"]),
-                              mu[trialtype == "Sequence Block"] + (1.96*se[trialtype == "Sequence Block"])),
-                       code = 3,
-                       col = c(wes_palette("IsleofDogs1")[3], wes_palette("IsleofDogs1")[4]),
-                       angle = 90,
-                       length = .025))
-  
+  par(bty = "n")
+  vioplot::vioplot(ffx.dat$RT ~ ffx.dat$trialtype, 
+                   col = adjustcolor(c(wes_palette("IsleofDogs1")[3], 
+                                       wes_palette("IsleofDogs1")[4]), 
+                                     alpha = 0.5),
+                   xlab = "", ylab = "RT", yaxt = "n")
+  axis(side = 1, at = c(1,2), labels = c("R", "S"))
+  axis(side = 2, at = c(0.3, 0.8),
+       labels = c("0.3", "0.8"),
+       las = 1)
   # leg_cols <- wes_palette("IsleofDogs1")[c(3, 4)]
   # legend(2, 1000, legend = c("rand", "rep"),
   #        col = leg_cols, pch = 19, bty = "n", cex = 1)
@@ -133,6 +112,7 @@ plot_CC_results <- function(fname) {
 
 plot_MT_results <- function(fname) {
 
+  library(vioplot)
   # ----------------------------------------------------------------------------------------------------
   # load data and wrangle into tidy form 
   # ----------------------------------------------------------------------------------------------------
@@ -170,53 +150,23 @@ plot_MT_results <- function(fname) {
     summarise(RT = mean(RT))
   names(ffx.dat)[names(ffx.dat) == "Subj.No"] = "sub"
   
-  grp_sum <- ffx.dat %>% group_by(task, trialtype) %>%
-                         summarise(mu = mean(RT),
-                                   N = length(RT),
-                                   se = sd(RT)/N) %>% 
-                         ungroup()
+  # reorder factors
+  ffx.dat$task <- factor(ffx.dat$task, levels = c("vis", "sound"))
+  ffx.dat$trialtype <- factor(ffx.dat$trialtype, levels = c("single", "dual"))
+  
   
   # ---------------------------------------------------------------
   # plot data
   # ---------------------------------------------------------------
-  ys <- with(grp_sum, c(mu[task == "sound" & trialtype == "single"], 
-                        mu[task == "vis" & trialtype == "single"],
-                        mu[task == "sound" & trialtype == "dual"],
-                        mu[task == "vis" & trialtype == "dual"]))
-  upper = ys + 1.96*with(grp_sum, c(se[task == "sound" & trialtype == "single"], 
-                                    se[task == "vis" & trialtype == "single"],
-                                    se[task == "sound" & trialtype == "dual"],
-                                    se[task == "vis" & trialtype == "dual"]))
-  lower = ys - 1.96*with(grp_sum, c(se[task == "sound" & trialtype == "single"], 
-                                    se[task == "vis" & trialtype == "single"],
-                                    se[task == "sound" & trialtype == "dual"],
-                                    se[task == "vis" & trialtype == "dual"]))
-  plot(x = c(1,2,3,4),
-       y = ys,
-       bty = "n",
-       pch = 20,
-       cex = 1,
-       col = rep(c(wes_palette("IsleofDogs1")[3], wes_palette("IsleofDogs1")[4]), times = 2),
-       xlim = c(.5, 4.5),
-       ylim = c(0.4, 1.2),
-       ylab = expression(italic(paste(mu, "RT", sep = " "))),
-       xlab = expression(italic("task")),
-       cex.lab = 1,
-       cex.axis = 1,
-       xaxt = "n")
-  axis(side = 1, at = c(1, 2, 3, 4), labels = c("S", "S", "M", "M"))
-  # now add error bars
-  arrows(x0 = c(1,2,3,4), 
-         y0 = lower,
-         x1 = c(1,2,3,4), 
-         y1 = upper,
-         code = 3,
-         col = rep(c(wes_palette("IsleofDogs1")[3], wes_palette("IsleofDogs1")[4]), times = 2),
-         angle = 90,
-         length = .05)
-  leg_cols <- wes_palette("IsleofDogs1")[c(3, 4)]
-  legend(3, .65, legend = c("A", "V"),
-         col = leg_cols, pch = 19, bty = "n", cex = 1)
+  par(bty = "n")
+  vioplot(ffx.dat$RT ~ ffx.dat$task*ffx.dat$trialtype, 
+          col = adjustcolor(rep(c(wes_palette("IsleofDogs1")[3], wes_palette("IsleofDogs1")[4]), times = 2), alpha = 0.5),
+          xlab = "", ylab = "RT", yaxt = "n")
+  axis(side = 1, at = 1:4, labels = c("VS", "SoS", "VM", "SoM"))
+  axis(side = 2, at = c(min(ffx.dat$RT), max(ffx.dat$RT)),
+                 labels = c(sprintf("%1.2f", min(ffx.dat$RT)),
+                            sprintf("%1.2f", max(ffx.dat$RT))),
+       las = 1)
 }
 
 plot_AB_results <- function(fname) {
@@ -236,9 +186,6 @@ plot_AB_results <- function(fname) {
     pivot_longer(cols=c("T1.Accuracy", "T2T1.Accuracy"),
                  names_to = "condition",
                  values_to = "accuracy") %>%
-    group_by(Trial.Type.Name, condition) %>%
-    summarise(acc=mean(accuracy),
-              se=sd(accuracy)/sqrt(length(accuracy))) %>% 
     ungroup()
   names(ffx_dat)[names(ffx_dat)=="Trial.Type.Name"] = "lag"
   ffx_dat$lag <- fct_recode(ffx_dat$lag, "2" = "lag_2", "3" = "lag_3", "5" = "lag_5", "7" = "lag_7")
@@ -247,43 +194,18 @@ plot_AB_results <- function(fname) {
   # ---------------------------------------------------------------
   # plot data
   # ---------------------------------------------------------------
-  with(ffx_dat, plot(x = c(2,3,5,7),
-                     y = acc[condition == "T1"],
-                     bty = "n",
-                     pch = 20,
-                     cex = 1,
-                     col = wes_palette("IsleofDogs1")[3],
-                     xlim = c(1.5, 7.5),
-                     ylim = c(0.4, 1),
-                     ylab = expression(italic(paste(mu, "acc", sep = " "))),
-                     xlab = expression(italic("lag")),
-                     cex.lab = 1,
-                     cex.axis = 1))
-  with(ffx_dat, points(x = c(2,3,5,7),
-                       y = acc[condition == "T2gT1"],
-                       pch = 20,
-                       cex = 1,
-                       col = wes_palette("IsleofDogs1")[4]))
-  # now add error bars
-  with(ffx_dat, arrows(x0 = c(2,3,5,7), 
-                       y0 = acc[condition == "T1"] - se[condition == "T1"],
-                       x1 = c(2,3,5,7),
-                       y1 = acc[condition == "T1"] + se[condition == "T1"],
-                       code = 3,
-                       col = wes_palette("IsleofDogs1")[3],
-                       angle = 90,
-                       length = .05))
-  with(ffx_dat, arrows(x0 = c(2,3,5,7),
-                       y0 = acc[condition == "T2gT1"] - se[condition == "T2gT1"],
-                       x1 = c(2,3,5,7),
-                       y1 = acc[condition == "T2gT1"] + se[condition == "T2gT1"],
-                       code = 3,
-                       col = wes_palette("IsleofDogs1")[4],
-                       angle = 90,
-                       length = .05))
+  par(bty = "n")
+  vioplot::vioplot(ffx_dat$accuracy ~ ffx_dat$condition*ffx_dat$lag, 
+                   col = adjustcolor(rep(c(wes_palette("IsleofDogs1")[3], wes_palette("IsleofDogs1")[4]), 
+                                           times = 4), alpha = 0.5),
+                   xlab = "lag", ylab = "acc", yaxt = "n")
+  axis(side = 1, at = c(1.5, 3.5, 5.5, 7.5), labels = c("2", "3", "5", "7"))
+  axis(side = 2, at = c(0, 1),
+       labels = c("0", "1"),
+       las = 1)
   
   leg_cols <- wes_palette("IsleofDogs1")[c(3, 4)]
-  legend(5, .6, legend = c("T1", "T2gT1"),
+  legend(1.9, .3, legend = c("T1", "T2gT1"),
          col = leg_cols, pch = 19, bty = "n", cex = 1)
 }
 

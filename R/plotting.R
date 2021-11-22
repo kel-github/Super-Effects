@@ -42,14 +42,19 @@ plot_dens <- function(inputs4plot) {
     figlabel <- inputs4plot$figlabel
     figlabelon <- inputs4plot$figlabelon
     mods <- c("RM-AN", "LME")
+    imm <- inputs4plot$imm
     # ----------------------------------------------------
     # load data
     # ----------------------------------------------------
-    load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
+    if (imm) {
+      load(paste(datpath, task, "/", "IMM", task, "stats.RData", sep = ""))
+    } else {
+      load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
+    }
 
     for (j in 1:jmax) {
         plot(res[sel_n[length(sel_n)], ][[dv]][[mods[j]]],
-             col = wes_palette("IsleofDogs1")[1],
+             col = wes_palette("IsleofDogs1")[length(sel_n)],
              lwd = 3,
              ylim = c(0,
                       max(res[max_idx[j], ][[dv]][[mods[j]]]["y"]$y)),
@@ -61,13 +66,15 @@ plot_dens <- function(inputs4plot) {
              cex.axis = 1)
         polygon(res[sel_n[length(sel_n)], ][[dv]][[mods[j]]],
                 col = adjustcolor(wes_palette("IsleofDogs1")[length(sel_n)],
-                alpha.f = 0.5))
+                alpha.f = 0.5),
+                border = NA)
     for (i in c((length(sel_n)-1):1)) {
         lines(res[sel_n[i], ][[dv]][[mods[j]]],
               col = wes_palette("IsleofDogs1")[i], lwd = 2)
         polygon(res[sel_n[i], ][[dv]][[mods[j]]],
               col = adjustcolor(wes_palette("IsleofDogs1")[i],
-              alpha.f = 0.5))
+              alpha.f = 0.5),
+              border = NA)
     }
     # if a p statistic plot, add the criteria for significance
     if (dv == "dens_p") {
@@ -76,8 +83,7 @@ plot_dens <- function(inputs4plot) {
     }
     # do you want a legend, and if so where to put it?
     if (j == leg_id) {
-        leg_cols <- adjustcolor(wes_palette("IsleofDogs1")[c(1:4)],
-                                alpha.f = 0.5)
+        leg_cols <-wes_palette("IsleofDogs1")[c(1:4)]
         legend(leg_locs[1], leg_locs[2], legend = sel_n,
                col = leg_cols, lty = 1, bty = "n", cex = 1)
     }
@@ -479,12 +485,6 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
        cex.axis = 1)
   axis(side=1, at=1:length(sub_Ns), labels = sub_Ns)
   
-  points(x = jitter(1:length(sub_Ns)),
-         y = jitter(t(ys[[mods[[2]]]]["a"])),
-         pch = 20,
-         cex = 1,
-         col = wes_palette("IsleofDogs1")[5])
-  
   arrows(x0 = 1:length(sub_Ns),
          y0 = t(ys[[mods[[1]]]]["a"]) - 1.96*(t(ys[[mods[[1]]]]["se"])),
          x1 = 1:length(sub_Ns),
@@ -494,6 +494,13 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
          angle = 90,
          length = .05)
   
+  if (length(mods) > 1){
+  points(x = jitter(1:length(sub_Ns)),
+         y = jitter(t(ys[[mods[[2]]]]["a"])),
+         pch = 20,
+         cex = 1,
+         col = wes_palette("IsleofDogs1")[5])
+
   arrows(x0 = 1:length(sub_Ns),
          y0 = t(ys[[mods[[2]]]]["a"]) - (1.96*t(ys[[mods[[2]]]]["se"])),
          x1 = 1:length(sub_Ns),
@@ -502,13 +509,14 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
          col = wes_palette("IsleofDogs1")[5],
          angle = 90,
          length = .05)
+  }
   
   if (leg_id){
     leg_cols <- wes_palette("IsleofDogs1")[c(6, 5)]
     legend(x=leg_locs[1], y=leg_locs[2], legend = mods,
            col = leg_cols, pch = 19, bty = "n", cex = 1)
   }
-  abline(h=0, lty=2, col="grey48")
+  abline(h=0, lty=2, col= adjustcolor("grey48", alpha = 0.3))
   # add signifance lines
   if (!is.null(sig_y)){
     sig_line_cols <- wes_palette("IsleofDogs1")[c(6, 5)]

@@ -42,7 +42,6 @@ source("R_rainclouds.R") # functions for plotting
 task <- "AB"
 subfol <- "AB"
 sub_Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
-sub_Ns <- sub_Ns[c(19,20)]
 convert <- NA
 rxvnme <- "AB"
 
@@ -205,7 +204,7 @@ stats_4_subs <- function(fstem, n, j, datpath, rxvnme, convert) {
 # ------------------------------------------------------------
 # run the code across each subject group
 # ------------------------------------------------------------
-res <- lapply(13, stats_4_subs,
+res <- lapply(sub_Ns, stats_4_subs,
                       fstem = fstem,
                       j = j,
                       datpath = datpath,

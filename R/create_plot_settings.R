@@ -1,6 +1,6 @@
 rm(list=ls())
 
-task <- "VSL"
+task <- "AB"
 datpath <- "../data/"
 medN <- "25"
 mods <- c("t", "p")
@@ -14,18 +14,19 @@ sub_Ns <- paste(round(exp(seq(log(13), log(313), length.out = 20))))
 # ----------------------------------------------------
 fx <- list(datpath = datpath,
            task = task,
-           jmax = 2,
+           jmax = 1,
            dv = "dens_fx",
            sel_n = paste(c(25, 59, 136, 313)),
            w = 1.96,
            h = 2.36 * 2,
-           xlabs = c(expression("d"), expression("p")),
-           xl = c(-.5, 3, -0.1, 1.1),
+           xlabs = expression(eta[p]^2, "r"^2),
+           xl =  c(0.0, 1.0),
            max_idx = c(20, 1),
            leg_id = 1,
-           leg_locs = c(1, 6),
+           leg_locs = c(0.15, 10),
            figlabel = "B",
-           figlabelon = TRUE)
+           figlabelon = TRUE,
+           imm = TRUE)
 
 p <- list(datpath = datpath,
           task = task,
@@ -59,7 +60,8 @@ kl <- list(datpath = datpath,
            leg_txt = mods,
            y_label = expression(italic("KL p||q")),
            yl = c(0,100),
-           xvals = c(-0.5, 1.5, 0, 1))
+           xvals = c(-0.5, 1.5, 0, 1),
+           mods = "RM-AN")
 
 # ----------------------------------------------------
 # fx sz ratio between models
@@ -151,9 +153,10 @@ qq_inputs <- list(datpath = datpath,
                   leg_txt = mods,
                   xl = c(0, 1),
                   yl = c(0, 1),
-                  mods = c("RM-AN", "LME"))
+                  mods = c("RM-AN"),
+                  modn = 1)
 
 save(task, fname, fx, p, kl, meta_mu, model_mu_diff, model_rats, sig, p_rat,
      qq_inputs,
-     file = paste("../data/", task, "/",
+     file = paste("../data/", task, "/", "IMM",
                   task, "_plot_settings.RData", sep = ""))
