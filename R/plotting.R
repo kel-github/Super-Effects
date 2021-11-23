@@ -109,7 +109,8 @@ calc_ratios_sing_origin <- function(rat_inputs, res) {
     dv <- rat_inputs$dv
 
     # get models from which to return results
-    mods <- unique(colnames(res[, dv][[origin]]))
+    #mods <- unique(colnames(res[, dv][[origin]]))
+    mods <- unique(names(res[, dv][[origin]]))
     base <- do.call(cbind, lapply(mods,
                            function(x)
                            abs(diff(res[, dv][[origin]][, x][["qs"]]))))
@@ -304,12 +305,17 @@ plot_ratios <- function(rat_inputs) {
     h <- rat_inputs$h
     yl <- rat_inputs$yl
     mods <- rat_inputs$mods # model ratios to plot
+    imm <- rat_inputs$imm # TRUE or FALSE for sampling type
     if (ratio_type == "origin" | ratio_type == "KL") origin <- rat_inputs$origin
     
     # ----------------------------------------------------
     # load data
     # ----------------------------------------------------
-    load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
+    if (imm) {
+      load(paste(datpath, task, "/", "IMM", task, "stats.RData", sep = ""))
+    } else {
+      load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
+    }
 
     # ----------------------------------------------------
     # compute ratios
@@ -442,10 +448,15 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
   leg_id <- mu_vs_meta_inputs$leg_id
   sig_lines <- mu_vs_meta_inputs$sig_lines
   sig_y <- mu_vs_meta_inputs$sig_y
+  imm <- mu_vs_meta_inputs$imm
   # ----------------------------------------------------
   # load data
   # ----------------------------------------------------
-  load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
+  if (imm) {
+    load(paste(datpath, task, "/", "IMM", task, "stats.RData", sep = ""))
+  } else {
+    load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
+  }
   
   # ----------------------------------------------------
   # get dvs
@@ -635,12 +646,19 @@ plot_qq_med_vs_best <- function(qq_inputs){
   leg_id <- qq_inputs$leg_id
   leg_txt <- qq_inputs$leg_txt
   modn <- qq_inputs$modn
+  imm <- qq_inputs$imm # TRUE or FALSE
 
   # sig_y <- mu_z_inputs$sig_y
   # ----------------------------------------------------
   # load data and assign variables
   # ----------------------------------------------------
-  load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
+  
+  if (imm) {
+    load(paste(datpath, task, "/", "IMM", task, "stats.RData", sep = ""))
+  } else {
+    load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
+  }
+  
   medNdens <- res[,"dens_fx"][[median_N]]
   maxNdens <- res[,"dens_fx"][['313']]
   

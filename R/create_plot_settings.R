@@ -1,13 +1,14 @@
 rm(list=ls())
 
-task <- "AB"
+task <- "SRT"
 datpath <- "../data/"
 medN <- "25"
-mods <- c("t", "p")
+mods <- "RM-AN" #c("t", "p")
+imm = TRUE
 # ----------------------------------------------------
 # behavioural data
 # ----------------------------------------------------
-fname <- "../data/total_of_313_subs_VSL_task_trial_level_data.csv"
+fname <- "../data/total_of_313_subs_SingDual_task_trial_level_data.csv"
 sub_Ns <- paste(round(exp(seq(log(13), log(313), length.out = 20))))
 # ----------------------------------------------------
 # density variables
@@ -19,14 +20,14 @@ fx <- list(datpath = datpath,
            sel_n = paste(c(25, 59, 136, 313)),
            w = 1.96,
            h = 2.36 * 2,
-           xlabs = expression(eta[p]^2, "r"^2),
-           xl =  c(0.0, 1.0),
-           max_idx = c(20, 1),
+           xlabs = expression(eta[p]^2, "r"^2), #expression("d"), 
+           xl =  c(0.6, 1.0),
+           max_idx = c(20, 20),
            leg_id = 1,
-           leg_locs = c(0.15, 10),
+           leg_locs = c(0.6, 29.0),
            figlabel = "B",
            figlabelon = TRUE,
-           imm = TRUE)
+           imm = imm)
 
 p <- list(datpath = datpath,
           task = task,
@@ -55,13 +56,14 @@ kl <- list(datpath = datpath,
            sub_Ns = sub_Ns,
            w = 1.96,
            h = 2.36,
-           leg_id = TRUE,
-           leg_locs = c(2, 85),
+           leg_id = FALSE,
+           leg_locs = c(5, 20),
            leg_txt = mods,
            y_label = expression(italic("KL p||q")),
-           yl = c(0,100),
-           xvals = c(-0.5, 1.5, 0, 1),
-           mods = "RM-AN")
+           yl = NULL,
+           xvals = c(0, 1, 0, 1),
+           mods = "RM-AN",
+           imm = imm)
 
 # ----------------------------------------------------
 # fx sz ratio between models
@@ -89,11 +91,12 @@ meta_mu <- list(datpath = datpath,
                 task = task,
                 mods = mods,
                 sub_Ns = paste(round(exp(seq(log(13), log(313), length.out = 20)))),
-                yl = c(-0.5, .5),
-                leg_locs = c(2, .3),
-                leg_id = TRUE,
+                yl = c(-0.05, .05),
+                leg_locs = c(2, -0.05),
+                leg_id = FALSE,
                 sig_lines = NULL,
-                sig_y = NULL)
+                sig_y = NULL,
+                imm = imm)
 
 # ----------------------------------------------------
 # model mu difference
@@ -148,15 +151,23 @@ qq_inputs <- list(datpath = datpath,
                   task = task,
                   sub_Ns = sub_Ns,
                   median_N = as.numeric(medN),
-                  leg_id = TRUE,
+                  leg_id = FALSE,
                   leg_locs = c(0.01, .9),
                   leg_txt = mods,
-                  xl = c(0, 1),
-                  yl = c(0, 1),
+                  xl = c(0.6, 1.0),
+                  yl = c(0.6, 1.0),
                   mods = c("RM-AN"),
-                  modn = 1)
+                  modn = 1,
+                  imm = imm)
 
-save(task, fname, fx, p, kl, meta_mu, model_mu_diff, model_rats, sig, p_rat,
-     qq_inputs,
-     file = paste("../data/", task, "/", "IMM",
-                  task, "_plot_settings.RData", sep = ""))
+if (imm){
+  save(task, fname, fx, p, kl, meta_mu, model_mu_diff, model_rats, sig, p_rat,
+       qq_inputs,
+       file = paste("../data/", task, "/", "IMM",
+                    task, "_plot_settings.RData", sep = ""))
+} else {
+  save(task, fname, fx, p, kl, meta_mu, model_mu_diff, model_rats, sig, p_rat,
+       qq_inputs,
+       file = paste("../data/", task, "/",
+                    task, "_plot_settings.RData", sep = ""))
+}
