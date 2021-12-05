@@ -35,7 +35,7 @@ h = 2.36 * 2 # height
 # TASK SETTINGS
 # ----------------------------------------------------
 imm = TRUE
-task = "SRT"
+task = "CC"
 if (imm) {
   load(paste("../data/", task, "/",
              "IMM", task, "_plot_settings.RData", sep = ""))
@@ -62,7 +62,7 @@ plot.mat = matrix(c(1, 1, 1, 2, 2, 2,
 layout(plot.mat)
 #plot_AB_results(fname)
 #plot_MT_results(fname)
-plot_SRT_results(fname)
+#plot_SRT_results(fname)
 fig_label("A", cex = 2)
 plot_dens(fx)
 plot_qq_med_vs_best(qq_inputs)
@@ -76,14 +76,57 @@ dev.off()
 # ----------------------------------------------------
 # plotting
 # ----------------------------------------------------
-# use this for plots containing two tests
+# use the below for plots containing two tests
 # i.e. VSL & CC
+
+# first plot CC behavioural data separately if using
+if (task == "CC"){
+  
+  w = 1.96 * 4 # width of the plot, in inches
+  h = 2.36 * 2 # height
+  pdf(paste("../images/", task, "_", "behav", ".pdf", sep = ""),
+      width = w, height = h)
+  par(mfrow = c(1, 2), mar = c(3, 3, 1, 1),
+      oma = c(1, 2, 1, 1),
+      mgp = c(2, 1, 0), las = 0)
+  plot_CC_results(fname, "mean")
+  plot_CC_results(fname, "dist")
+  dev.off()
+}
+
+
+if (task == "CC"){
+  w = 1.96 * 3 # width of the plot, in inches
+  h = 2.36 * 2 # height
+  
+  if (imm){
+    pdf(paste("../images/", "IMM", task, "_", "fx_main", ".pdf", sep = ""),
+        width = w, height = h)  
+  } else {
+    pdf(paste("../images/", task, "_", "fx_main", ".pdf", sep = ""),
+        width = w, height = h)
+  }
+  plot.mat = matrix(c(1, 1, 1, 2, 2, 2,
+                      3, 3, 4, 4, 5, 5),
+                    nrow = 2, byrow = T)
+  layout(plot.mat)
+  plot_dens(fx)
+  fig_label("B", cex = 2)
+  plot_qq_med_vs_best(qq_inputs)
+  fig_label("C", cex = 2)
+  plot_ratios(kl)
+  fig_label("D", cex = 2)
+  plot_mean_vs_meta(meta_mu)
+  fig_label("E", cex = 2)
+  dev.off()
+  
+}
+
 pdf(paste("../images/", task, "_", "fx_main", ".pdf", sep = ""),
           width = w, height = h)
 par(mfrow = c(2, 3), mar = c(3, 3, 1, 1),
     oma = c(1, 2, 1, 1),
     mgp = c(2, 1, 0), las = 0)
-#plot_CC_results(fname)
 plot_VSL_results(fname)
 fig_label("A", cex = 2)
 plot_dens(fx)
@@ -111,8 +154,16 @@ dev.off()
 # ----------------------------------------------------
 # pvalue plots for 2 models
 # ----------------------------------------------------
+w = 1.96 * 4 # width of the plot, in inches
+h = 2.36 * 2 # height
+pdf(paste("../images/", task, "_", "ps", ".pdf", sep = ""),
+    width = w, height = h)
+par(mfrow = c(1, 2), mar = c(4, 3, 0, 0),
+    oma = c(1, 1, 1, 1),
+    mgp = c(2, 1, 0), las = 1)
+plot_dens(p)
 fig_label("B", cex = 2)
-plot_ratios(p_rat)
-abline(h=1, lty = 2, col = "grey48")
-fig_label("C", cex = 2)
+#plot_ratios(p_rat)
+#abline(h=1, lty = 2, col = "grey48")
+#fig_label("C", cex = 2)
 dev.off()

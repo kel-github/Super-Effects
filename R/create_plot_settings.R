@@ -1,31 +1,31 @@
 rm(list=ls())
 
-task <- "SRT"
+task <- "CC"
 datpath <- "../data/"
 medN <- "25"
-mods <- "RM-AN" #c("t", "p")
+mods <- c("RM-AN", "LME") #c("t", "p")
 imm = TRUE
 # ----------------------------------------------------
 # behavioural data
 # ----------------------------------------------------
-fname <- "../data/total_of_313_subs_SingDual_task_trial_level_data.csv"
+fname <- "../data/total_of_313_subs_CC_task_trial_level_data.csv"
 sub_Ns <- paste(round(exp(seq(log(13), log(313), length.out = 20))))
 # ----------------------------------------------------
 # density variables
 # ----------------------------------------------------
 fx <- list(datpath = datpath,
            task = task,
-           jmax = 1,
+           jmax = 2,
            dv = "dens_fx",
            sel_n = paste(c(25, 59, 136, 313)),
            w = 1.96,
            h = 2.36 * 2,
-           xlabs = expression(eta[p]^2, "r"^2), #expression("d"), 
-           xl =  c(0.6, 1.0),
+           xlabs = expression(eta[p]^2, eta[p]^2), #expression("d"), 
+           xl =  c(0.0, 0.4, 0.0, 1),
            max_idx = c(20, 20),
            leg_id = 1,
-           leg_locs = c(0.6, 29.0),
-           figlabel = "B",
+           leg_locs = c(0.25, 49.0),
+           figlabel = "A",
            figlabelon = TRUE,
            imm = imm)
 
@@ -37,12 +37,14 @@ p <- list(datpath = datpath,
           w = 1.96,
           h = 2.36 * 2,
           xlabs = c("p", "p"),
-          xl = c(-15, 2, -5, 0),
-          max_idx = c(20, 20),
-          leg_id = 2,
-          leg_locs = c(-5, 6),
+          xl = c(-40, 2, -40, 2),
+          max_idx = c(1, 1),
+          leg_id = 1,
+          leg_locs = c(-40, 0.35),
+          leg_txt = c("b x tt", "tt"),
           figlabel = "A",
-          figlabelon = TRUE)
+          figlabelon = TRUE,
+          imm = imm)
 
 # ----------------------------------------------------
 # KL divergence
@@ -58,11 +60,11 @@ kl <- list(datpath = datpath,
            h = 2.36,
            leg_id = FALSE,
            leg_locs = c(5, 20),
-           leg_txt = mods,
+           leg_txt = c("b x tt", "tt"),
            y_label = expression(italic("KL p||q")),
            yl = NULL,
            xvals = c(0, 1, 0, 1),
-           mods = "RM-AN",
+           mods = c("RM-AN", "LME"),
            imm = imm)
 
 # ----------------------------------------------------
@@ -91,9 +93,10 @@ meta_mu <- list(datpath = datpath,
                 task = task,
                 mods = mods,
                 sub_Ns = paste(round(exp(seq(log(13), log(313), length.out = 20)))),
-                yl = c(-0.05, .05),
-                leg_locs = c(2, -0.05),
-                leg_id = FALSE,
+                yl = c(-0.25, .15),
+                leg_locs = c(2, 0.145),
+                leg_id = TRUE,
+                leg_txt = c("b x tt", "tt"),
                 sig_lines = NULL,
                 sig_y = NULL,
                 imm = imm)
@@ -124,7 +127,8 @@ p_rat <- list(datpath = datpath,
               leg_id = TRUE,
               leg_locs = c(1, 0.95),
               leg_txt = mods,
-              yl = c(0, 2.5))
+              yl = c(0, 2.5),
+              imm = imm)
 
 # ----------------------------------------------------
 # meta-analytic vs observed fx sz ratio
@@ -151,13 +155,13 @@ qq_inputs <- list(datpath = datpath,
                   task = task,
                   sub_Ns = sub_Ns,
                   median_N = as.numeric(medN),
-                  leg_id = FALSE,
-                  leg_locs = c(0.01, .9),
-                  leg_txt = mods,
-                  xl = c(0.6, 1.0),
-                  yl = c(0.6, 1.0),
-                  mods = c("RM-AN"),
-                  modn = 1,
+                  leg_id = TRUE,
+                  leg_locs = c(0.01, .79),
+                  leg_txt = c("b x tt", "tt"),
+                  xl = c(0.0, 0.8),
+                  yl = c(0.0, 0.8),
+                  mods = c("RM-AN", "LME"),
+                  modn = 2,
                   imm = imm)
 
 if (imm){

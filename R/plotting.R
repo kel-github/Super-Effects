@@ -339,9 +339,14 @@ plot_ratios <- function(rat_inputs) {
 
     if (length(mods) > 1) {
       if (is.null(yl)){
+        if (ncol(ratios) != 2){
         nuyl = c(0,
                  max(cbind(do.call(cbind, ratios[, "RM-AN"]),
                            do.call(cbind, ratios[, "LME"]))))
+        } else {
+          nuyl = c(0, max(ratios))
+          rownames(ratios) <- sub_Ns
+        }
       } else {
         nuyl = yl
       }
@@ -445,6 +450,7 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
   sub_Ns <- mu_vs_meta_inputs$sub_Ns
   yl <- mu_vs_meta_inputs$yl
   leg_locs <- mu_vs_meta_inputs$leg_locs
+  leg_txt <- mu_vs_meta_inputs$leg_txt
   leg_id <- mu_vs_meta_inputs$leg_id
   sig_lines <- mu_vs_meta_inputs$sig_lines
   sig_y <- mu_vs_meta_inputs$sig_y
@@ -524,7 +530,7 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
   
   if (leg_id){
     leg_cols <- wes_palette("IsleofDogs1")[c(6, 5)]
-    legend(x=leg_locs[1], y=leg_locs[2], legend = mods,
+    legend(x=leg_locs[1], y=leg_locs[2], legend = leg_txt,
            col = leg_cols, pch = 19, bty = "n", cex = 1)
   }
   abline(h=0, lty=2, col= adjustcolor("grey48", alpha = 0.3))

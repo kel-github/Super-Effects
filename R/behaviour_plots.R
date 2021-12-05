@@ -39,7 +39,7 @@ plot_SRT_results <- function(fname) {
 }
 
 
-plot_CC_results <- function(fname) {
+plot_CC_results <- function(fname, type) {
   ## plot the trial type x block interaction for mean RTs
   # -----------------------------------------------------
   # read in data
@@ -56,58 +56,77 @@ plot_CC_results <- function(fname) {
     filter(Accuracy == 1) %>%
     filter(RT.ms > min_RT) %>%
     filter(RT.ms < (mean(RT.ms) + sd_crit * sd(RT.ms))) %>%
-    summarise(RT = mean(RT.ms))
+    summarise(RT = mean(RT.ms)/1000)
   subs  <- unique(ffx_dat$Subj.No)
   names(ffx_dat) <- c("sub", "block", "type", "RT")
-
-  # Create a summary of the data for fixed fx depiction
-  ffx_dat <- ffx_dat %>% group_by(sub, block, type) %>%
-                 summarise(RT = mean(RT)) %>%
-                 group_by(block, type) %>%
-                 summarise(mu = mean(RT),
-                 se = sd(RT) / sqrt(length(RT))) %>% 
-                 ungroup()
 
   # ---------------------------------------------------------------
   # plot data
   # ---------------------------------------------------------------
-  with(ffx_dat, plot(x = block[type == "Novel"],
-                     y = mu[type == "Novel"],
-                     bty = "n",
-                     pch = 20,
-                     cex = 1,
-                     col = wes_palette("IsleofDogs1")[3],
-                     ylim = c(800, max(mu)),
-                     ylab = expression(italic(paste(mu, "RT", sep = " "))),
-                     xlab = expression(italic("block")),
-                     cex.lab = 1,
-                     cex.axis = 1))
-   with(ffx_dat, points(x = block[type == "Repeated"],
-                       y = mu[type == "Repeated"],
+  if (type == "dist"){
+    par(bty = "n")
+    vioplot::vioplot(ffx_dat$RT ~ ffx_dat$type*ffx_dat$block, 
+                     col = adjustcolor(c(wes_palette("IsleofDogs1")[3], 
+                                         wes_palette("IsleofDogs1")[4]), 
+                                     alpha = 0.5),
+                     xlab = "", ylab = "RT", yaxt = "n",
+                     pchMed = 20,
+                     colMed = rep(c(wes_palette("IsleofDogs1")[3], wes_palette("IsleofDogs1")[4]), times=12))
+    axis(side = 1, at = seq(3.5, 23.5, by = 4), labels = c("2", "4", "6", "8", "10", "12"))
+    axis(side = 2, at = c(0.3, 3.8),
+         labels = c("0.3", "3.8"),
+         las = 1)
+    # add legend 
+    leg_cols <- wes_palette("IsleofDogs1")[c(3, 4)]
+    legend(12, 4, legend = c("novel", "repeat"),
+           col = leg_cols, pch = 19, bty = "n", cex = 1)
+  } else if (type == "mean"){
+    
+    ffx_dat <- ffx_dat %>% group_by(sub, block, type) %>%
+      summarise(RT = mean(RT)) %>%
+      group_by(block, type) %>%
+      summarise(mu = mean(RT),
+                se = sd(RT) / sqrt(length(RT))) %>% 
+      ungroup()
+    
+    with(ffx_dat, plot(x = block[type == "Novel"],
+                       y = mu[type == "Novel"],
+                       bty = "n",
                        pch = 20,
                        cex = 1,
-                       col = wes_palette("IsleofDogs1")[4]))
+                       col = wes_palette("IsleofDogs1")[3],
+                       ylim = c(0.8, 1.5),
+                       ylab = expression(italic(paste(mu, "RT", sep = " "))),
+                       xlab = expression(italic("block")),
+                       cex.lab = 1,
+                       cex.axis = 1))
+     with(ffx_dat, points(x = block[type == "Repeated"],
+                          y = mu[type == "Repeated"],
+                          pch = 20,
+                          cex = 1,
+                          col = wes_palette("IsleofDogs1")[4]))
    # now add error bars
-   with(ffx_dat, arrows(x0 = block[type == "Novel"], 
-                        y0 = mu[type == "Novel"] - se[type == "Novel"],
-                        x1 = block[type == "Novel"],
-                        y1 = mu[type == "Novel"] + se[type == "Novel"],
-                        code = 3,
-                        col = wes_palette("IsleofDogs1")[3],
-                        angle = 90,
-                        length = .025))
-   with(ffx_dat, arrows(x0 = block[type == "Repeated"], 
-                        y0 = mu[type == "Repeated"] - se[type == "Repeated"],
-                        x1 = block[type == "Repeated"],
-                        y1 = mu[type == "Repeated"] + se[type == "Repeated"],
-                        code = 3,
-                        col = wes_palette("IsleofDogs1")[4],
-                        angle = 90,
-                        length = .025))
+     with(ffx_dat, arrows(x0 = block[type == "Novel"], 
+                          y0 = mu[type == "Novel"] - se[type == "Novel"],
+                          x1 = block[type == "Novel"],
+                          y1 = mu[type == "Novel"] + se[type == "Novel"],
+                          code = 3,
+                          col = wes_palette("IsleofDogs1")[3],
+                          angle = 90,
+                          length = .025))
+     with(ffx_dat, arrows(x0 = block[type == "Repeated"], 
+                          y0 = mu[type == "Repeated"] - se[type == "Repeated"],
+                          x1 = block[type == "Repeated"],
+                          y1 = mu[type == "Repeated"] + se[type == "Repeated"],
+                          code = 3,
+                          col = wes_palette("IsleofDogs1")[4],
+                          angle = 90,
+                          length = .025))
 
-    leg_cols <- wes_palette("IsleofDogs1")[c(3, 4)]
-    legend(2, 1000, legend = c("novel", "repeat"),
-           col = leg_cols, pch = 19, bty = "n", cex = 1)
+    # leg_cols <- wes_palette("IsleofDogs1")[c(3, 4)]
+    # legend(2, 1000, legend = c("novel", "repeat"),
+    #        col = leg_cols, pch = 19, bty = "n", cex = 1)
+  }
 }
 
 plot_MT_results <- function(fname) {
