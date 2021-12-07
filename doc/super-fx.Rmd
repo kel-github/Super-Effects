@@ -54,12 +54,12 @@ library(knitr)
 #opts_knit$set(root.dir = normalizePath("../")) 
 opts_chunk$set(fig.align = 'center', cache = FALSE, warning = FALSE,
   message = TRUE, echo = FALSE)
-options(digits = 3, width = 88, knitr.graphics.auto_pdf = TRUE,
-        knitr.kable.NA = '')
-knit_hooks$set(inline = function(x) {
-  x <- sprintf("%1.2f", x)
-  paste(x, collapse = ", ")
-})
+# options(digits = 3, width = 88, knitr.graphics.auto_pdf = TRUE,
+#         knitr.kable.NA = '')
+# knit_hooks$set(inline = function(x) {
+#   x <- sprintf("%1.2f", x)
+#   paste(x, collapse = ", ")
+# })
 ```
 
 ```{r loadpackagesandfunctions, echo=FALSE, message=F, warning=F}
@@ -122,7 +122,7 @@ The current study uses a data set collected for a previous [pre-registered](http
 ## Apparatus
 \label{sec:Apparatus}
 
-Experimental procedures were run on an Apple Mac Minicomputer (OS X Late 2014, 2.8 GHz Intel Core i5) with custom code using the Psychophysics toolbox (v3.0.14) [@brainardPsychophysicsToolbox1997; @pelliVideoToolboxSoftwareVisual1997] in Matlab v2015b. Participants completed 5 tasks; Attentional Blink (AB), Dual Task (DT), Contextual Cueing (CC), Serial Response Task (SRT), and Visual Statistical Learning (VSL). Task order was randomised for each participant, apart from the VSL task, which was presented last. This was because the recognition component of the task may have allowed participants to infer that other tasks were also assessing implicit learning. 
+Experimental procedures were run on an Apple Mac Minicomputer (OS X Late 2014, 2.8 GHz Intel Core i5) with custom code using the Psychophysics toolbox (v3.0.14) [@brainardPsychophysicsToolbox1997; @pelliVideoToolboxSoftwareVisual1997] in Matlab v2015b. Participants completed 7 tasks; Attentional Blink (AB), Dual Task (DT), Contextual Cueing (CC), Serial Response Task (SRT), Visual Statistical Learning (VSL), Operation Span task and a Stop Signal Inhibition task. Only the data from the AB, DT, CC and SRT are reported here. 
 
 ## Procedures
 \label{sec:Procedures}
@@ -130,9 +130,9 @@ Experimental procedures were run on an Apple Mac Minicomputer (OS X Late 2014, 2
 Across all tasks, participants sat approximately 57 cm from the monitor. An overview of the task procedures is presented in Figure \@ref(fig:FigureParadigm). Further details regarding the task protocols are presented within each section below. We first provide an overview of the simulation procedures, before detailing the specific procedural and statistical methods for each task.
 
 
-```{r, FigureParadigm, out.width='70%', fig.cap='Task battery. A) Attentional Blink Paradigm (AB). Participants report the two letter targets from the rapid serial visual presentation of numbers and letters, B) Multitasking Paradigm (MT). Participants make a discriminate the colour of a disc, a complex tone, or both C) Contextual Cueing Paradigm (CC). i) Participants perform an inefficient visual search task where they search for a rotated T among L distractors. ii) Unknown to participants, half of the search arrays are repeated throughout the course of the experiment. D) Serial reaction time task (SRT). Participants respond to one of four stimuli, each mapped to a spatially-compatible button press. Unknown to participants, for half of the blocks the stimulus follows a repeating sequence. E) Visual Statistical Learning Paradigm (VSL): i) 12 shapes are grouped into 6 base pairs. ii) Learning: three of the six pairs are presented as an array, this is repeated as participants passively view the displays. iii) Test: participants are presented with a base pair, and a novel pair formed from a recombination of the 12 shapes, and is asked which of the two pairs they have seen previously.'}
+```{r, FigureParadigm, out.width='70%', fig.cap='Task battery. A) Attentional Blink Paradigm (AB). Participants report the two letter targets from the rapid serial visual presentation of numbers and letters, B) Multitasking Paradigm (MT). Participants make a discriminate the colour of a disc, a complex tone, or both C) Contextual Cueing Paradigm (CC). i) Participants perform an inefficient visual search task where they search for a rotated T among L distractors. ii) Unknown to participants, half of the search arrays are repeated throughout the course of the experiment. D) Serial reaction time task (SRT). Participants respond to one of four stimuli, each mapped to a spatially-compatible button press. Unknown to participants, for half of the blocks the stimulus follows a repeating sequence.'}
 
-paradigm.fig.pth <- '../images/FigXXXX_alltasks.png'
+paradigm.fig.pth <- '../images/FigXXXX_alltasks.pdf'
 knitr::include_graphics(paradigm.fig.pth)
 
 ```
@@ -142,28 +142,15 @@ All the [data]() and [code](https://github.com/kel-github/Super-Effects) used fo
 ### Sampling procedure
 \label{sec:SamplingProc}
 
-For each task, we simulated experiments across 20 different sample sizes ($N$s), defined on a logarithmic interval between N=13 and N=313. We opted for a logarithmic interval given the decreasing information gained at higher $N$ values. To simulate $k$ experiments at each of our chosen $N$, we developed a sampling procedure that sought to leverage information from across the whole dataset while also protecting against any reductions in effect size variablility that may be attributable to saturation as the simulated $N$ approaches the maximum ($N_{max}$=313). Specifically, it could be that as $N$ approaches 313, the overlap of participants between subsamples may be greater than when $N$ equals a lower number such as 13. It follows then that any decreasing variability in effect size estimates at higher $N$s could be due to the decrease in variability of the subsamples, rather than the improved estimate of the population variance that should come with a larger $N$. 
-
-To protect against this possibility we applied the following procedure; for each level of $N$ ($N_{1}, N_{2}, ...N_{20}$), we first selected a subsample from the total dataset _without_ replacement, e.g. $N$ of 13 unique samples from the total $N$=313. We refer to this from now on as the _parent subsample_. From this parent subsample, we sampled $k$ = 1000 times _with_ replacement - e.g. $N$=13 sampled 1000 times from $N$=13. These shall now be referred to as the _child subsamples_. The relevant analysis was then applied to each of the child subsamples. Sampling with replacement ensured that the child subsamples carried the Markov property. Given that this procedure reduces the heterogeneity of the parent sample (for example, in the case of $N$=13, all the child subsamples are derived from only 13 unique observations), we repeated the entire process over $j$ = 1000 iterations. Therefore the presented data reflects $j * k$ simulated experiments for each level of $N$. We refer to this now as the two-step sampling procedure: $j$ = 1000, $k$ = 1000. It is worth noting that we compared this procedure to one where we performed the two-step sampling procedure with $j$ = 1, and to a one-step sampling procedure where we sampled $N$ with replacement from the entire dataset, i.e. $k$=1000 and $j$ = 0. Outcomes were broadly comparable between the sampling procedures, although for lower $N$ (e.g. 25) the two step procedure where $j$ = 1 and $k$ = 1000 appears more susceptible to produce a biased set of observations, which is unsurpising given the dependence on the composition of the parent sample. The two-step procedure ($j$ = 1000) offered better resolution of the resulting densities (see Figure \@ref(fig:figSuppSamp) for a representative example). 
-
-
-```{r figSuppSamp, out.width='70%', fig.cap='Comparison between sampling procedures for the AB task data fit with a repeated measures ANOVA for selected $N$; densities of observed effect sizes for the two-step sampling procedure $j$=1000, $k$=1000, the two-step sampling procedure, $j$=1, $k$=1000, and the one-step procedure, $k$ = 1000', message=F}
-# plot.d.by.samp(dat, px_rng_d, 1, mod) + xlab(bquote(eta['p']^2)) + theme(axis.text.x = element_text(size=11),
-samp.fig.pth <- '../images/AB_sampling.pdf'
-knitr::include_graphics(samp.fig.pth)      
-
-```
-
-
-Specific details regarding which analyses were applied to each $k$ (child) subsample are detailed below for each paradigm. Note that given the iterative fitting procedure that is inherent to the LME approach, the models specified were the simplest possible, as the computational requirements for fitting more complex models would have resulted in simulations running for over 11 months. In the current work we present examples of the simplest case, to provide a basis for comparison, or a set of minimum assumptions for researchers interested in applying LME models to their data on these or comparable paradigms. That being said, application of this model is not without precedent in the literature, given that this simple case is often taken as an analysis choice []. 
+For each task, we simulated experiments across 20 different sample sizes ($N$s), defined on a logarithmic interval between N=13 and N=313. We opted for a logarithmic interval given the decreasing information gained at higher $N$ values. To simulate $k$=1000 experiments at each of our chosen $N$, we sampled $N$ participants from $N_{max}$ over $k$ iterations. The relevant analysis was applied to each of the samples. Specific details regarding which analyses were applied to each $k$ sample are detailed below for each paradigm. Sampling with replacement ensured that the samples carried the Markov property. It may be of concern that any reductions in observed effect size variablility that may be attributable to saturation as the simulated $N$ approaches the maximum ($N_{max}$=313). Specifically, it could be that as $N$ approaches 313, the overlap of participants between subsamples may be greater than when $N$ equals a lower number such as 13. It follows then that any decreasing variability in effect size estimates at higher $N$s could be due to the decrease in variability of the subsamples, rather than the improved estimate of the population variance that should come with a larger $N$. We have run simulations that suggest that this is not the case and these are presented in appendix i.
 
 _Effect Sizes_
-For each task, we report the following information from the observed effect size densities: to assess the best estimate of the effect size and its variability, given our large dataset, we report the central tendency and the standard deviation observed for our highest $N$ (apart from in one case of multimodality, where we report the points of highest probability). These values can be used to motivate power calculations for future studies. To test whether the best estimate differs from what is representative for the field, we next report the summary statistics for the $N$ that is closest to the median sample size from our survey of the literature. We use a qqplot to determine if the two distributions are different. To determine imprecision in effect size estimates across each level of $N$, we compute the Kullback-Leibler Divergence ($D_{KL}$) between the effect size distributions observed at each level of $N$, and the distribution that reflects our best estimate, i.e. that observed with $N_{313}$. This measure quantifies the information lost (in bits), should we use the distribution observed at any level of $N$ as an approximation for our best estimate. To quantify the relationship between information loss and $N$, we correlate $D_{KL}$ and $N$ using Spearman's Rho. 
+For each task, we report the following information from the observed effect size densities: to assess the best estimate of the effect size and its variability, given our large dataset, we report the median and the standard deviation observed for our highest $N$ (apart from in one case of multimodality, where we report the points of highest probability). These values can be used to motivate power calculations for future studies. To test whether the best estimate differs from what is representative for the field, we next report the summary statistics for the $N$ that is closest to the median sample size from our survey of the literature. We use a qqplot to determine if the two distributions are different. To determine imprecision in effect size estimates across each level of $N$, we compute the Kullback-Leibler Divergence ($D_{KL}$) to determine how much information would be lost if the effect size distributions observed at each level of $N$ were used to approximate the distribution that reflects our best estimate, i.e. that observed with $N_{313}$.To quantify the relationship between information loss and $N$, we correlate $D_{KL}$ and $N$ using Spearman's Rho. 
 
-To provide an estimate of the effect size that would be yielded through a meta-analysis of the published literature, we compute summary statistics for all analyses that yielded a statistically significant result (p<.05), we then present the difference between our observed effect sizes and our estimate of the meta-analytic effect size, for each level of $N$. To compare outcomes between the standard and LME approaches (or in the case of VSL, the t-test and prevalence statistic approaches, see below), we present the difference of the means from the distributions yielded by each method, at each level of $N$. 
+To provide an estimate of the effect size that would be yielded through a meta-analysis of the published literature, we compute summary statistics for all analyses that yielded a statistically significant result (p<.05), we then present the difference between our observed effect sizes and our estimate of the meta-analytic effect size, for each level of $N$. 
 
 _p Values_
-To determine the $N$ required to achieve 90% power to reject the null hypothesis, we report the $N$ for which over 90% of p-values pass the threshold for significance ($\alpha$=.05). To compare the standard and the LME approaches, we then determine whether there is agreement in the $N$ required to achieve greater than 90% statistical power. To assess the range of p-values that one can expect to observe at some given $N$, i.e. the confidence for the most likely observed p-value, or certainty on the certainty of the test outcome, we computed the difference between the the .025 and .975 quantiles ($q$) of the observed p-values at each level of $N$. We then computed the ratio between that range and that observed for the median $N$ for the field $N$ ($\frac{q_{N}}{q_{medianN}}$). Values below 1 suggest that the certainty over the p-value is lower for the median $N$ for the field, relative to the given $N$. As p-values clustered close to 0 in many instances, we applied the probit transform to rescale the values on the range [-$\infty$, $\infty$]. This allowed for a clearer visualisation of the spread of p-values at each level of $N$.
+To determine the $N$ required to achieve 90% power to reject the null hypothesis, we report the $N$ for which over 90% of p-values pass the threshold for significance for the effects of interest ($\alpha$=.05). To assess the range of p-values that one can expect to observe at some given $N$, i.e. the confidence for the most likely observed p-value, or certainty of the test outcome, we computed the difference between the the .025 and .975 quantiles ($q$) of the observed p-values at each level of $N$. We then computed the ratio between that range and that observed for the median $N$ for the field $N$ ($\frac{q_{N}}{q_{medianN}}$). Values below 1 suggest that the certainty over the p-value is lower for the median $N$ for the field, relative to the given $N$. As p-values clustered close to 0 in many instances, we applied the probit transform to rescale the values on the range [-$\infty$, $\infty$]. This allowed for a clearer visualisation of the spread of p-values at each level of $N$.
 
 ## Attentional Blink (AB)
 \label{sec:ABMeth}
@@ -176,54 +163,30 @@ The AB protocol was the same as that reported in [@benderRelationshipResponseSel
 
 ### Statistical Approach
 
-As is typical for the field, and to ascertain the effectiveness of the lag manipulation, T2|T1 accuracy was subject to a repeated measures ANOVA, with lag (2, 3, 5, & 7) as the independent variable. This analysis was also applied to each $k$ sample. For each $k$ sample, $\eta_{p}^2$ and the resulting $p$ value were taken for the main effect of lag. For this task, and all remaining ANOVA tests, models were fit using the anova_test() function from the [rstatix](https://rpkgs.datanovia.com/rstatix/index.html) package. Where possible, the models were fit using type 3 sum of squares, owing to the computational expediency and match to commercial statistical software packages. In some cases, models were unable to be fit using type 3 sum of squares, owing to rank deficiencies in the underlying design matrix (e.g. when one participant was drawn more than twice within a child subsample). In these cases, models were fit using type 1 sum of squares. However, as the experiment designs were fully balanced, each sum of squares type should yield the same results.
-
-We also applied a LME to estimate the fixed effect of lag, with a random intercept for each participant ($j$) and an intercept for random error ($i$): 
-
-\begin{equation}
-  y_{ij} \sim \beta_{0} + \beta_{1}lag + e_{j} + e_{ij}
-  (\#eq:ABLME)
-\end{equation}
-
-This, and all subsequent LME's were fit using the lmer() function from the lme4 package @batesFittingLinearMixedEffects2015. To compute an effect size estimate from the LME approach, a proxy for $d$ can be calculated as the ratio of the estimated fixed effect of interest (lag) to the squareroot of the sum of the variance accounted for by the random effects in the model (see @brysbaertPowerAnalysisEffect2018; @westfallStatisticalPowerOptimal2014):
-
-\begin{equation}
-  d = \frac{lag}{\sqrt{{\sigma_{e_{j}} + \sigma_{e_{ij}}}}}
-  (\#eq:LMEd)
-\end{equation}
-
-To facilitate comparison with $\eta_{p}^2$ (which is a generalisation of $r^2$, see Cohen -@cohenStatisticalPowerAnalysis1988), the resulting $d$ value was converted to $r^2$ using the following from Cohen -@cohenStatisticalPowerAnalysis1988:
-
-\begin{equation}
-  r^2 = \biggl(\frac{d}{\sqrt(d^2 + \frac{1}{pq})}\biggr)^2
-  (\#eq:d2r)
-\end{equation}
-
-where $p$ = proportion of A's combined in A and B populations, and $q$ = 1 - $p$. 
-
-For this and for all subsequent applications of LME models, the $p$ value for the regressor of interest (in this case 'lag') was attained by applying Wald's chi-square test as implemented using the Anova function from the car package [@foxCompanionAppliedRegression2018] (note: all the results were comparable regardless of whether we used Wald's test or whether we performed a log-likelihood test between the model of interest and a null model, which for the current AB case contained only the two random intercept terms $e_{j}$ and $e_{ij}$). 
+As is typical for the field, and to ascertain the effectiveness of the lag manipulation, T2|T1 accuracy was subject to a repeated measures ANOVA, with lag (2, 3, 5, & 7) as the independent variable. This analysis was also applied to each $k$ sample. For each $k$ sample, $\eta_{p}^2$ and the resulting $p$ value were taken for the main effect of lag. For this task, and all remaining ANOVA tests, models were fit using the anova_test() function from the [rstatix](https://rpkgs.datanovia.com/rstatix/index.html) package. Where possible, the models were fit using type 3 sum of squares, owing to the computational expediency and match to commercial statistical software packages. In some cases, models were unable to be fit using type 3 sum of squares, owing to rank deficiencies in the underlying design matrix (e.g. when one participant was drawn more than twice within a sample). In these cases, models were fit using type 1 sum of squares. However, as the experiment designs were fully balanced, each sum of squares type should yield the same results.
 
 ## Multitasking (MT)
 \label{sec:MTMeth}
 
 ### Protocol
 
-The MT protocol was previously reported in [@benderRelationshipResponseSelection2016]. Each trial began with a black fixation cross presented in the center of a gray screen [RGB: 128, 128, 128] for a variable interval of 200-600 ms. Next either one of two possible coloured circles [red, RGB: 237, 32, 36 or blue, RGB: 44, 71, 151] or one of two possible sounds (complex tones taken from [@duxIsolationCentralBottleneck2006]), or both (circle and sound) were presented for 200 ms. The coloured circle subtended 1.3$^\circ$ visual angle. Participants were instructed to respond to all presented tasks by using the appropriate key press ['A' or 'S' for left hand responses, 'J' or 'K' for right hand responses, with the task-hand mapping counterbalanced across participants]. The DT consisted of 4 blocks of 36 trials, with each trial type (ST visual, ST auditory or DT) randomly mixed within blocks. Participants completed the DT task after completing two ST blocks as practice, one for the visual task and one for the auditory task. Mean response times (RTs) to each task modality x condition were taken as the dependent variable of interest.
+The MT protocol was previously reported in [@benderRelationshipResponseSelection2016]. Each trial began with a black fixation cross presented in the center of a gray screen [RGB: 128, 128, 128] for a variable interval of 200-600 ms. Next either one of two coloured circles [red, RGB: 237, 32, 36 or blue, RGB: 44, 71, 151] or one of two sounds (complex tones taken from [@duxIsolationCentralBottleneck2006]), or both (circle and sound) were presented for 200 ms. The coloured circle subtended 1.3$^\circ$ visual angle. Participants were instructed to respond to all presented tasks by using the appropriate key press ['A' or 'S' for left hand responses, 'J' or 'K' for right hand responses, with the task-hand mapping counterbalanced across participants]. The DT consisted of 4 blocks of 36 trials, with each trial type (ST visual, ST auditory or DT) randomly mixed within blocks. Participants completed the DT task after completing two ST blocks as practice, one for the visual task and one for the auditory task. Mean response times (RTs) to each task modality x condition were taken as the dependent variable of interest.
 
 ### Statistical Analysis
 
-To ascertain the effectiveness of the multitasking manipulation, the data were modelled using a 2 (task-modality: visual-manual vs auditory-manual) x 2 (task: single vs multitask) repeated-measures ANOVA. This analysis was also applied to each $k$ sample; $\eta_{p}^2$ and $p$ are reported for the main effect of task. We also applied an LME model which included fixed effects regressors for task-modality, task and their interaction, and random intercepts for participants $e_{j}$, and measurement error $e_{ij}$. As above, $d$ was computed as the ratio of the estimated fixed effect for the task regressor to the square root of the summed variance of the estimated random effects, and was converted to $r^2$. Again, Wald's chi-square test was applied to attain a $p$ value for the main effect of task.
+To ascertain the effectiveness of the multitasking manipulation, the data were modelled using a 2 (task-modality: visual-manual vs auditory-manual) x 2 (task: single vs multitask) repeated-measures ANOVA. This analysis was also applied to each $k$ sample; $\eta_{p}^2$ and $p$ are reported for the main effect of task. 
 
 ## Contextual Cueing (CC)
 \label{sec:CCMeth}
 
 ### Protocol
 
-The CC protocol was the same as that reported by Nydam et al -@nydamCathodalElectricalStimulation2018. Each trial began with a white fixation cross presented on a grey screen [RGB: 80, 80, 80]. An array of 12 L's and a single T were then presented presented within an invisible 15 x 15 grid that subtended 10$^\circ$ x 10$^\circ$ of visual angle. Orientation of each L was determined randomly to be rotated 0$^\circ$, 90$^\circ$, 180$^\circ$ or 270$^\circ$ clockwise. The T was oriented to either 90$^\circ$ or 270$^\circ$. Participants reported whether the T was oriented to the left (using the 'z' key) or the right (using the 'm' key). The task consisted of 12 blocks of 24 trials. For half the trials in each block, the display was taken (without replacement) from 1 of 12 configurations that was uniquely generated for each participant, where the location of the distractors and target (but not the orientation of the target) was fixed. These trials were called 'repeats'. For the remaining trials, the display was randomly generated for each trial, making them 'novel'. Displays were generated with the constraint that equal items be placed in each quadrant and each eccentricity. Target positions were matched between the repeat and novel displays for both quadrant and eccentricity. The exact location of the item was jittered within each cell for each presentation, to prevent perceptual learning or adaptation to the specific position of the item. The order of display type (repeat vs novel), configuration (1:12) and target orientation (left or right) was randomised for each block. Mean RTs to each block (1:12) and display type (repeat vs novel) were taken as the dependent variable.
+The CC protocol was the same as that reported by Nydam et al -@nydamCathodalElectricalStimulation2018 which is modeled on Chun and Jiang -@chunContextualCueingImplicit1998. Each trial began with a white fixation cross presented on a grey screen [RGB: 80, 80, 80]. An array of 12 L's and a single T were then presented presented within an invisible 15 x 15 grid that subtended 10$^\circ$ x 10$^\circ$ of visual angle. Orientation of each L was determined randomly to be rotated 0$^\circ$, 90$^\circ$, 180$^\circ$ or 270$^\circ$ clockwise. The T was oriented to either 90$^\circ$ or 270$^\circ$. Participants reported whether the T was oriented to the left (using the 'z' key) or the right (using the 'm' key). The task consisted of 12 blocks of 24 trials. For half the trials in each block, the display was taken (without replacement) from 1 of 12 configurations that was uniquely generated for each participant, where the location of the distractors and target (but not the orientation of the target) was fixed. These trials were called 'repeats'. For the remaining trials, the display was randomly generated for each trial, making them 'novel'. Displays were generated with the constraint that equal items be placed in each quadrant and each eccentricity. Target positions were matched between the repeat and novel displays for both quadrant and eccentricity. The exact location of the item was jittered within each cell for each presentation, to prevent perceptual learning or adaptation to the specific position of the item. The order of display type (repeat vs novel), configuration (1:12) and target orientation (left or right) was randomised for each block. Mean RTs to each block (1:12) and display type (repeat vs novel) were taken as the dependent variable.
 
 ### Statistical Approach
 
-To ascertain whether participants speeded responses to repeat relative to novel trials over the course of the experiment (i.e. whether participants learned the statistical regularities of the repeated arrays), the data were subject to a block (1:12) x condition (repeat vs novel array) repeated measures ANOVA. Specifically, learning should be evidenced by a significant block x condition interaction. This analysis was applied to each $k$ sample, and we report $\eta_{p}^2$ and $p$ for the block x condition interaction. We also applied LME models, containing fixed effects regressors for block, condition and their interaction, and random intercepts for subjects and random error. We report $r^2$ for the block x condition interaction and the resulting $p$ value from Wald's chi-square test.
+To ascertain whether participants speeded responses to repeat relative to novel trials over the course of the experiment (i.e. whether participants learned the statistical regularities of the repeated arrays), the data were subject to a block (1:12) x condition (repeat vs novel array) repeated measures ANOVA. Specifically, learning should be evidenced by a significant block x condition interaction. This analysis was applied to each $k$ sample, and we report $\eta_{p}^2$ and $p$ for the block x condition interaction. 
+As sometimes in the literature a significant main effect and not an interaction are reported motivating the notion that contextual cueing reflects single-shot learning, we also report the $\eta_{p}^2$ and $p$ for the main effect of condition.
 
 ## Serial Response Task (SRT)
 \label{sec:SRTMeth}
@@ -234,48 +197,9 @@ The SRT was adapted from [@nissenAttentionalRequirementsLearning1987]. Four squa
 
 ### Statistical Approach
 
-To ascertain whether participants learned the repeating sequences, RTs in the final block of repeats (block 3) were compared to those in the final block of random trials (block 4) using a paired-samples t-test. This analysis was also applied to each $k$ sample, and we present the resulting Cohen's $d$, converted to $r^2$, and $p$ value from each test. We also applied an LME approach where we fit models with a fixed effects regressor for block (3 vs 4), and included the same random intercepts as described above. We report the resulting $r^2$ and $p$ values for the fixed effect of block.
+To ascertain whether participants learned the repeating sequences, RTs in the final block of repeats (block 3) were compared to those in the final block of random trials (block 4) using a paired-samples t-test. This analysis was also applied to each $k$ sample, and we present the resulting Cohen's $d$, converted to $r^2$, and $p$ value from each test. 
 
 <br>
-
-#### Visual Statistical Learning (VSL)
-\label{sec:VSLMeth}
-
-##### Protocol
-
-The VSL task was adapted from Fiser and Aslin [-@fiserUnsupervisedStatisticalLearning2001]. For each participant, twelve abstract shapes were grouped into 6 base pairs. On each trial of the learning phase, three base pairs were randomly positioned onto a 3 x 3 grid, which subtended ?$^\circ$ of visual angle. Each shape subtended ?$^\circ$. A total of 144 of these displays were each presented for 2000 ms, interleaved with a blank screen presented for 1000 ms. Participants were instructed to pay attention to the displays, but no overt response was required. The test phase consisted of trials where two shape pairs were each presented for 2000 ms, with an intervening blank screen lasting 1000 ms. One pair was selected from the 6 base pairs for that participant, and one pair was formed by a novel recombination formed by randomly selecting two of the 12 shapes, with the constraint that a base pair could not be selected. Participants were instructed to report which of the two pairs was more familiar, using the 'z' and 'm' keys to denote the first or second pair respectively, with the exact mapping counterbalanced across participants. Paticipants completed a total of 24 trials, with each base pair presented 4 times. The order of base and novel pairs was counterbalanced across trials, and trial order was randomised for each participant. Response accuracy in the testing phase was taken as the dependent variable of interest.
-
-<br>
-
-##### Statistical Approach
-
-To assess whether participants recognised familiar base pairs more than would be expected by chance, it is typical to apply a one-sample t-test to recognition test accuracies, against theoretical chance (p=.5) (e.g. @fiserUnsupervisedStatisticalLearning2001). Therefore we applied this test to our data to determine if our results corroborated that of the field. We applied this test to each $k$ sample, and we report the resulting $r^2$ and $p$ values.
-
-It has recently been shown that the assumptions of the one-sample t-test are not met when data are from an information based measure such as classification accuracy [@allefeldValidPopulationInference2016]. Specifically, because the true value of such a measure can never be below chance (50 % in the case of a 2 alternative-forced-choice), application of the t-test, which carries the assumption that the null distribution can include values above and below 50 %, becomes a fixed effects analysis (see Allefeld et al [-@allefeldValidPopulationInference2016] for a full treatment), which tests the hypothesis that any individual in the sample shows accuracy that is greater than you would expect by chance. This test does not allow inference regarding the generalisability of the effect, i.e. what proportion of the population is the observed effect expected to generalise to? Instead, application of the prevalence statistic [@allefeldValidPopulationInference2016] allows for valid second-level inference with information-based measures such as classification accuracy. 
-
-Implementing the prevalence statistic typically involves a two step permutation procedure. First, a null distribution is generated for each participant's accuracies (first level permutations), given their responses and the trials to which they were exposed. This is typically attained by shuffling the trial labels over multiple iterations (e.g. $m$ = 1000), and taking the participant's accuracy under each permutation (with the constraint that $m$ = 1 is the observed data) [@allefeldValidPopulationInference2016]. This yields $m$ accuracies per participant that would be attained given the null hypothesis ($H_0$) was true, where $H_0$ is that the participant is guessing. Secondly, to attain the second-level null distribution, each participant's first level permutations are sampled $z$ times (e.g. $z$ = 1000), with the constraint that $z_{1}$ contains the observed accuracies across participants. This results in $z$ sets of $N$ accuracies as would be expected given the second-level $H_0$. The minimum accuracy is then taken from each of the $z$ sets of permutated accuracies ($PA_{min}$). The proportion for which the observed minimum accuracy ($OA_{min}$) is greater than PA ($p = \frac{1}{z} \sum_{i=1}^z [OA_{min} > PA_{min}]$) is taken as the probability that the observed accuracies are drawn from the distribution defined by $H_0$ (i.e. this serves as the $p$ value of the second-level inferential test). 
-
-Given that our sampling procedure already entailed $N*j*k$ permutations, and that such a permutation procedure as defined above would require $N*j*k*m*z$ permutations (which in our case is 2$e$+13), we opted to instead apply an analytical definition of the first- and second level distributions for $H_0$. 
-
-To summarise this analytical distribution; each set of participant responses comes from a binary forced choice task with possible answers $a$ (the first pair is more familiar) and $b$ (the second pair is more familiar), consisting of $T$ trials with exactly half of the trials having each possible answer as the correct response (i.e. $A_a = A_b = \frac{1}{2}N$). For any given set of responses $R_a + R_b = N$, we assign the identity of $a$ and $b$ to the possible choices such that $R_a \le A_a$.
-
-Now we can assemble a distribution for this configuration of responses by computing the number of possible combinations of $x$ responses in $A_a$ 'slots', multiplied by the number of $R_a - x$ responses in $A_b$ 'slots', for all x between zero and $R_a$. Or if $F(x)$ is the frequency for a given (not necessarily unique) accuracy, and $G(x)$ is the corresponding accuracy:
-
-\begin{equation}
-  F(x) = {{A_a}\choose {x}} \times {{A_b}\choose {R_a - x}}, G(x) = \frac{x + R_b - (R_a - x)}{R_a+R_b} , \forall x \in \mathbb{Z} \mid 0 \le x \le R_a
-  (\#eq:FLPrev)
-\end{equation}
-
-To generate the second level null distribution, we then sampled each participant's first level distribution $z$ = 1000 times, to provide $z$ iterations of $N$ accuracies as would be expected under $H_0$. 
-
-Having calculated the $p$ value for a given set of neutral accuracies, we can compute the proportion of the population expected to show the effect $\gamma$, given the observed $p$ statistic (i.e. an effect size), using the formula defined by Allefeld et al [-@allefeldValidPopulationInference2016]:
-
-\begin{equation}
-  \gamma = \frac{\alpha^\frac{1}{N} - p^\frac{1}{N}}{1-p^\frac{1}{N}}
-  (\#eq:gamma)
-\end{equation}
-
-where $\alpha$ = .05.
 
 # Results
 \label{sec:Results}
@@ -288,56 +212,43 @@ abfname <- "../data/total_of_313_subs_AB_task_trial_level_data.csv"
 ab_res <- do.AB.analysis(abfname)
 ```
 
-An overview for the findings for the AB task are presented in Figure \@ref(fig:ABFX). As expected, proportion accuracy for T2|T1 decreased (by around `r abs(ab_res[[2]][,3]$estimate)`) when T2 was presented at lag 2, relative to lag 7. A one-way ANOVA revealed that the effect of lag was statistically significant (F (`r ab_res[[1]]$DFn`, `r ab_res[[1]]$DFd`) = `r ab_res[[1]]$F`, $\eta_{p}^2$ = `r ab_res[[1]]$pes`, p = `r ab_res[[1]]$p`). Post-hoc t-tests showed that accuracy at each lag differed statistically from accuracy at each of the other lags (all p's $\leq$ `r max(do.call(rbind, lapply(1:6, function(x) cbind(ab_res[[2]][,x]$p.value))))`), with lower accuracy values at the shorter relative to the longer lags. Therefore we see that our implementation of the AB paradigm yielded the typically observed effects on the accuracy data.
+An overview for the findings for the AB task are presented in Figure \@ref(fig:ABFX). As expected, proportion accuracy for T2|T1 decreased (by around `r sprintf("%.2f", abs(ab_res[[2]][,3]$estimate))`) when T2 was presented at lag 2, relative to lag 7. A one-way ANOVA revealed that the effect of lag was statistically significant (F (`r sprintf("%.1f", ab_res[[1]]$DFn)`), `r sprintf("%.0f", ab_res[[1]]$DFd)`) = `r sprintf("%.0f", ab_res[[1]]$F)`, $\eta_{p}^2$ = `r sprintf("%.2f", ab_res[[1]]$pes)`, p = `r sprintf("%.2e", ab_res[[1]]$p)`). Post-hoc t-tests showed that accuracy at each lag differed statistically from accuracy at each of the other lags (all p's $\leq$ `r sprintf("%.2e", max(do.call(rbind, lapply(1:6, function(x) cbind(ab_res[[2]][,x]$p.value)))))`), with lower accuracy values at the shorter relative to the longer lags. Therefore we see that our implementation of the AB paradigm yielded the typically observed effects.
 
 ```{r, AB_results, message=F}
-load("../data/AB/ABstats.RData")
+load("../data/AB/IMMABstats.RData")
 ```
 
+```{r, ABFX, out.width='80%', fig.cap='AB Effects. A) Violin plot showing accuracy across subjects for T1 and T2|T1 by lag. As was expected, accuracy for T2|T1 was poorer at shorter relative to longer lags. B) Observed effect size densities for simulated experiments for select $N$, for the RM-ANOVA and LME analyses. C) QQ-plot of the density of effect sizes observed for the median $N$ (25) against that observed for $N_{max}$. D) KL divergenence when the effect size density for each $N$ is used to approximate the density for $N_{max}$. E) The difference between the observed and meta-analytic effect size was 0, across all $N$.'}
 
-```{r, ABFX, out.width='80%', fig.cap='AB Effects. A) accuracy for T1 and T2|T1 by lag. As was expected, accuracy for T2|T1 was poorer at shorter relative to longer lags. B) Observed effect size densities for simulated experiments for select $N$, for the RM-ANOVA and LME analyses. C) KL divergenence when the density for each $N$ is used to approximate the density for N=313. D) The difference between the observed and meta-analytic effect size was very close to 0 for both RM-ANOVA and LME approaches, across all N. E) Difference between the mean effect size observed for the RM-ANOVA and LME analyses at each level of N. The effect size derived from the RM-ANOVA method was higher across all levels of N'}
-
-paradigm.fig.pth <- '../images/AB_fx_main.pdf'
+paradigm.fig.pth <- '../images/IMMAB_fx_main.pdf'
 knitr::include_graphics(paradigm.fig.pth)
 
 ```
 
-```{r ABinf, message = F}
+```{r ABinf, message = F, echo=F}
 # compute inferential stats on AB effect size measures
 kl_inputs <- list(origin = "313", dv = "dens_fx", sub_Ns = paste(round(exp(seq(log(13), log(313), length.out = 20)))))
 AB_KL_corrs <- do_KL_and_spearmans(kl_inputs, res)
 names(AB_KL_corrs) <- c("RM-AN", "LME")
-
-
-
-AB_best_vs_typical <- comp_z(res['313', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`, 
-                             res['313', 'stats_fx'][[1]][2, "RM-AN"]$`RM-AN`,
-                             res['25', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`, 
-                             res['25', 'stats_fx'][[1]][2, "RM-AN"]$`RM-AN`)
-AB_best_vs_typical_p <- 2*pnorm(q=abs(AB_best_vs_typical), lower.tail=FALSE)
-#AB_meta <- do_z_tests(z_inputs = list(x = "meta", sub_Ns = kl_inputs$sub_Ns), res)
-#AB_model <- do_z_tests(z_inputs = list(x = "model", sub_Ns = kl_inputs$sub_Ns), res)
-
 ```
 
-_Effect sizes_ As can be seen in Figure \@ref(fig:ABFX), panel B, increasing $N$ both reduced the central tendency and the variability of observed effect sizes. Unsurprisingly, given the many demonstrations of the AB effect in the experimental psychology literature, the best estimate of the effect size (with $N_{313}$) was large (mean $\eta_{p}^2$ = `r res['313', 'stats_fx'][[1]][,1][[1]]`, sd: `r res['313', 'stats_fx'][[1]][,1][[2]]`). Despite that, this estimate was statistically smaller than that observed for the typical N of the field ($N_{25}$, mean $\eta_{p}^2$ = `r res['25', 'stats_fx'][[1]][,1][[1]]`, sd: `r res['25', 'stats_fx'][[1]][,1][[2]]`, $z$ = `r AB_best_vs_typical`, p < .0001). This suggests that aggregating effect size observations with small $N$ would result in an inflated estimate of the size of the effect of the AB, although this inflation is small. In line with the idea that existing effect size estimates suffer some imprecision with decreasing $N$, there was a strong negative relationship between $D_{KL}$ and $N$ for both the ANOVA ($r_{s}$(`r AB_KL_corrs[["RM-AN"]]$parameter`) = `r AB_KL_corrs[["RM-AN"]]$estimate`, p = `r AB_KL_corrs[["RM-AN"]]$p.value`) and LME approaches ($r_{s}$(`r AB_KL_corrs[["LME"]]$parameter`) = `r AB_KL_corrs[["LME"]]$estimate`, p = `r AB_KL_corrs[["LME"]]$p.value` see Figure \@ref(fig:ABFX), panel C). This suggests significant information loss when using experiments of lower N to produce effect size estimates for the AB. However, owing to the large effect under study, there were minimal differences between the observed effect size distributions and the estimated meta-analytic effect size, across all levels of $N$ (panel D), suggesting that the AB effect is large enough to yield statistically significant results (and presumably publication) across all levels of $N$. Interestingly, $r^2$ estimates from the LME analysis yielded statistically lower effect size estimates across all $N$, relative to $\eta_{p}^2$ (Figure \@ref(fig:ABFX), panel E, all ps < .0001). This may be due to the simpler model structure of the LME resulting in larger random effects terms, which in turn would reduce the effect size estimate. We return to this in the discussion.
+_Effect sizes_ As can be seen in Figure \@ref(fig:ABFX), panel B, increasing $N$ both reduced the variability of observed effect sizes. Unsurprisingly, given the many demonstrations of the AB effect in the experimental psychology literature, the best estimate of the effect size (with $N_{313}$) was large (median $\eta_{p}^2$ = `r sprintf(".2f", res['313', 'stats_fx'][[1]][,"RM-AN"]$med)`, sd: `r sprintf(".2f", res['313', 'stats_fx'][[1]][,"RM-AN"]$sd)`). This estimate was comparable, although slightly smaller for the typical N of the field ($N_{25}$, median $\eta_{p}^2$ = `r sprintf(".2f", res['25', 'stats_fx'][[1]][,"RM-AN"]$med)`, sd: `r sprintf(".2f", res['25', 'stats_fx'][[1]][,"RM-AN"]$sd)`. This suggests that the long running median of effect sizes observed across AB studies would provide a reasonable estimate of the underlying effect. Examination of the QQ-plot between $\eta_{p}^2$ densities for $N_{25}$ and $N_{313}$ demonstrates higher variability for $N_{25}$, suggesting that imprecision in effect size estimates does exist in the field currently (Figure \@ref(fig:ABFX), panel C). In support of this, there was a strong negative relationship between $D_{KL}$ and $N$ ($r_{s}$(`r sprintf("%.0f", AB_KL_corrs[["RM-AN"]]$parameter)`) = `r sprintf("%.2f", AB_KL_corrs[["RM-AN"]]$estimate)`, p = `r sprintf("%.2e", AB_KL_corrs[["RM-AN"]]$p.value)`, see Figure \@ref(fig:ABFX), panel D). This suggests significant information loss when using experiments of lower N to produce effect size estimates for the AB. However, owing to the large effect under study, there were no differences between the observed effect size distributions and the estimated meta-analytic effect size, across all levels of $N$ (panel E), suggesting that the AB effect is large enough to yield consistent statistically significant results (and presumably publication). 
 
-_p Values_ All observed p-values were < .05, even for the lowest sample size ($N_{13}$). This was the case for both the RM-ANOVA and LME approaches (see Figure \@ref(fig:ABps), panels A and B), showing that both approaches would lead to the same decision-outcomes. Interestingly, p-values were lower overall for the LME approach. therefore use of these models would result in higher certainty that the null hypothesis is unlikely to be true. As can be seen in panel C, certainty around $p$ for the median $N$ for the field ($N_{25}$) is lower than $N_{313}$ by a ratio of `r abs(diff(res['313',"stats_p"][[1]][[3,1]]))/abs(diff(res['25',"stats_p"][[1]][[3,1]]))` for RM-ANOVA. The result was comparable for the LME approach. Collectively these data show that reproducibility is sound with the AB. 
-
+_p Values_ All observed p-values were < .05, even for the lowest sample size ($N_{13}$). (see Figure \@ref(fig:ABps), panel A), showing that decision-outcomes are likely the same across all AB experiments. Panel B shows the ratio between the 97.5 quantiles for $N_{med}$ relative to the other N's. Certainty around the most likely $p$ increased with increasing sample size up to a ratio of `r sprintf("%1.2f", diff(res[19,"stats_p"][[1]][,"RM-AN"]$qs)/diff(res['25',"stats_p"][[1]][,"RM-AN"]$qs))`. However, the median moved further from p=.05, so the certainty in the decision increases with increasing $N$. 
 
 ```{r, ABps, out.width='40%', fig.cap='Probit transformed p-values from the AB analysis, presented for selected N. A) p-values attained from the RM-ANOVA model. B) p-values attained from the LME model. The black dotted vertical line reflects alpha = .05 (probit transformed). Anything to the left of this line reflects a statistically significant result, C) Ratio between the range of p-values observed for each level of N, relative to the median N (25) for the field'}
-paradigm.fig.pth <- '../images/AB_ps.pdf'
+paradigm.fig.pth <- '../images/IMMAB_ps.pdf'
 knitr::include_graphics(paradigm.fig.pth)
 ```
 
-## Multitasking 
+## Multitasking
 
 ```{r, MT_F, message=F}
 mtfname <- "../data/total_of_313_subs_SingDual_task_trial_level_data.csv"
 mt_res <- do.MT.analysis(mtfname)
 ```
 
-As was anticipated, the multitask condition slowed RTs relative to single task conditions (see Figure \@ref(fig:MTFX)). RTs were on average `r abs(mt_res[[2]]$me_MT$estimate[[1]])` (95% CI[`r abs(mt_res[[2]]$me_MT$conf.int[1])`, `r abs(mt_res[[2]]$me_MT$conf.int[2])`] seconds (s) slower on MT trials (F(`r mt_res[[1]]$DFn[mt_res[[1]]$Effect == "trialtype"]`, `r mt_res[[1]]$DFd[mt_res[[1]]$Effect == "trialtype"]`) = `r mt_res[[1]]$F[mt_res[[1]]$Effect == "trialtype"]`,  $\eta_{p}^2$ = `r mt_res[[1]]$pes[mt_res[[1]]$Effect == "trialtype"]`, p<.0001). There was also a significant task modality (sound or visual) x task (ST vs MT) interaction  (F(`r mt_res[[1]]$DFn[mt_res[[1]]$Effect == "task:trialtype"]`, `r mt_res[[1]]$DFd[mt_res[[1]]$Effect == "task:trialtype"]`) = `r mt_res[[1]]$F[mt_res[[1]]$Effect == "task:trialtype"]`,  $\eta_{p}^2$ = `r mt_res[[1]]$pes[mt_res[[1]]$Effect == "task:trialtype"]`, p<.0001), with the MT cost (MT RT - ST RT) being larger for sound relative to visual tasks by on average `r abs(mt_res[[2]]$interaction$estimate[[1]])` (95% CI[`r abs(mt_res[[2]]$interaction$conf.int[1])`, `r abs(mt_res[[2]]$interaction$conf.int[2])`] s. This latter finding is typical in the multitasking literature (@hazeltineModalityPairingEffects2006, @garnerTransferabilityTrainingBenefits2015a), but is not pertinent to the focus of the current work which seeks to quantify the size of the main effect of multitasking cost.
+As was anticipated, the RTs were slowed on multitask relative to single task conditions (see Figure \@ref(fig:MTFX)). RTs were on average `r sprintf("%.2f", abs(mt_res[[2]]$me_MT$estimate[[1]]))` (95% CI[`r sprintf("%.2f", abs(mt_res[[2]]$me_MT$conf.int[2]))`, `r sprintf("%.2f", abs(mt_res[[2]]$me_MT$conf.int[1]))`] seconds (s) slower on MT trials (F(`r sprintf("%1.0f", mt_res[[1]]$DFn[mt_res[[1]]$Effect == "trialtype"])`, `r sprintf("%3.0f", mt_res[[1]]$DFd[mt_res[[1]]$Effect == "trialtype"])`) = `r sprintf("%4.0f", mt_res[[1]]$F[mt_res[[1]]$Effect == "trialtype"])`,  $\eta_{p}^2$ = `r sprintf("%.2f", mt_res[[1]]$pes[mt_res[[1]]$Effect == "trialtype"])`, p<.0001). There was also a significant task modality (sound or visual) x task (ST vs MT) interaction  (F(`r sprintf("%1.0f", mt_res[[1]]$DFn[mt_res[[1]]$Effect == "task:trialtype"])`, `r sprintf("%3.0f", mt_res[[1]]$DFd[mt_res[[1]]$Effect == "task:trialtype"])`) = `r sprintf("%2.1f", mt_res[[1]]$F[mt_res[[1]]$Effect == "task:trialtype"])`,  $\eta_{p}^2$ = `r sprintf("%.2f", mt_res[[1]]$pes[mt_res[[1]]$Effect == "task:trialtype"])`, p<.0001), with the MT cost (MT RT - ST RT) being larger for sound relative to visual tasks by on average `r sprintf("%.2f", abs(mt_res[[2]]$interaction$estimate[[1]]))` (95% CI[`r sprintf("%.2f", abs(mt_res[[2]]$interaction$conf.int[1]))`, `r sprintf(sprintf("%.2f", abs(mt_res[[2]]$interaction$conf.int[2])))`] s. This latter finding is typical in the multitasking literature (@hazeltineModalityPairingEffects2006, @garnerTransferabilityTrainingBenefits2015a), but is not pertinent to the focus of the current work which seeks to quantify the size of the main effect of multitasking cost.
 
 
 ```{r, MT_results, message=F}
@@ -345,9 +256,9 @@ load("../data/SD/SDstats.RData")
 ```
 
 
-```{r, MTFX, out.width='80%', fig.cap='MT Effects. A) Group mean RTs for multitasking condition for each task modality. As was expected, RTs were slower for multitasking relative to single-task conditions. B) Observed effect size densities for simulated experiments for select $N$, for the RM-ANOVA and LME analyses. C) KL divergenence when the density for each $N$ is used to approximate the density for N=313. D) The difference between the observed and meta-analytic effect size was very close to 0 for the RM-ANOVA approach, and more variable for the LME approaches, across all N. E) Difference between the mean effect size observed for the RM-ANOVA and LME analyses at each level of N. The effect size derived from the RM-ANOVA method was higher across all levels of N, S = single-task, M = multi-task, A = auditory manual task, V = visual manual task, RM-An = repeated measures ANOVA, LME = linear-mixed effects'}
+```{r, MTFX, out.width='80%', fig.cap='MT Effects. A) Violin plots of mean RTs for each multitasking condition broken down by task modality. As was expected, RTs were slower for multitasking relative to single-task conditions. B) Observed effect size densities for simulated experiments for select $N$. C) QQ-plot of $N_{med}$ = 25 against $N_{max}$. D) KL divergenence when the density for each $N$ is used to approximate the density for N=313. E) The difference between the observed and meta-analytic effect size was 0 across all N. S = single-task, M = multi-task, So = sound manual task, V = visual manual task'}
 
-paradigm.fig.pth <- '../images/SD_fx_main.pdf'
+paradigm.fig.pth <- '../images/IMMSD_fx_main.pdf'
 knitr::include_graphics(paradigm.fig.pth)
 
 ```
@@ -357,22 +268,15 @@ kl_inputs <- list(origin = "313", dv = "dens_fx", sub_Ns = paste(round(exp(seq(l
 MT_KL_corrs <- do_KL_and_spearmans(kl_inputs, res)
 names(MT_KL_corrs) <- c("RM-AN", "LME")
 
-
-
-MT_best_vs_typical <- comp_z(res['313', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`, 
-                             res['313', 'stats_fx'][[1]][2, "RM-AN"]$`RM-AN`,
-                             res['25', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`, 
-                             res['25', 'stats_fx'][[1]][2, "RM-AN"]$`RM-AN`)
-MT_best_vs_typical_p <- 2*pnorm(q=abs(MT_best_vs_typical), lower.tail=FALSE)
 ```
 
 
-_Effect sizes_ Similar the AB findings, the effect size results for the MT paradigm show that increasing $N$ reduced both the central tendency and the variability of observed $\eta_{p}^2$ (see Figure \@ref(fig:MTFX)). Again, the best estimate of the effect size (with $N_{313}$) was large (mean $\eta_{p}^2$ = `r res['313', 'stats_fx'][[1]][,1][[1]]`, sd: `r res['313', 'stats_fx'][[1]][,1][[2]]`). Despite that, this estimate was statistically smaller than that observed for the typical N of the field ($N_{25}$, mean $\eta_{p}^2$ = `r res['25', 'stats_fx'][[1]][,1][[1]]`, sd: `r res['25', 'stats_fx'][[1]][,1][[2]]`, $z$ = `r MT_best_vs_typical`, p < .0001). Therefore aggregating effect size observations with small $N$ would result in a small inflation of the estimate of the effect size for multitasking. Again, there was a strong negative relationship between $D_{KL}$ and $N$ for both the ANOVA ($r_{s}$(`r MT_KL_corrs[["RM-AN"]]$parameter`) = `r MT_KL_corrs[["RM-AN"]]$estimate`, p = `r MT_KL_corrs[["RM-AN"]]$p.value`) and LME approaches ($r_{s}$(`r MT_KL_corrs[["LME"]]$parameter`) = `r MT_KL_corrs[["LME"]]$estimate`, p = `r MT_KL_corrs[["LME"]]$p.value` see Figure \@ref(fig:MTFX), panel C), showing significant information loss when using experiments of lower N to quantify effect sizes for multitasking. Again, given the strnegth of the effect, there were no differences between the observed effect size distributions and the estimated meta-analytic effect size, across all levels of $N$ (panel D). Once again, $r^2$ estimates from the LME analysis yielded statistically lower effect size estimates across all $N$, relative to $\eta_{p}^2$ (Figure \@ref(fig:MTFX), panel E, all ps < .0001). This, in conjunction with the AB results, suggests a systematic difference in the computation of effect sizes for these models, that may need to be accounted for when making comparisons in the broader literature. 
+_Effect sizes_ Similar to the AB findings, the effect size results for the MT paradigm show that increasing $N$ reduced both the median estimate and the variability of $\eta_{p}^2$ (see Figure \@ref(fig:MTFX)). The best estimate of the effect size (with $N_{313}$) was large (median $\eta_{p}^2$ = `r sprintf("%.2f", res['313', 'stats_fx'][[1]][,"RM-AN"]$med)`, sd: `r sprintf("%.2f", res['313', 'stats_fx'][[1]][,"RM-AN"]$sd)`). This estimate was comparable to that observed for the typical N of the field ($N_{25}$, mean $\eta_{p}^2$ = `r sprintf("%.2f", res['25', 'stats_fx'][[1]][,"RM-AN"]$med)`, sd: `r sprintf("%.2f", res['25', 'stats_fx'][[1]][,"RM-AN"]$sd)`. Therefore the median estimate across all experiments from the field likely provides a reasonable estimate of the effect size for multitasking costs. However, examination of the QQ-plot between $\eta_{p}^2$ densities for $N_{25}$ and $N_{313}$ demonstrates higher variability for $N_{25}$ (Figure \@ref(fig:ABFX), panel C). Corrobatively, a strong negative relationship between $D_{KL}$ and $N$ ($r_{s}$ =`r sprintf("%2.0f", MT_KL_corrs[["RM-AN"]]$parameter)`) = `r sprintf("%.2f", MT_KL_corrs[["RM-AN"]]$estimate)`, p = `r sprintf("%.2e", MT_KL_corrs[["RM-AN"]]$p.value)`, Figure \@ref(fig:MTFX), panel D), suggests that any given effect size from $N_{med}$ holds a higher potential to be a misleading estimate. Also similar to the AB results and owing to the large effect size under study, there were no differences between the observed effect size distributions and the estimated meta-analytic effect size, across all levels of $N$ (panel E). 
 
-_p Values_ As with the AB, all observed p-values were < .05, even the lowest sample size ($N_{313}$). This was the case for both the RM-ANOVA and LME approaches (see Figure \@ref(fig:MTps), panels A and B), showing that both approaches would lead to the same decision-outcomes. Overall, p-values were lower for the LME approach. therefore use of these models would result in higher certainty that the null hypothesis is unlikely to be true. As can be seen in panel C, certainty around $p$ for the median $N$ for the field ($N_{25}$) is lower than $N_{313}$ with a ratio of `r abs(diff(res['313',"stats_p"][[1]][[3,1]]))/abs(diff(res['25',"stats_p"][[1]][[3,1]]))` for the ANOVA approach. The result was comparable for the LME approach. 
+_p Values_ As with the AB, all observed p-values were < .05, even the lowest sample size ($N_{13}$), see Figure \@ref(fig:MTps), panel A for example $p$ distributions). As can be seen in panel B, certainty in the median estimate of $p$ for $N_{25}$ is higher `r sprintf("%1.2f", diff(res[19,"stats_p"][[1]][,"RM-AN"]$qs)/diff(res['25',"stats_p"][[1]][,"RM-AN"]$qs))` times higher than $N_{313}$. However certainty in the decision as manifest in distance from p=.05, increased with each $N$.
 
 ```{r, MTps, out.width='40%', fig.cap='Probit transformed p-values from the MT analysis, presented for selected N. A) p-values attained from the ANOVA model. B) p-values attained from the LME model. The black dotted vertical line reflects alpha = .05 (probit transformed). Anything to the left of this line reflects a statistically significant result, C) Ratio between the range of p-values observed for each level of N, relative to the median N (25) for the field'}
-paradigm.fig.pth <- '../images/SD_ps.pdf'
+paradigm.fig.pth <- '../images/IMMSD_ps.pdf'
 knitr::include_graphics(paradigm.fig.pth)
 ```
 
@@ -399,9 +303,9 @@ names(CC_KL_corrs) <- c("RM-AN", "LME")
 
 
 
-CC_best_vs_typical <- comp_z(res['313', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`, 
+CC_best_vs_typical <- comp_z(res['313', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`,
                              res['313', 'stats_fx'][[1]][2, "RM-AN"]$`RM-AN`,
-                             res['25', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`, 
+                             res['25', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`,
                              res['25', 'stats_fx'][[1]][2, "RM-AN"]$`RM-AN`)
 CC_best_vs_typical_p <- 2*pnorm(q=abs(CC_best_vs_typical), lower.tail=FALSE)
 
@@ -445,9 +349,9 @@ names(SRT_KL_corrs) <- c("RM-AN", "LME")
 
 
 
-SRT_best_vs_typical <- comp_z(res['313', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`, 
+SRT_best_vs_typical <- comp_z(res['313', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`,
                              res['313', 'stats_fx'][[1]][2, "RM-AN"]$`RM-AN`,
-                             res['25', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`, 
+                             res['25', 'stats_fx'][[1]][1, "RM-AN"]$`RM-AN`,
                              res['25', 'stats_fx'][[1]][2, "RM-AN"]$`RM-AN`)
 SRT_best_vs_typical_p <- 2*pnorm(q=abs(CC_best_vs_typical), lower.tail=FALSE)
 

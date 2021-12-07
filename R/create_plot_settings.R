@@ -128,7 +128,8 @@ p_rat <- list(datpath = datpath,
               leg_locs = c(1, 0.95),
               leg_txt = mods,
               yl = c(0, 2.5),
-              imm = imm)
+              imm = imm,
+              mods = c("RM-AN"))
 
 # ----------------------------------------------------
 # meta-analytic vs observed fx sz ratio

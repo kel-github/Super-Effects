@@ -35,7 +35,7 @@ h = 2.36 * 2 # height
 # TASK SETTINGS
 # ----------------------------------------------------
 imm = TRUE
-task = "CC"
+task = "SD"
 if (imm) {
   load(paste("../data/", task, "/",
              "IMM", task, "_plot_settings.RData", sep = ""))
@@ -61,7 +61,7 @@ plot.mat = matrix(c(1, 1, 1, 2, 2, 2,
                   nrow = 2, byrow = T)
 layout(plot.mat)
 #plot_AB_results(fname)
-#plot_MT_results(fname)
+plot_MT_results(fname)
 #plot_SRT_results(fname)
 fig_label("A", cex = 2)
 plot_dens(fx)
@@ -143,12 +143,21 @@ dev.off()
 # ----------------------------------------------------
 # pvalue plots for 1 model
 # ----------------------------------------------------
-pdf(paste("../images/", task, "_", "ps", ".pdf", sep = ""),
-          width = w*.7, height = h*.5)
-par(mfrow = c(1, 1), mar = c(4, 3, 0, 0),
+w = 1.96*2
+h = 2.36*2
+if (imm){
+  pdf(paste("../images/", "IMM", task, "_", "ps", ".pdf", sep = ""),
+      width = w, height = h)  
+} else {
+  pdf(paste("../images/", task, "_", "ps", ".pdf", sep = ""),
+      width = w, height = h)
+}
+par(mfrow = c(2, 1), mar = c(4, 3, 0, 0),
 oma = c(1, 1, 1, 1),
 mgp = c(2, 1, 0), las = 1)
 plot_dens(p)
+plot_ratios(p_rat)
+fig_label("B", cex = 2)
 dev.off()
 
 # ----------------------------------------------------
