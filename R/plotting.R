@@ -600,7 +600,8 @@ plot_qq_med_vs_best <- function(qq_inputs){
       culm_ps[i] <- sum(culm_ps[i-1], ps[i])
     }
     # now get indexes for desired probs
-    probs <- seq(0, 1, 1/nps)
+    if (task != "SRT") probs <- seq(0, 1, 1/nps)
+    if (task == "SRT") probs <- seq(0, 3, 1/nps)
     idx <- c()
     for (iP in 1:length(probs)){
       idx[iP] <- which.min(abs(culm_ps - probs[iP]))
@@ -630,7 +631,7 @@ plot_qq_med_vs_best <- function(qq_inputs){
        cex = 1,
        col = wes_palette("IsleofDogs1")[6],
        ylab = expression(italic("N"[313])),
-       xlab = expression(italic("N"[25])),
+       xlab = expression(italic("N"[36])),
        cex.lab = 1,
        cex.axis = 1)
   abline(0, 1, lty=2, col="grey48")

@@ -35,7 +35,7 @@ h = 2.36 * 2 # height
 # TASK SETTINGS
 # ----------------------------------------------------
 imm = TRUE
-task = "SD"
+task = "SRT"
 if (imm) {
   load(paste("../data/", task, "/",
              "IMM", task, "_plot_settings.RData", sep = ""))
@@ -61,8 +61,8 @@ plot.mat = matrix(c(1, 1, 1, 2, 2, 2,
                   nrow = 2, byrow = T)
 layout(plot.mat)
 #plot_AB_results(fname)
-plot_MT_results(fname)
-#plot_SRT_results(fname)
+#plot_MT_results(fname)
+plot_SRT_results(fname)
 fig_label("A", cex = 2)
 plot_dens(fx)
 plot_qq_med_vs_best(qq_inputs)
@@ -86,11 +86,16 @@ if (task == "CC"){
   h = 2.36 * 2 # height
   pdf(paste("../images/", task, "_", "behav", ".pdf", sep = ""),
       width = w, height = h)
-  par(mfrow = c(1, 2), mar = c(3, 3, 1, 1),
-      oma = c(1, 2, 1, 1),
-      mgp = c(2, 1, 0), las = 0)
+  # par(mfrow = c(1, 2), mar = c(3, 3, 1, 1),
+  #     oma = c(1, 2, 1, 1),
+  #     mgp = c(2, 1, 0), las = 0)
+  plot.mat = matrix(c(1, 1, 2, 2, 2),
+                    nrow = 1, byrow = T)
+  layout(plot.mat)
   plot_CC_results(fname, "mean")
+  fig_label("A", cex = 2)  
   plot_CC_results(fname, "dist")
+  fig_label("B", cex = 2)  
   dev.off()
 }
 
@@ -163,16 +168,22 @@ dev.off()
 # ----------------------------------------------------
 # pvalue plots for 2 models
 # ----------------------------------------------------
-w = 1.96 * 4 # width of the plot, in inches
+w = 1.96 * 2 # width of the plot, in inches
 h = 2.36 * 2 # height
-pdf(paste("../images/", task, "_", "ps", ".pdf", sep = ""),
-    width = w, height = h)
-par(mfrow = c(1, 2), mar = c(4, 3, 0, 0),
+if (imm){
+  pdf(paste("../images/", "IMM", task, "_", "ps", ".pdf", sep = ""),
+      width = w, height = h)  
+} else {
+  pdf(paste("../images/", task, "_", "ps", ".pdf", sep = ""),
+      width = w, height = h)
+}
+par(mfrow = c(2, 2), mar = c(4, 3, 0, 0),
     oma = c(1, 1, 1, 1),
-    mgp = c(2, 1, 0), las = 1)
+    mgp = c(2, 1, 0), las = 0)
 plot_dens(p)
 fig_label("B", cex = 2)
-#plot_ratios(p_rat)
+plot_ratios(p_rat)
+fig_label("C", cex = 2)
 #abline(h=1, lty = 2, col = "grey48")
 #fig_label("C", cex = 2)
 dev.off()

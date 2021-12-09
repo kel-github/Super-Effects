@@ -1,8 +1,8 @@
 rm(list=ls())
 
-task <- "CC"
+task <- "SRT"
 datpath <- "../data/"
-medN <- "25"
+medN <- "36"
 mods <- c("RM-AN", "LME") #c("t", "p")
 imm = TRUE
 # ----------------------------------------------------
