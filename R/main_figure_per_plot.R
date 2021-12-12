@@ -35,7 +35,7 @@ h = 2.36 * 2 # height
 # TASK SETTINGS
 # ----------------------------------------------------
 imm = TRUE
-task = "SRT"
+task = "CC"
 if (imm) {
   load(paste("../data/", task, "/",
              "IMM", task, "_plot_settings.RData", sep = ""))
@@ -82,8 +82,8 @@ dev.off()
 # first plot CC behavioural data separately if using
 if (task == "CC"){
   
-  w = 1.96 * 4 # width of the plot, in inches
-  h = 2.36 * 2 # height
+  w = 1.96 * 3 # width of the plot, in inches
+  h = 2.36 * 1 # height
   pdf(paste("../images/", task, "_", "behav", ".pdf", sep = ""),
       width = w, height = h)
   # par(mfrow = c(1, 2), mar = c(3, 3, 1, 1),
