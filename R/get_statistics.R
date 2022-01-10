@@ -53,7 +53,7 @@ N <- sub_Ns
 j <- 1000
 if (task == "VSL"){
   j <- 1:1000
-# #  j <- j[-66]
+  # #  j <- j[-66]
   j <- j[-c(66,119,152)]
 }
 
@@ -73,23 +73,23 @@ get_data <- function(fstem, n, j, datpath, rxvnme) {
   # -- rxvnme: name of zipped rxv folder e.g. "CC"
   # -- model: "rfx" (LME) or "ffx" (e.g. ANOVA)
   if (nchar(rxvnme) <= nchar("VSL")) {
-       dn <- lapply(n, function(x) unzp(paste(datpath, rxvnme, "/", sep = ""),
-                                   paste(rxvnme, ".zip", sep = ""),
-                                   rxvnme,
-                                   rxvnme,
-                                   j,
-                                   x))
+    dn <- lapply(n, function(x) unzp(paste(datpath, rxvnme, "/", sep = ""),
+                                     paste(rxvnme, ".zip", sep = ""),
+                                     rxvnme,
+                                     rxvnme,
+                                     j,
+                                     x))
   } else {
-      dn <- lapply(n, function(x)
-                       unzp(paste(datpath, sub("IMM", "", rxvnme), "/", sep = ""),
-                            paste(rxvnme, ".zip", sep = ""),
-                            rxvnme,
-                            paste("imm_", sub("IMM", "", rxvnme), sep = ""),
-                            j,
-                            x))
+    dn <- lapply(n, function(x)
+      unzp(paste(datpath, sub("IMM", "", rxvnme), "/", sep = ""),
+           paste(rxvnme, ".zip", sep = ""),
+           rxvnme,
+           paste("imm_", sub("IMM", "", rxvnme), sep = ""),
+           j,
+           x))
   }
   dn <- do.call(rbind, dn)
-
+  
   get.dat <- function(f) {
     load(f)
     out
@@ -109,81 +109,85 @@ d2r <- function(dat, m) {
 data_proc <- function(fstem, n, j, datpath, rxvnme, convert) {
   # see get.data for input arg info
   # : -- convert = model name for which conversion is required
-
+  
   # do data preprocessing, largely for passing 
   # dat into the plotting or the stats function
   dat <- get_data(fstem, n, j, datpath, rxvnme)
   
   if (!is.na(convert)){
-  dat <- rbind(dat %>% filter(mod != convert),
-               d2r(dat, convert)) 
+    dat <- rbind(dat %>% filter(mod != convert),
+                 d2r(dat, convert)) 
   }
   
-  dat <- dat %>% mutate(p = qnorm(p))
+  #dat <- dat %>% mutate(p = qnorm(p))
   dat %>% ungroup()
 }
 
 compute_stats <- function(dat) {
-   # given the output of the data preprocessing (data.proc), 
-   # compute the required stats
-# -----------------------------------------------------------------
-   # for each model produce a density for
-   # the effect sizes and for the p-values
-# -----------------------------------------------------------------
-   do_dens <- function(dat, x, dv) {
-     tryCatch(
+  # given the output of the data preprocessing (data.proc), 
+  # compute the required stats
+  # -----------------------------------------------------------------
+  # for each model produce a density for
+  # the effect sizes and for the p-values
+  # -----------------------------------------------------------------
+  do_dens <- function(dat, x, dv) {
+    tryCatch(
       {
-        density(dat[dat$mod == x, dv])
+        if (dv == "p"){
+          density(qnorm(dat[dat$mod == x, dv]))
+        } else {
+          density(dat[dat$mod == x, dv])
+        }
       },
-        error = function(cond) {
+      error = function(cond) {
         NULL
       }
-     )
-   }
-   mods <- unique(dat$mod)
-   dens_fx <- lapply(mods, do_dens, dat = dat, dv = "esz")
-   names(dens_fx) <- mods
-   dens_p <- lapply(mods, do_dens, dat = dat, dv = "p")
-   names(dens_p) <- mods
-
-# -----------------------------------------------------------------
-   # for each model, get the central tendency, sd,
-   # and .025 & .975 quantiles
-# -----------------------------------------------------------------
-   get_stats <- function(y) {
-     mu <- mean(y)
-     med <- median(y)
-     sd <- sd(y)
-     qs <- quantile(y, probs = c(.025, .975))
-     list(mu=mu, med=med, sd=sd, qs=qs)
-   }
-   stats_fx <- sapply(mods,
-              function(x) get_stats(dat$esz[dat$mod == x & is.finite(dat$esz)]))
-   stats_p <- sapply(mods,
-              function(x) get_stats(pnorm(dat$p[dat$mod == x & is.finite(dat$esz)])))
-
+    )
+  }
+  mods <- unique(dat$mod)
+  dens_fx <- lapply(mods, do_dens, dat = dat, dv = "esz")
+  names(dens_fx) <- mods
+  dens_p <- lapply(mods, do_dens, dat = dat, dv = "p")
+  names(dens_p) <- mods
+  
+  # -----------------------------------------------------------------
+  # for each model, get the central tendency, sd,
+  # and .025 & .975 quantiles
+  # -----------------------------------------------------------------
+  get_stats <- function(y) {
+    mu <- mean(y)
+    med <- median(y)
+    sd <- sd(y)
+    qs <- quantile(y, probs = c(.025, .975))
+    list(mu=mu, med=med, sd=sd, qs=qs)
+  }
+  stats_fx <- sapply(mods,
+                     function(x) get_stats(dat$esz[dat$mod == x & is.finite(dat$esz)]))
+  stats_p <- sapply(mods,
+                    function(x) get_stats(dat$p[dat$mod == x & is.finite(dat$esz)]))
+  
   # -------------------------------------------------------------
-   # for each model, get the percent of 'significant results'
-   # -----------------------------------------------------------
-   psig <- function(data,y) {
-      sum(data$p[data$mod == y] < qnorm(.05)) / length(data$p[data$mod == y])
-   }
-   sig <- sapply(mods, psig, data = dat)
-
+  # for each model, get the percent of 'significant results'
+  # -----------------------------------------------------------
+  psig <- function(data,y) {
+    sum(data$p[data$mod == y] < .05) / length(data$p[data$mod == y])
+  }
+  sig <- sapply(mods, psig, data = dat)
+  
   # -----------------------------------------------------
-   # get the mean effect size from 'sig results'
-   # ----------------------------------------------------
-   stats_sig <- sapply(mods,
-                       function(x) get_stats(dat$esz[dat$mod == x & is.finite(dat$esz) & dat$p < qnorm(.05)]) )
-
-   #--------------------------------------------------
-   # return it all!
-   # -------------------------------------------------
-   res <- list(dens_fx, dens_p, stats_fx, stats_p, sig, stats_sig)
-   names(res) <- c("dens_fx", "dens_p", 
-                   "stats_fx", "stats_p", 
-                   "sig", "stats_sig")
-   res
+  # get the mean effect size from 'sig results'
+  # ----------------------------------------------------
+  stats_sig <- sapply(mods,
+                      function(x) get_stats(dat$esz[dat$mod == x & is.finite(dat$esz) & dat$p < .05]) )
+  
+  #--------------------------------------------------
+  # return it all!
+  # -------------------------------------------------
+  res <- list(dens_fx, dens_p, stats_fx, stats_p, sig, stats_sig)
+  names(res) <- c("dens_fx", "dens_p", 
+                  "stats_fx", "stats_p", 
+                  "sig", "stats_sig")
+  res
 }
 
 stats_4_subs <- function(fstem, n, j, datpath, rxvnme, convert) {
