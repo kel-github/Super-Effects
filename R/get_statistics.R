@@ -160,7 +160,7 @@ compute_stats <- function(dat) {
    stats_fx <- sapply(mods,
               function(x) get_stats(dat$esz[dat$mod == x & is.finite(dat$esz)]))
    stats_p <- sapply(mods,
-              function(x) get_stats(dat$p[dat$mod == x & is.finite(dat$esz)]))
+              function(x) get_stats(pnorm(dat$p[dat$mod == x & is.finite(dat$esz)])))
 
   # -------------------------------------------------------------
    # for each model, get the percent of 'significant results'

@@ -35,7 +35,7 @@ h = 2.36 * 2 # height
 # TASK SETTINGS
 # ----------------------------------------------------
 imm = TRUE
-task = "CC"
+task = "AB"
 if (imm) {
   load(paste("../data/", task, "/",
              "IMM", task, "_plot_settings.RData", sep = ""))
@@ -60,9 +60,9 @@ plot.mat = matrix(c(1, 1, 1, 2, 2, 2,
                     3, 3, 4, 4, 5, 5),
                   nrow = 2, byrow = T)
 layout(plot.mat)
-#plot_AB_results(fname)
+plot_AB_results(fname)
 #plot_MT_results(fname)
-plot_SRT_results(fname)
+#plot_SRT_results(fname)
 fig_label("A", cex = 2)
 plot_dens(fx)
 plot_qq_med_vs_best(qq_inputs)
