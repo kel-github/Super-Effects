@@ -223,7 +223,7 @@ plot_ratios <- function(rat_inputs) {
   mods <- rat_inputs$mods # model ratios to plot
   imm <- rat_inputs$imm # TRUE or FALSE for sampling type
   if (ratio_type == "origin" | ratio_type == "KL") origin <- rat_inputs$origin
-  
+  if (dv == "stats_p") yl <- NULL # a hack setting because I don't want to go back and resave all the plot settings
   # ----------------------------------------------------
   # load data
   # ----------------------------------------------------
@@ -267,8 +267,8 @@ plot_ratios <- function(rat_inputs) {
       nuyl = yl
       if (dv == "stats_p") rownames(ratios) <- sub_Ns
     }
-    if (ratio_type == "KL"){
-      xs = sub_Ns
+    if (ratio_type == "KL" | dv == "stats_p" ){
+      xs = as.numeric(sub_Ns)
     } else {
       xs = 1:length(rownames(ratios))
     }
@@ -283,7 +283,7 @@ plot_ratios <- function(rat_inputs) {
          xlab = expression(italic("N")),
          cex.lab = 1,
          cex.axis = 1)
-    if (ratio_type == "KL"){
+    if (ratio_type == "KL" | dv == "stats_ps"){
       axis(1, at = sub_Ns,
            labels = sub_Ns,
            cex.lab = 1,
@@ -323,13 +323,14 @@ plot_ratios <- function(rat_inputs) {
     } else {
       nuyl = yl
     }
-    if (ratio_type == "KL"){
-      xs = sub_Ns
+    if (ratio_type == "KL" | dv == "stats_p"){
+      xs = as.numeric(sub_Ns)
     } else {
       xs = 1:length(rownames(ratios))
     }
     plot(x = xs, y = ratios[, 1], 
          xaxt = "n",
+         yaxt = "n",
          bty = "n",
          type = "l", lty = 1,
          lwd = 2,
@@ -339,14 +340,27 @@ plot_ratios <- function(rat_inputs) {
          xlab = expression(italic("N")),
          cex.lab = 1,
          cex.axis = 1)
-    if (ratio_type == "KL"){
-      axis(1, at = sub_Ns, 
+    if (ratio_type == "KL" | dv == "stats_p"){
+      axis(1, at = as.numeric(sub_Ns), 
            labels = sub_Ns, 
+           cex.lab = 1,
+           cex.axis = 1)
+      if (dv == "stats_p"){
+        ylabels <- sprintf("%.1e", nuyl)
+      } else {
+        ylabels <- sprintf("%.2f", nuyl)
+      }
+      axis(2, at = nuyl,
+           labels = ylabels,
            cex.lab = 1,
            cex.axis = 1)
     } else {
       axis(1, at = seq(1, 20, 2), 
            labels = sub_Ns[seq(1, 20, 2)], 
+           cex.lab = 1,
+           cex.axis = 1)
+      axis(2, at = nuyl,
+           labels = nuyl,
            cex.lab = 1,
            cex.axis = 1)
     }
