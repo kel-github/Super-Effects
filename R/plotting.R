@@ -256,16 +256,19 @@ plot_ratios <- function(rat_inputs) {
   if (length(mods) > 1) {
     if (is.null(yl)){
       if (ncol(ratios) != 2){
+        if (is.list(ratios)){
         nuyl = c(0,
                  max(cbind(do.call(cbind, ratios[, "RM-AN"]),
                            do.call(cbind, ratios[, "LME"]))))
+        } else {
+          nuyl = c(0, max(ratios))
+        } 
       } else {
         nuyl = c(0, max(ratios))
         rownames(ratios) <- sub_Ns
       }
     } else {
       nuyl = yl
-      if (dv == "stats_p") rownames(ratios) <- sub_Ns
     }
     if (ratio_type == "KL" | dv == "stats_p" ){
       xs = as.numeric(sub_Ns)
@@ -284,8 +287,8 @@ plot_ratios <- function(rat_inputs) {
          cex.lab = 1,
          cex.axis = 1)
     if (ratio_type == "KL" | dv == "stats_ps"){
-      axis(1, at = sub_Ns,
-           labels = sub_Ns,
+      axis(1, at = as.numeric(sub_Ns),
+           labels = as.numeric(sub_Ns),
            cex.lab = 1,
            cex.axis = 1)
     } else {
@@ -298,8 +301,8 @@ plot_ratios <- function(rat_inputs) {
       points(x = xs, y = ratios[, "LME"],
              pch = 19, col = wes_palette("IsleofDogs1")[5])
     } else {
-      if (ratio_type == "KL"){
-        xs = sub_Ns
+      if (ratio_type == "KL" | dv == "stats_p"){
+        xs = as.numeric(sub_Ns)
       } else {
         xs = 1:length(rownames(ratios))
       }

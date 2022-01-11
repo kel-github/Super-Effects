@@ -35,7 +35,7 @@ h = 2.36 * 2 # height
 # TASK SETTINGS
 # ----------------------------------------------------
 imm = TRUE
-task = "SD"
+task = "CC"
 if (imm) {
   load(paste("../data/", task, "/",
              "IMM", task, "_plot_settings.RData", sep = ""))
@@ -62,7 +62,7 @@ plot.mat = matrix(c(1, 1, 1, 2, 2, 2,
 layout(plot.mat)
 par(las=1)
 #plot_AB_results(fname)
-plot_MT_results(fname)
+#plot_MT_results(fname)
 #plot_SRT_results(fname)
 fig_label("A", cex = 2)
 plot_dens(fx)
@@ -116,6 +116,8 @@ if (task == "CC"){
                       3, 3, 4, 4, 5, 5),
                     nrow = 2, byrow = T)
   layout(plot.mat)
+  par(las=1)
+  
   plot_dens(fx)
   fig_label("B", cex = 2)
   plot_qq_med_vs_best(qq_inputs)
@@ -162,7 +164,7 @@ if (imm){
 }
 par(mfrow = c(2, 2), mar = c(4, 3, 0, 0),
     oma = c(1, 1, 1, 1),
-    mgp = c(2, 1, 0), las = 0)
+    mgp = c(2, 1, 0), las = 2)
 plot_dens(p)
 fig_label("B", cex = 2)
 plot_ratios(p_rat)
