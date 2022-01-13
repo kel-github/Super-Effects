@@ -223,7 +223,8 @@ plot_ratios <- function(rat_inputs) {
   mods <- rat_inputs$mods # model ratios to plot
   imm <- rat_inputs$imm # TRUE or FALSE for sampling type
   if (ratio_type == "origin" | ratio_type == "KL") origin <- rat_inputs$origin
-  if (dv == "stats_p") yl <- NULL # a hack setting because I don't want to go back and resave all the plot settings
+  if (dv == "stats_p") yl <- NULL # a hack setting because I don't want to go back and resave all the 
+  # plot settings and I want yl to be set by the data range rather than by a pre-defined value
   # ----------------------------------------------------
   # load data
   # ----------------------------------------------------
@@ -286,7 +287,7 @@ plot_ratios <- function(rat_inputs) {
          xlab = expression(italic("N")),
          cex.lab = 1,
          cex.axis = 1)
-    if (ratio_type == "KL" | dv == "stats_ps"){
+    if (ratio_type == "KL" | dv == "stats_p"){
       axis(1, at = as.numeric(sub_Ns),
            labels = as.numeric(sub_Ns),
            cex.lab = 1,
@@ -698,3 +699,84 @@ plot_qq_med_vs_best <- function(qq_inputs){
     }
   }
 } 
+
+mean_med_mode <- function(plot_set){
+  # hacky function to plot mean, median and mode from selected n, using fx settngs
+  # ----------------------------------------------------
+  # settings - see fx for definitions
+  # ----------------------------------------------------
+  # imm = TRUE if immediate samples
+  # datpath
+  # task
+  # sel_n
+  # xlabs
+
+  datpath = plot_set$datpath
+  task = plot_set$task
+  imm = plot_set$imm
+  sel_n = plot_set$sel_n
+  xlabs = plot_set$xlabs
+  # ----------------------------------------------------
+  # load data and assign variables
+  # ----------------------------------------------------
+  palette_choice <- wes_palette("IsleofDogs1")[c(1, 2, 3, 5)] # for colours
+  if (imm) {
+    load(paste(datpath, task, "/", "IMM", task, "stats.RData", sep = ""))
+  } else {
+    load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
+  }
+# first get mode values    
+  get_mode_idx <- function(res, N, mod){
+    which(abs(max(res[N, "dens_fx"][[1]][[mod]]$y)-res[N, "dens_fx"][[1]][[mod]]$y) 
+          == min(abs(max(res[N, "dens_fx"][[1]][[mod]]$y)-res[N, "dens_fx"][[1]][[mod]]$y)))
+  }
+  mode_idxs <- list(RM = sapply(sel_n, get_mode_idx, res=res, mod = "RM-AN"),
+                    LME = sapply(sel_n, get_mode_idx, res=res, mod = "LME"))
+  get_mode <- function(res, N, mod, idx){
+    res[N, "dens_fx"][[1]][[mod]]$x[idx[N]]
+  }
+  modes <- list(RM = sapply(sel_n, get_mode, res=res, mod="RM-AN", idx=mode_idxs$RM),
+                LME = sapply(sel_n, get_mode, res=res, mod="LME", idx=mode_idxs$LME))
+  
+  # now get medians
+  meds <- list(RM = do.call(cbind, sapply(sel_n, function(x) res[x, "stats_fx"][[1]]["med", "RM-AN"])),
+               LME = do.call(cbind, sapply(sel_n, function(x) res[x, "stats_fx"][[1]]["med", "LME"])))
+  
+  mus <- list(RM = do.call(cbind, sapply(sel_n, function(x) res[x, "stats_fx"][[1]]["mu", "RM-AN"])),
+              LME = do.call(cbind, sapply(sel_n, function(x) res[x, "stats_fx"][[1]]["mu", "LME"])))
+
+  # ----------------------------------------------------  
+  # now can begin plotting
+  # ----------------------------------------------------
+  # PLOT 1st FX
+  ylims <- c(.01, .07)
+  plot(as.numeric(sel_n), modes$RM, 
+       pch = 17, col = palette_choice,
+       xaxt = "n", yaxt = "n", ylim = ylims,
+       xlab = "N", ylab = xlabs[1], bty = "n")
+  points(as.numeric(sel_n), meds$RM,
+         pch = 19, col = palette_choice)
+  points(as.numeric(sel_n), mus$RM,
+         pch = 15, col = palette_choice)
+  axis(1, at=as.numeric(sel_n), labels = sel_n)
+  axis(2, at=ylims, labels=as.character(ylims))
+  
+  # add legend here
+  legend(x=250, y=ylims[2],
+         legend = c("mode", "med", "mu"),
+         pch = c(17, 19, 15), bty="n")
+  fig_label("C", cex = 2)
+  
+  # PLOT 2nd FX
+  ylims <- c(.01, .14)
+  plot(as.numeric(sel_n), modes$LME, 
+       pch = 17, col = palette_choice,
+       xaxt = "n", yaxt = "n", ylim = ylims,
+       xlab = "N", ylab = xlabs[1], bty = "n")
+  points(as.numeric(sel_n), meds$LME,
+         pch = 19, col = palette_choice)
+  points(as.numeric(sel_n), mus$LME,
+         pch = 15, col = palette_choice)
+  axis(1, at=as.numeric(sel_n), labels = sel_n)
+  axis(2, at=ylims, labels=as.character(ylims))
+}
