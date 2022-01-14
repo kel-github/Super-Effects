@@ -155,8 +155,8 @@ dev.off()
 # ----------------------------------------------------
 # pvalue plots for 2 models
 # ----------------------------------------------------
-w = 1.96 * 2.5 # width of the plot, in inches
-h = 2.36 * 2 # height
+w = 1.96 * 3 # width of the plot, in inches
+h = 2.36 * 2.5 # height
 if (imm){
   pdf(paste("../images/", "IMM", task, "_", "ps", ".pdf", sep = ""),
       width = w, height = h)  
