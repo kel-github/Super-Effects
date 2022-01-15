@@ -13,6 +13,8 @@ An accurate quantification of effect sizes for an experimental manipulation has 
 Data:
 Preprint:
 
+<br>
+
 ##Background: 
 
 Data taken from the Executive Function and Implicit Learning (EFIL) project run by Abbey Nydam and Paul Dux for the Team Honours Thesis in 2019.
@@ -23,6 +25,8 @@ Uses data from 313 1st-year psychology participants on a battery of cognitive ta
 3. Contextual Cuing
 4. Serial Reaction Time Task
 5. Visual Statistical Learning
+
+<br>
 
 ## Quick guide to repo
 
