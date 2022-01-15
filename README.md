@@ -24,11 +24,12 @@ Uses data from 313 1st-year psychology participants on a battery of cognitive ta
 2. Multitasking paradigm (also referred to as single and dual task [SD])
 3. Contextual Cuing
 4. Serial Reaction Time Task
-5. Visual Statistical Learning
 
 <br>
 
 ## Quick guide to repo
 
-Running of code in this repository requires the 'data' folder from [insert link] be downloaded and stored locally in the top level directory of this repo. Code to run the analysis is in 'R' (see that folder for further info). To generate the manuscript document, knit the .Rmd file in 'doc'
+Running of code in this repository requires the 'data' folder from [insert link] be downloaded and stored locally in the top level directory of this repo. Code to run the analysis is in 'R' (see that folder for further info). To generate the manuscript document, knit the .Rmd file in 'doc'. <p>
+
+The code for the appendices of the paper can also be found in 'doc'
 
