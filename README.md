@@ -1,7 +1,9 @@
 # Quantifying error in effect size estimates in executive function and implicit learning
 
 Lead: Kelly Garner; Co-authors: Christopher Nolan, Abbey Nydam, Zoie Nott, Howard Bowman, & Paul Dux <p>
-	
+
+CC BY-SA
+
 <br>
 
 ##Project Overview:
