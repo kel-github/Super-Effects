@@ -57,7 +57,7 @@ if (imm){
       width = w, height = h)
 }
 plot.mat = matrix(c(1, 1, 1, 2, 2, 2,
-                    3, 3, 4, 4, 5, 5),
+                    3, 3, 3, 4, 4, 4),
                   nrow = 2, byrow = T)
 layout(plot.mat)
 par(las=1)
@@ -68,11 +68,12 @@ fig_label("A", cex = 2)
 plot_dens(fx)
 plot_qq_med_vs_best(qq_inputs)
 fig_label("C", cex = 2)
-plot_ratios(kl)
-fig_label("D", cex = 2)
 plot_mean_vs_meta(meta_mu)
-fig_label("E", cex = 2)
+fig_label("D", cex = 2)
 dev.off()
+
+# plot_ratios(kl)
+# fig_label("D", cex = 2)
 
 # ----------------------------------------------------
 # plotting
@@ -114,7 +115,7 @@ if (task == "CC"){
   }
   plot.mat = matrix(c(1, 1, 1, 2, 2, 2, 
                       3, 3, 3, 4, 4, 4,
-                      5, 5, 6, 6, 7, 7),
+                      5, 5, 5, 6, 6, 6),
                     nrow = 3, byrow = T)
   layout(plot.mat)
   par(las=1)
@@ -124,10 +125,8 @@ if (task == "CC"){
   fig_label("D", cex = 2)
   plot_qq_med_vs_best(qq_inputs)
   fig_label("E", cex = 2)
-  plot_ratios(kl)
-  fig_label("F", cex = 2)
   plot_mean_vs_meta(meta_mu)
-  fig_label("G", cex = 2)
+  fig_label("F", cex = 2)
   dev.off()
   
 }
@@ -144,9 +143,15 @@ if (imm){
   pdf(paste("../images/", task, "_", "ps", ".pdf", sep = ""),
       width = w, height = h)
 }
-par(mfrow = c(2, 1), mar = c(5, 4, 0, 0),
-oma = c(1, 1, 1, 1),
-mgp = c(2, 1, 0), las = 1)
+
+plot.mat = matrix(c(1, 1, 1,
+                    2, 2, 2),
+                  nrow = 2, byrow = T)
+layout(plot.mat)
+par(las=1)
+# par(mfrow = c(2, 1), mar = c(5, 4, 0, 0),
+# oma = c(1, 1, 1, 1),
+# mgp = c(2, 1, 0), las = 1)
 plot_dens(p)
 plot_ratios(p_rat)
 fig_label("B", cex = 2)
@@ -164,9 +169,11 @@ if (imm){
   pdf(paste("../images/", task, "_", "ps", ".pdf", sep = ""),
       width = w, height = h)
 }
-par(mfrow = c(2, 2), mar = c(4, 3, 1, 1),
-    oma = c(1, 1, 1, 1),
-    mgp = c(2, 1, 0), las = 0)
+plot.mat = matrix(c(1, 1, 1, 2, 2, 2,
+                    3, 3, 3, 3, 3, 3),
+                  nrow = 2, byrow = T)
+layout(plot.mat)
+par(las=1)
 plot_dens(p)
 fig_label("B", cex = 2)
 plot_ratios(p_rat)

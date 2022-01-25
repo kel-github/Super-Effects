@@ -175,8 +175,8 @@ calc_kl_sing_origin <- function(rat_inputs, res) {
     # -- pf: function for p - P IS THE P DIST
     # -- pq: function for q - Q IS THE APPROXIMATING DIST
     # -- x: values of x
-    p <- pf(x) +(rnorm(length(x), 0, 1e-06)^2)
-    q <- qf(x) +(rnorm(length(x), 0, 1e-06)^2)
+    p <- pf(x) + (rnorm(length(x), 0, 1e-06)^2)
+    q <- qf(x) + (rnorm(length(x), 0, 1e-06)^2)
     kl <- p * log2(p / q)
     sum(kl, na.rm = T)
   }
@@ -763,7 +763,7 @@ mean_med_mode <- function(plot_set){
   
   # add legend here
   legend(x=250, y=ylims[2],
-         legend = c("mode", "med", "mu"),
+         legend = c("mode", "med", "mean"),
          pch = c(17, 19, 15), bty="n")
   fig_label("C", cex = 2)
   
