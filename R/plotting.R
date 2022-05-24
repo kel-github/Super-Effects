@@ -678,7 +678,7 @@ plot_qq_med_vs_best <- function(qq_inputs){
        cex = 1,
        col = wes_palette("IsleofDogs1")[6],
        ylab = expression(italic("N"[313])),
-       xlab = expression(italic("N"[42])),
+       xlab = expression(italic("N"[36])),
        cex.lab = 1,
        cex.axis = 1)
   abline(0, 1, lty=2, col="grey48")

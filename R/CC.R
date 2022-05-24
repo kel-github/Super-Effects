@@ -71,7 +71,7 @@ ffx.dat <- dat %>% mutate(Block.No = rep(c(1:12), each = 24, length(unique(dat$S
 subs  <- unique(ffx.dat$Subj.No)
 
 # ----------------------------------------------------------------------------------------------------
-# run simulations, getting p values from t.tests, and cohen's d values, and save results to a list, using immediate sampling
+# run simulations, and save results to a list, using immediate sampling
 # ----------------------------------------------------------------------------------------------------
 fstem <- paste(outpath, "/imm_CC_N-%d_parent-%d.RData", sep="")
 lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1,
@@ -85,12 +85,12 @@ lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1,
 # # ----------------------------------------------------------------------------------------------------
 # # run simulations, getting p values from t.tests, and cohen's d values, and save results to a list, using intermediate sampling
 # # ----------------------------------------------------------------------------------------------------
-fstem <- paste(outpath, "/CC_N-%d_parent-%d.RData", sep="")
-lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, 
-                                     k=n.inner, j=n.outer, outer_index=i.outer,
-                                     cores=cores, 
-                                     f=get.ps.CC, 
-                                     fstem=fstem, samp="int",
-                                     seeds=seeds))
+# fstem <- paste(outpath, "/CC_N-%d_parent-%d.RData", sep="")
+# lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, 
+#                                      k=n.inner, j=n.outer, outer_index=i.outer,
+#                                      cores=cores, 
+#                                      f=get.ps.CC, 
+#                                      fstem=fstem, samp="int",
+#                                      seeds=seeds))
 
 

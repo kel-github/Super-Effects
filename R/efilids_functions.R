@@ -390,6 +390,9 @@ get.ps.CC <- function(data){
           get_anova_table(anova_test(data=data%>%ungroup(), dv=RT, wid=sub, within=c(block,trialtype), effect.size="pes", type=1))
   })
 
+  # compute partial epsilon sq:
+  peps <- compute_partial_epsilon_sq(an)
+  peps <- peps[names(peps) %in% c("block:trialtype", "block")]
   # RUN LME VERSION 
   # Notes: this is commented out as I wound up ditching the LME side of the analyses
   # However, I kept the infrastructure so that I could send the main effect of 
@@ -410,7 +413,8 @@ get.ps.CC <- function(data){
   p <- c(an$p[an$Effect == 'block:trialtype'], an$p[an$Effect == 'trialtype'])
   out$p <- p
   
-  peta <- c(an$pes[an$Effect == 'block:trialtype'], an$pes[an$Effect == 'trialtype']) 
+  #peta <- c(an$pes[an$Effect == 'block:trialtype'], an$pes[an$Effect == 'trialtype']) 
+  peta <- c(peps[names(peps) == "block:trialtype"], peps[names(peps) == "block"])
   out$esz <- peta
   # get residuals from lme model
   #df = as.data.frame(VarCorr(mod))
@@ -420,7 +424,6 @@ get.ps.CC <- function(data){
   out$eRes = c(NA, NA)
   out
 }
-
 
 # ----------------------------------------------------------------------------------------------------
 ###### aov and LME functions for SD data
@@ -976,7 +979,19 @@ d2r <- function(d, model_name){
         filter(x>0))
   }
 
-
+compute_partial_epsilon_sq <- function(an){
+  # given 'an' [output from get_anova_table(anova_test(...))], compute
+  # partial epsilon sq for each effect
+  # uses equation of appendix A of Albers & Lakens 2018, see: 
+  # https://www.sciencedirect.com/science/article/pii/S002210311630230X
+  ## inputs:
+  # -- an [output from get_anova_table(anova_test(...))]
+  ## outputs:
+  # -- 
+  
+  sapply(unique(an$Effect), function(x) (an$F[an$Effect == x] - 1) / 
+           (an$F[an$Effect == x] + (an$DFn[an$Effect == x]/an$DFd[an$Effect == x])))
+}
 
 
 
