@@ -88,14 +88,14 @@ plot_CC_results <- function(fname, type) {
       summarise(mu = mean(RT),
                 se = sd(RT) / sqrt(length(RT))) %>% 
       ungroup()
-    
+    par(las=1)
     with(ffx_dat, plot(x = block[type == "Novel"],
                        y = mu[type == "Novel"],
                        bty = "n",
                        pch = 20,
                        cex = 1,
                        col = wes_palette("IsleofDogs1")[3],
-                       ylim = c(0.8, 1.5),
+                       ylim = c(0.95, 1.3),
                        ylab = expression(italic(paste(mu, "RT", sep = " "))),
                        xlab = expression(italic("block")),
                        cex.lab = 1,

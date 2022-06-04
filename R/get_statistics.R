@@ -13,7 +13,6 @@ library(tidyverse) # for data wrangling
 library(wesanderson) # palette for some sweet figure colours
 library(cowplot)
 library(lme4) # for mixed effects modelling
-library(ggridges)
 library(car)
 library(parallel)
 source("efilids_functions.R") # custom functions written for this project
@@ -40,10 +39,10 @@ source("R_rainclouds.R") # functions for plotting
 # -----------------------------------------------------------------
 # define session variables
 # -----------------------------------------------------------------
-task <- "AB"
+task <- "imm_CC"
 sub_Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
 convert <- NA
-rxvnme <- "IMMAB"
+rxvnme <- "EPSCC"
 
 # -----------------------------------------------------------------
 # relatively constant settings
@@ -52,12 +51,12 @@ fstem <- "_N-%d_parent-%d.RData"
 N <- sub_Ns
 j <- 1000
 datpath <- "../data/"
-fname_add <- "IMM" #"IMM" #NULL # string or NULL
+fname_add <- "EPS" #"IMM" #NULL # string or NULL
 
 # -----------------------------------------------------------------
 # define functions
 # -----------------------------------------------------------------
-get_data <- function(fstem, n, j, datpath, rxvnme) {
+get_data <- function(fstem, n, j, datpath, rxvnme, fname_add) {
   # concatenate data for one task
   # -- fstem: fstem = filestem to be sprintf'd with N and j
   # -- n: vector of sub sample sizes
@@ -66,6 +65,7 @@ get_data <- function(fstem, n, j, datpath, rxvnme) {
   # -- datpath: where is the data? (relative path)
   # -- rxvnme: name of zipped rxv folder e.g. "CC"
   # -- model: "rfx" (LME) or "ffx" (e.g. ANOVA)
+  # -- fname_add: the text to remove or add from filepaths (e.g. IMM or EPS)
   if (nchar(rxvnme) <= nchar("VSL")) {
     dn <- lapply(n, function(x) unzp(paste(datpath, rxvnme, "/", sep = ""),
                                      paste(rxvnme, ".zip", sep = ""),
@@ -75,10 +75,10 @@ get_data <- function(fstem, n, j, datpath, rxvnme) {
                                      x))
   } else {
     dn <- lapply(n, function(x)
-      unzp(paste(datpath, sub("IMM", "", rxvnme), "/", sep = ""),
+      unzp(paste(datpath, sub(fname_add, "", rxvnme), "/", sep = ""), 
            paste(rxvnme, ".zip", sep = ""),
            rxvnme,
-           paste("imm_", sub("IMM", "", rxvnme), sep = ""),
+           paste("imm_", sub(fname_add, "", rxvnme), sep = ""),
            j,
            x))
   }
@@ -105,7 +105,7 @@ data_proc <- function(fstem, n, j, datpath, rxvnme, convert) {
   # : -- convert = model name for which conversion is required
   # do data preprocessing, largely for passing 
   # dat into the plotting or the stats function
-  dat <- get_data(fstem, n, j, datpath, rxvnme)
+  dat <- get_data(fstem, n, j, datpath, rxvnme, fname_add)
   if (!is.na(convert)) {
     dat <- rbind(dat %>% filter(mod != convert),
                  d2r(dat, convert))
@@ -204,7 +204,7 @@ res <- do.call(rbind, res) # makes it neater for reffing
 if (is.null(fname_add)){
   save(res, file = paste(datpath, task, "/", task, "stats.RData", sep = ""))
 } else {
-  save(res, file = paste(datpath, task, "/", task, fname_add, "stats.RData", sep = ""))
+  save(res, file = paste(datpath, sub("imm_", "", task), "/", fname_add, sub("imm_", "", task), "stats.RData", sep = ""))
 }
 # ------------------------------------------------------------
 # delete the unzipped files
@@ -212,5 +212,5 @@ if (is.null(fname_add)){
 if (nchar(rxvnme) <= nchar("VSL")) {
   unlink(paste(datpath, task, "/", task, sep = ""), recursive = TRUE)
 } else {
-  unlink(paste(datpath, task, "/", rxvnme, sep = ""), recursive = TRUE)
+  unlink(paste(datpath, sub("imm", "", task), "/", rxvnme, sep = ""), recursive = TRUE)
 }

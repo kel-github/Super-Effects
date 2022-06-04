@@ -935,7 +935,7 @@ plt.rfx <- function(data, xlims){
 unzp <- function(datpath, rxvnme, rxvsub, task, j, subN) {
   # function to unzip specific files from the data archive
   # :: datpath = where is the data?
-  # :: rxnme = name of zipped (rxiv) file e.g. CC/IMMCC
+  # :: rxnme = name of zipped (rxiv) file e.g. IMMCC
   # :: rxvsub = sub folder name in rxv
   # :: task = which task do you want to extract data for? 
   # e.g. "CC" or "imm_CC"

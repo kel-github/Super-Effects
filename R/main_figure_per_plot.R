@@ -35,7 +35,7 @@ h = 2.36 * 2 # height
 # TASK SETTINGS
 # ----------------------------------------------------
 imm = TRUE
-task = "SRT"
+task = "CC"
 if (imm) {
   load(paste("../data/", task, "/",
              "IMM", task, "_plot_settings.RData", sep = ""))
