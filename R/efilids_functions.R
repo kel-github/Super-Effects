@@ -385,9 +385,9 @@ get.ps.CC <- function(data){
 
   # adding a further tryCatch to the situ for times where type 3 fails
   an <- tryCatch({
-          get_anova_table(anova_test(data=data%>%ungroup(), dv=RT, wid=sub, within=c(block,trialtype), effect.size="pes", type=type))
+          get_anova_table(anova_test(data=data%>%ungroup(), dv=RT, wid=sub, within=c(block,trialtype), effect.size="pes", type=type), correction='GG')
   }, error=function(cond) {
-          get_anova_table(anova_test(data=data%>%ungroup(), dv=RT, wid=sub, within=c(block,trialtype), effect.size="pes", type=1))
+          get_anova_table(anova_test(data=data%>%ungroup(), dv=RT, wid=sub, within=c(block,trialtype), effect.size="pes", type=1), correction='GG')
   })
 
   # compute partial epsilon sq:
@@ -990,7 +990,7 @@ compute_partial_epsilon_sq <- function(an){
   # -- 
   
   sapply(unique(an$Effect), function(x) (an$F[an$Effect == x] - 1) / 
-           (an$F[an$Effect == x] + (an$DFn[an$Effect == x]/an$DFd[an$Effect == x])))
+           (an$F[an$Effect == x] + (an$DFd[an$Effect == x]/an$DFn[an$Effect == x])))
 }
 
 

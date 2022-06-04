@@ -49,7 +49,11 @@ plot_dens <- function(inputs4plot) {
   # load data
   # ----------------------------------------------------
   if (imm) {
-    load(paste(datpath, task, "/", "IMM", task, "stats.RData", sep = ""))
+    if (eps) {
+      load(paste(datpath, task, "/", "EPS", task, "stats.RData", sep = ""))
+    } else {
+      load(paste(datpath, task, "/", "IMM", task, "stats.RData", sep = ""))
+    }
   } else {
     load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
   }
@@ -617,6 +621,7 @@ plot_qq_med_vs_best <- function(qq_inputs){
   leg_txt <- qq_inputs$leg_txt
   modn <- qq_inputs$modn
   imm <- qq_inputs$imm # TRUE or FALSE
+  eps <- qq_inputs$eps
 
   # sig_y <- mu_z_inputs$sig_y
   # ----------------------------------------------------
@@ -624,7 +629,11 @@ plot_qq_med_vs_best <- function(qq_inputs){
   # ----------------------------------------------------
   
   if (imm) {
-    load(paste(datpath, task, "/", "IMM", task, "stats.RData", sep = ""))
+    if (eps) {
+      load(paste(datpath, task, "/", "EPS", task, "stats.RData", sep = ""))
+    } else {
+      load(paste(datpath, task, "/", "IMM", task, "stats.RData", sep = ""))
+    }
   } else {
     load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
   }
@@ -721,7 +730,11 @@ mean_med_mode <- function(plot_set){
   # ----------------------------------------------------
   palette_choice <- wes_palette("IsleofDogs1")[c(1, 2, 3, 5)] # for colours
   if (imm) {
-    load(paste(datpath, task, "/", "IMM", task, "stats.RData", sep = ""))
+    if (eps) {
+      load(paste(datpath, task, "/", "EPS", task, "stats.RData", sep = ""))
+    } else {
+      load(paste(datpath, task, "/", "IMM", task, "stats.RData", sep = ""))
+    }
   } else {
     load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
   }
@@ -749,7 +762,7 @@ mean_med_mode <- function(plot_set){
   # now can begin plotting
   # ----------------------------------------------------
   # PLOT 1st FX
-  ylims <- c(.01, .07)
+  ylims <- c(.01, 1.0)
   plot(as.numeric(sel_n), modes$RM, 
        pch = 17, col = palette_choice,
        xaxt = "n", yaxt = "n", ylim = ylims,
@@ -768,7 +781,7 @@ mean_med_mode <- function(plot_set){
   fig_label("C", cex = 2)
   
   # PLOT 2nd FX
-  ylims <- c(.01, .14)
+  ylims <- c(.01, 1.0)
   plot(as.numeric(sel_n), modes$LME, 
        pch = 17, col = palette_choice,
        xaxt = "n", yaxt = "n", ylim = ylims,

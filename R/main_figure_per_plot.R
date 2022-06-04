@@ -35,10 +35,17 @@ h = 2.36 * 2 # height
 # TASK SETTINGS
 # ----------------------------------------------------
 imm = TRUE
+eps = TRUE
 task = "CC"
 if (imm) {
-  load(paste("../data/", task, "/",
-             "IMM", task, "_plot_settings.RData", sep = ""))
+  
+  if (eps) {
+    load(paste("../data/", task, "/",
+               "EPS", task, "_plot_settings.RData", sep = ""))   
+  } else {
+    load(paste("../data/", task, "/",
+               "IMM", task, "_plot_settings.RData", sep = ""))
+  }
 } else {
   load(paste("../data/", task, "/",
              task, "_plot_settings.RData", sep = ""))
@@ -50,12 +57,18 @@ if (imm) {
 # use this for plots containing only one test
 # i.e. AB, SD & SRT
 if (imm){
-  pdf(paste("../images/", "IMM", task, "_", "fx_main", ".pdf", sep = ""),
-      width = w, height = h)  
+  if (eps){
+    pdf(paste("../images/", "EPS", task, "_", "fx_main", ".pdf", sep = ""),
+        width = w, height = h)      
+  } else {
+    pdf(paste("../images/", "IMM", task, "_", "fx_main", ".pdf", sep = ""),
+        width = w, height = h)  
+  }
 } else {
   pdf(paste("../images/", task, "_", "fx_main", ".pdf", sep = ""),
       width = w, height = h)
 }
+
 plot.mat = matrix(c(1, 1, 1, 2, 2, 2,
                     3, 3, 3, 4, 4, 4),
                   nrow = 2, byrow = T)
@@ -107,8 +120,13 @@ if (task == "CC"){
   h = 2.36 * 3 # height
   
   if (imm){
-    pdf(paste("../images/", "IMM", task, "_", "fx_main", ".pdf", sep = ""),
-        width = w, height = h)  
+    if (eps){
+      pdf(paste("../images/", "EPS", task, "_", "fx_main", ".pdf", sep = ""),
+          width = w, height = h)       
+    } else {
+      pdf(paste("../images/", "IMM", task, "_", "fx_main", ".pdf", sep = ""),
+          width = w, height = h)  
+    }
   } else {
     pdf(paste("../images/", task, "_", "fx_main", ".pdf", sep = ""),
         width = w, height = h)

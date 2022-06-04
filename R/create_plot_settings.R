@@ -1,8 +1,8 @@
 rm(list=ls())
 
-task <- "SRT"
+task <- "EPSCC"
 datpath <- "../data/"
-medN <- "36"
+medN <- "24"
 mods <- c("RM-AN", "LME") #c("t", "p")
 imm = TRUE
 # ----------------------------------------------------
@@ -163,13 +163,21 @@ qq_inputs <- list(datpath = datpath,
                   yl = c(0.0, 0.8),
                   mods = c("RM-AN", "LME"),
                   modn = 2,
-                  imm = imm)
+                  imm = imm,
+                  eps = eps)
 
 if (imm){
-  save(task, fname, fx, p, kl, meta_mu, model_mu_diff, model_rats, sig, p_rat,
-       qq_inputs,
-       file = paste("../data/", task, "/", "IMM",
-                    task, "_plot_settings.RData", sep = ""))
+  if (eps) {
+    save(task, fname, fx, p, kl, meta_mu, model_mu_diff, model_rats, sig, p_rat,
+         qq_inputs,
+         file = paste("../data/", task, "/", "EPS",
+                      task, "_plot_settings.RData", sep = ""))
+  } else {
+    save(task, fname, fx, p, kl, meta_mu, model_mu_diff, model_rats, sig, p_rat,
+         qq_inputs,
+         file = paste("../data/", task, "/", "IMM",
+                      task, "_plot_settings.RData", sep = ""))
+  }
 } else {
   save(task, fname, fx, p, kl, meta_mu, model_mu_diff, model_rats, sig, p_rat,
        qq_inputs,
