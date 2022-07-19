@@ -31,12 +31,13 @@ get.ps.t.test <- function(data, iv, dv, x){
   # y = second level of iv
   t.dat = data[eval(dv)]
   t.idx = data[eval(iv)] == x
-  t = t.test(t.dat[t.idx == TRUE], t.dat[t.idx==FALSE])
+  t = t.test(t.dat[t.idx == TRUE], t.dat[t.idx==FALSE], paired = TRUE)
   t$p.value
 }
 
 get.cohens.d <- function(data, iv, dv, x){
   # get Cohen's d measure for paired samples
+  # uses Cohen's d_z (equation 6 in https://www.frontiersin.org/articles/10.3389/fpsyg.2013.00863/full)
   # data = dataframe for testing
   # iv = name of iv
   # dv = name of dv
@@ -44,8 +45,11 @@ get.cohens.d <- function(data, iv, dv, x){
   # y = second level of iv  
   d.dat = data[eval(dv)]
   d.idx = data[eval(iv)] == x
-  sd.pool = sqrt( ( sd( d.dat[d.idx == TRUE]  )^2 + sd(  d.dat[d.idx == FALSE]  )^2 ) / 2 )
-  d = (mean(d.dat[d.idx == TRUE]) - mean(d.dat[d.idx == FALSE])) / sd.pool
+  mu_diff = (mean(d.dat[d.idx == TRUE]) - mean(d.dat[d.idx == FALSE]))
+  sd.pool = sum(((d.dat[d.idx == TRUE] - d.dat[d.idx == FALSE]) - mu_diff)^2)
+  sd.pool = sqrt(sd.pool / (length(d.dat[d.idx == TRUE])-1))
+#  sd.pool = sqrt( ( sd( d.dat[d.idx == TRUE]  )^2 + sd(  d.dat[d.idx == FALSE]  )^2 ) / 2 )
+  d =  mu_diff/ sd.pool
   d
 }
 
@@ -319,36 +323,45 @@ get.ps.srt <- function(data) {
   nsubs = length(data$sub)/length(levels(data$trialtype))
   data$sub <- rep(1:nsubs, each = length(levels(data$trialtype)))
   
+  # GET DATA STATS
+  # -----------------------------------------------------------------------------
+  stat_data <- data %>% select(sub, trialtype, RT) %>% 
+    pivot_wider(id_cols = sub, names_from = trialtype, values_from = RT)
+  stat_data <- get_RTdist_stats_dfs(stat_data)
+  
   # RUN t-test
   # ----------------------------------------------------------------------------
   t <- run.t.test.sim(data, subs = unique(data$sub))
   
   # RUN LME VERSION
   # ----------------------------------------------------------------------------
-  mod <- lmer(RT ~ trialtype + (1|sub), data=data)
-  lme.an <- Anova(mod)
-  
-  # get effect size for random effects
-  lme.peta <- summary(mod)$coefficients["trialtype1", "Estimate"]/
-    sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
-  
+  # mod <- lmer(RT ~ trialtype + (1|sub), data=data)
+  # lme.an <- Anova(mod)
+  # 
+  # # get effect size for random effects
+  # lme.peta <- summary(mod)$coefficients["trialtype1", "Estimate"]/
+  #   sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
+  # 
   # COLLATE OUTPUT VARIABLES
   # -----------------------------------------------------------------------------
   out <- list()
   
   # p 
-  p <- c(t$p, lme.an['trialtype','Pr(>Chisq)'])
+  p <- c(t$p, NA)
   out$p <- p
   
+  
   # get ef szs
-  efs <- c(t$d, lme.peta) 
+  efs <- c(t$d, NA) 
   out$esz <- efs
   
   # get residuals from lme model
-  df = as.data.frame(VarCorr(mod))
-  out$esub = c(NA, df$sdcor[df$grp=="sub"])
-  out$eRes = c(NA, df$sdcor[df$grp=="Residual"])
-  out
+  #df = as.data.frame(VarCorr(mod))
+  out$esub = c(NA, NA)
+  out$eRes = c(NA, NA)
+  
+  # put the distribution data into the dataframe
+  list(out, stat_data)
 }
 
 # ----------------------------------------------------------------------------------------------------
@@ -448,44 +461,47 @@ get.ps.SD <- function(data){
   
   # RUN RM ANOVA
   # -----------------------------------------------------------------------------
-
   an <- tryCatch({
           get_anova_table(anova_test(data=data%>%ungroup(), dv=RT, wid=sub, within=c(task,trialtype), effect.size="pes", type=type))
   }, error=function(cond) {
           get_anova_table(anova_test(data=data%>%ungroup(), dv=RT, wid=sub, within=c(task,trialtype), effect.size="pes", type=1))
   })
   
+  # compute partial epsilon sq:
+  peps <- compute_partial_epsilon_sq(an)
+  peps <- peps[names(peps) %in% c("trialtype", "task:trialtype")]
+
   # RUN LME VERSION
   # -----------------------------------------------------------------------------
-  mod <- lmer( RT ~ task*trialtype + (1|sub), data=data )
-  lme.an <- Anova(mod)
+#  mod <- lmer( RT ~ task*trialtype + (1|sub), data=data )
+#  lme.an <- Anova(mod)
   
   # get effect size for random effects
-  lme.peta <- summary(mod)$coefficients["trialtype1", "Estimate"]/sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
+#  lme.peta <- summary(mod)$coefficients["trialtype1", "Estimate"]/sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
   
   # COLLATE OUTPUT VARIABLES
   # -----------------------------------------------------------------------------
   out <- list()
   
   # p 
-  p <- c(an$p[an$Effect == "trialtype"], lme.an['trialtype','Pr(>Chisq)'])
+  p <- c(an$p[an$Effect == "trialtype"], an$p[an$Effect == "task:trialtype"])
   out$p <- p
   
   # compute partial eta squared
-  peta <- c(an$pes[an$Effect == "trialtype"], lme.peta) 
+  peta <- c(peps[names(peps) == "trialtype"], peps[names(peps) == "task:trialtype"])
   out$esz <- peta
   
   # get residuals from lme model
-  df = as.data.frame(VarCorr(mod))
-  out$esub = c(NA, df$sdcor[df$grp=="sub"])
-  out$eRes = c(NA, df$sdcor[df$grp=="Residual"])
+  #df = as.data.frame(VarCorr(mod))
+  out$esub = c(NA, NA)
+  out$eRes = c(NA, NA)
   out
 }
 
 # ----------------------------------------------------------------------------------------------------
 ###### aov and LME functions for AB data
 #### -------------------------------------------------------------------------------------------------
-
+# compute partial epsilon sq:
 get.ps.aov.AB <- function(data){
   # run lme and aov on the dv with lag as the iv
   # return the p value
@@ -504,6 +520,13 @@ get.ps.aov.AB <- function(data){
   nsubs <- length(data$sub)/length(levels(data$lag))
   data$sub <- as.factor(rep(1:nsubs, each=length(levels(data$lag))))
   
+  # GET DATA STATS
+  # -----------------------------------------------------------------------------
+  stat_data <- data %>% select(sub, lag, T2gT1) %>% 
+                pivot_wider(id_cols = sub, names_from = lag, values_from = T2gT1)
+  stat_data <- get_RTdist_stats_dfs(stat_data)
+  
+  
   # RUN RM ANOVA
   # -----------------------------------------------------------------------------
   # aov doesn't do sum of squares 3, ezANOVA = ~500 ms slower than get_anova_table
@@ -512,31 +535,39 @@ get.ps.aov.AB <- function(data){
   }, error=function(cond) {
           get_anova_table(anova_test(data=data%>%ungroup(), dv=T2gT1, wid=sub, within=lag, effect.size="pes", type=1))
   })
+  
+  # compute partial epsilon
+  # -----------------------------------------------------------------------------
+  peps <- compute_partial_epsilon_sq(an)
+
   # RUN LME VERSION
   # -----------------------------------------------------------------------------
-  mod <- lmer( T2gT1 ~ lag + (1|sub), data=data )
-  lme.an <- Anova(mod)
-  
-  # get effect size for random effects
-  lme.peta <- summary(mod)$coefficients["lag1", "Estimate"]/sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
-  
+  # mod <- lmer( T2gT1 ~ lag + (1|sub), data=data )
+  # lme.an <- Anova(mod)
+  # 
+  # # get effect size for random effects
+  # lme.peta <- summary(mod)$coefficients["lag1", "Estimate"]/sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
+  # 
   # COLLATE OUTPUT VARIABLES
   # -----------------------------------------------------------------------------
   out <- list()
   
   # p 
-  p <- c(an$p, lme.an$`Pr(>Chisq)`)
-  peta <- c(an$pes, lme.peta) 
+  p <- c(an$p, NA)
   out$p <- p
   
   # compute partial eta squared
+  peta <- c(peps, NA) 
   out$esz <- peta
   
   # get residuals from lme model
-  df = as.data.frame(VarCorr(mod))
-  out$esub = c(NA, df$sdcor[df$grp=="sub"])
-  out$eRes = c(NA, df$sdcor[df$grp=="Residual"])
-  out
+#  df = as.data.frame(VarCorr(mod))
+  out$esub = c(NA, NA)
+  out$eRes = c(NA, NA)
+  
+  # put the distribution data into the dataframe
+  
+  list(out, stat_data)
 }
 
 
@@ -552,8 +583,6 @@ set.SS.type <- function(data){
   }
   type
 }
-
-
 
 # ----------------------------------------------------------------------------------------------------
 ###### functions to run sims ACROSS ALL TASKS
@@ -633,13 +662,40 @@ run.inner <- function(in.data, parent.subs, N, k, j, fstem, f, samp) {
   # -- fstem: see run.outer
   # -- samp: sampling type: 'int' for intermediate or 'imm' for immediate
   
-  out = replicate(k, run.models(in.data=in.data, subs=parent.subs, N=N, f=f, samp=samp), simplify=FALSE)
-  out = do.call(rbind, out)
-  out$k = rep(1:k, each=2)
+  tmp = replicate(k, run.models(in.data=in.data, subs=parent.subs, N=N, f=f, samp=samp), simplify=FALSE)
   
-  # now save the output
+  # first get the standard data frame of effect size results
+  tmp.fx = tmp[[1]][[1]] # note, a multi inner loop will no longer work!
+                         # but I have decided I'll worry about this if the inner loop
+                         # ever becomes a thing again
+  out = data.frame( n    = c(N, N),
+                    p    = tmp.fx$p,
+                    esz  = tmp.fx$esz,
+                    esub = tmp.fx$esub,
+                    eRes = tmp.fx$eRes,
+                    mod = c("RM-AN", "LME") )
+  out$k = rep(1:k, each=2)
+  # now save the out data
   fname = sprintf(fstem, N, j)
   save(out, file=fname)
+  
+  # now to get/save distributional data
+  dist_summary <- tmp[[1]][[2]][[1]] # this code is gross, sorry world
+  dist_out <- data.frame(dist_summary)
+  dist_out$n <- N
+  dist_out$k <- k
+  dist_fstem <- str_split(fstem, pattern = ".RD", simplify = TRUE)[1,1]
+  dist_fstem <- paste(dist_fstem, "_diststats.RData", sep="")
+  dist_fname = sprintf(dist_fstem, N, j)
+  save(dist_out, file=dist_fname)
+  
+  # now get and save density function data
+  dens_func_dat <- tmp[[1]][[2]][2]
+  names(dens_func_dat) <- sprintf("N%d_k%d", N, k)
+  dens_fstem <- str_split(fstem, pattern = ".RD", simplify = TRUE)[1,1]
+  dens_fstem <- paste(dens_fstem, "_DV_dens_funcs.RData", sep="")
+  dens_fname <- sprintf(dens_fstem, N, j)
+  save(dens_func_dat, file=dens_fname)
 }
 
 run.models <- function(in.data, subs, N, f, samp){
@@ -663,6 +719,9 @@ run.models <- function(in.data, subs, N, f, samp){
   
   f <- eval(f) # get the function
   tmp.fx = f(inner_join(idx, in.data, by="sub"))
+  tmp = tmp.fx # some re-labelling due to legacy issues
+  
+  tmp.fx = tmp[[1]]
   
   if (length(tmp.fx) > 4){
     out = data.frame( n    = c(N, N),
@@ -681,7 +740,8 @@ run.models <- function(in.data, subs, N, f, samp){
                       mod = c("RM-AN", "LME") )
   }
   
-  out
+  list(out, tmp[[2]]) # now output the dataframe of effect results
+                      # and the data distribution results
 }
 
 # ----------------------------------------------------------------------------------------------------
@@ -993,10 +1053,56 @@ compute_partial_epsilon_sq <- function(an){
            (an$F[an$Effect == x] + (an$DFd[an$Effect == x]/an$DFn[an$Effect == x])))
 }
 
+# ----------------------------------------------------------------------------------------------------
+###### functions to get distributional info of RT/accuracy data
+#### -------------------------------------------------------------------------------------------------
 
+get_RTdist_stats <- function(x, cond){
+  # given a vector x, return distribution
+  # moments
+  # Kwargs:
+  #   -- x : a vector of real values
+  #   -- cond : str, condition name e.g. "lag2"
 
+  mu <- mean(x)
+  med <- median(x)
+  sigma <- var(x)
+  skew <- (mu - med)/sqrt(sigma) # see https://en.wikipedia.org/wiki/Skewness
+  
+  # now kurtosis - see https://en.wikipedia.org/wiki/Kurtosis - Moore's interpretation
+  Z <- (x - mu) / sqrt(sigma)[1]
+  k <- var(Z^2)+1 # excessive kurtosis < -3 ok 3 > excessive 
+  
+  # now make the ecdf so we can recreate the distribution later
+  d <- density(x)
+  
+  list(data.frame(cond = cond,
+                  mu = mu,
+                  med = med, 
+                  sigma = sigma,
+                  skew = skew,
+                  k = k),
+                  d = d)
+}
 
-
+get_RTdist_stats_dfs <- function(stat_data){
+  # return a data frame containing the stats info for the dependent variable (dv) distributions
+  # return a list of the density info
+  # Kwargs
+  # -- stat_data - a dataframe of the condition data in WIDEFORM, containing only the columns 'sub' and the
+  #                  other variables of interest
+  # Returns
+  # --  lists, one element contains the dataframe
+  #            the other contains the densities
+  
+  stat_conds <- colnames(stat_data)[colnames(stat_data)!="sub"]
+  stats <- lapply(stat_conds, function(y) get_RTdist_stats(unlist(stat_data[,y]), y))
+  stats_df <- do.call(rbind, lapply(c(1:length(stats)), function(x) stats[[x]][[1]]))
+  stats_dens <- do.call(rbind, lapply(c(1:length(stats)), function(x) stats[[x]][[2]]))
+  rownames(stats_dens) <- stat_conds
+  
+  list(stats_df, stats_dens)
+}
 
 
 

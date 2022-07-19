@@ -70,8 +70,7 @@ ffx.dat <- dat %>% filter(Block.No > 2) %>%
               filter(RT.ms > min.RT) %>%
               filter(RT.ms < (mean(RT.ms) + sd.crit*sd(RT.ms))) %>%
               summarise(RT=mean(RT.ms))
-
-
+subs  <- unique(ffx.dat$Subj.No)
 
 
 # ----------------------------------------------------------------------------------------------------
@@ -89,14 +88,14 @@ lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1,
 # ----------------------------------------------------------------------------------------------------
 # run simulations, getting p values from linear models, and cohen's d values, and save results to a list, using intermediate sampling
 # ----------------------------------------------------------------------------------------------------
-fstem <- paste(outpath, "/SRT_N-%d_parent-%d.RData", sep="")
-lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, 
-                                     k=n.inner, j=n.outer, outer_index=i.outer,
-                                     cores=cores, 
-                                     f=get.ps.srt, 
-                                     fstem=fstem, 
-                                     samp="int",
-                                     seeds=seeds))
+# fstem <- paste(outpath, "/SRT_N-%d_parent-%d.RData", sep="")
+# lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, 
+#                                      k=n.inner, j=n.outer, outer_index=i.outer,
+#                                      cores=cores, 
+#                                      f=get.ps.srt, 
+#                                      fstem=fstem, 
+#                                      samp="int",
+#                                      seeds=seeds))
 
 # ----------------------------------------------------------------------------------------------------
 # get outta here

@@ -33,7 +33,6 @@ n.inner <- 1000
 i.outer <- NA
 cores <- 10
 sub.Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
-sub.Ns <- 59
 
 if (length(args) == 0) {
   fname <- "../data/total_of_313_subs_AB_task_trial_level_data.csv"
@@ -56,6 +55,7 @@ seeds <- sample(1:n.outer, n.outer, replace=FALSE)
 # a little simpler
 # ----------------------------------------------------------------------------------------------------
 dat <- read.csv(fname, header=TRUE)
+
 # ----------------------------------------------------------------------------------------------------
 # Create dataframes 
 # ----------------------------------------------------------------------------------------------------
@@ -72,25 +72,26 @@ subs  <- unique(ffx.dat$Subj.No)
 # eta squares, and save results to a list, using immediate sampling
 # approach
 # ----------------------------------------------------------------------------------------------------
-# fstem <- paste(outpath, "/imm_AB_N-%d_parent-%d.RData", sep="")
-# lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1,
-#                                      j=n.outer, outer_index=i.outer,
-#                                      cores=cores,
-#                                      f=get.ps.aov.AB,
-#                                      fstem=fstem,
-#                                      samp="imm",
-#                                      seeds=seeds))
+fstem <- paste(outpath, "/imm_AB_N-%d_parent-%d.RData", sep="")
+lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1,
+                                     j=n.outer, outer_index=i.outer,
+                                     cores=cores,
+                                     f=get.ps.aov.AB,
+                                     fstem=fstem,
+                                     samp="imm",
+                                     seeds=seeds))
 
 # ----------------------------------------------------------------------------------------------------
 # run simulations for ffx & rfx models, getting p values and partial
 # eta squares, and save results to a list, using intermediate sampling
 # approach
 # ----------------------------------------------------------------------------------------------------
-fstem <- paste(outpath, "/AB_N-%d_parent-%d.RData", sep="")
-lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x,
-                                     k=n.inner, j=n.outer, outer_index=i.outer,
-                                     cores=cores,
-                                     f=get.ps.aov.AB,
-                                     fstem=fstem,
-                                     samp="int",
-                                     seeds=seeds))
+# fstem <- paste(outpath, "/AB_N-%d_parent-%d.RData", sep="")
+# lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x,
+#                                      k=n.inner, j=n.outer, outer_index=i.outer,
+#                                      cores=cores,
+#                                      f=get.ps.aov.AB,
+#                                      fstem=fstem,
+#                                      samp="int",
+#                                      seeds=seeds))
+quit()
