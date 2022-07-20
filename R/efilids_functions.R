@@ -391,6 +391,12 @@ get.ps.CC <- function(data){
   # set subject identifiers as unique
   data$sub <- as.factor(rep(1:nsubs, each=length(levels(data$block)) * length(levels(data$trialtype))))
 
+  # GET DATA STATS
+  # -----------------------------------------------------------------------------
+  stat_data <- data %>% select(sub, block, trialtype, RT) %>% 
+    pivot_wider(id_cols = sub, names_from = c(block, trialtype), values_from = RT)
+  stat_data <- get_RTdist_stats_dfs(stat_data)
+  
   # RUN RM ANOVA (see anova function notes for choice)
   # -----------------------------------------------------------------------------
   # running type 3 SS to match with spss - however, data are balanced so the results are the same either way
@@ -436,6 +442,8 @@ get.ps.CC <- function(data){
   out$esub = c(NA, NA)
   out$eRes = c(NA, NA)
   out
+  
+  list(out, stat_data)
 }
 
 # ----------------------------------------------------------------------------------------------------
