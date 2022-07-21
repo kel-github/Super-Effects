@@ -467,6 +467,12 @@ get.ps.SD <- function(data){
   nsubs <- length(data$sub)/(length(levels(data$task)) * length(levels(data$trialtype)))
   data$sub <- as.factor(rep(1:nsubs, each=length(levels(data$task)) * length(levels(data$trialtype))))
   
+  # GET DATA STATS
+  # -----------------------------------------------------------------------------
+  stat_data <- data %>% select(sub, task, trialtype, RT) %>% 
+    pivot_wider(id_cols = sub, names_from = c(task, trialtype), values_from = RT)
+  stat_data <- get_RTdist_stats_dfs(stat_data)
+  
   # RUN RM ANOVA
   # -----------------------------------------------------------------------------
   an <- tryCatch({
@@ -503,7 +509,8 @@ get.ps.SD <- function(data){
   #df = as.data.frame(VarCorr(mod))
   out$esub = c(NA, NA)
   out$eRes = c(NA, NA)
-  out
+  
+  list(out, stat_data)
 }
 
 # ----------------------------------------------------------------------------------------------------
