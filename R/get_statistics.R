@@ -39,10 +39,10 @@ source("R_rainclouds.R") # functions for plotting
 # -----------------------------------------------------------------
 # define session variables
 # -----------------------------------------------------------------
-task <- "imm_CC"
+task <- "imm_SRT"
 sub_Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
 convert <- NA
-rxvnme <- "EPSCC"
+rxvnme <- "EPSSRT"
 
 # -----------------------------------------------------------------
 # relatively constant settings

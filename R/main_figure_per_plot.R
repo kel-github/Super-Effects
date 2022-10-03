@@ -8,7 +8,7 @@ rm(list = ls())
 library(wesanderson) # palette for some sweet figure colours
 library(cowplot)
 library(lme4) # for mixed effects modelling
-library(ggridges)
+#library(ggridges)
 library(car)
 library(parallel)
 library(tidyverse) # for data wrangling
@@ -36,7 +36,7 @@ h = 2.36 * 2 # height
 # ----------------------------------------------------
 imm = TRUE
 eps = TRUE
-task = "CC"
+task = "SD"
 if (imm) {
   
   if (eps) {
@@ -75,8 +75,8 @@ plot.mat = matrix(c(1, 1, 1, 2, 2, 2,
 layout(plot.mat)
 par(las=1)
 #plot_AB_results(fname)
-#plot_MT_results(fname)
-plot_SRT_results(fname)
+plot_MT_results(fname)
+#plot_SRT_results(fname)
 fig_label("A", cex = 2)
 plot_dens(fx)
 plot_qq_med_vs_best(qq_inputs)
@@ -154,9 +154,15 @@ if (task == "CC"){
 # ----------------------------------------------------
 w = 1.96*2
 h = 2.36*2
+
 if (imm){
-  pdf(paste("../images/", "IMM", task, "_", "ps", ".pdf", sep = ""),
-      width = w, height = h)  
+  if (eps){
+    pdf(paste("../images/", "EPS", task, "_", "ps", ".pdf", sep = ""),
+        width = w, height = h)       
+  } else {
+    pdf(paste("../images/", "IMM", task, "_", "ps", ".pdf", sep = ""),
+        width = w, height = h)  
+  }
 } else {
   pdf(paste("../images/", task, "_", "ps", ".pdf", sep = ""),
       width = w, height = h)
@@ -180,9 +186,15 @@ dev.off()
 # ----------------------------------------------------
 w = 1.96 * 3 # width of the plot, in inches
 h = 2.36 * 2.5 # height
+
 if (imm){
-  pdf(paste("../images/", "IMM", task, "_", "ps", ".pdf", sep = ""),
-      width = w, height = h)  
+  if (eps){
+    pdf(paste("../images/", "EPS", task, "_", "ps", ".pdf", sep = ""),
+        width = w, height = h)       
+  } else {
+    pdf(paste("../images/", "IMM", task, "_", "ps", ".pdf", sep = ""),
+        width = w, height = h)  
+  }
 } else {
   pdf(paste("../images/", task, "_", "ps", ".pdf", sep = ""),
       width = w, height = h)

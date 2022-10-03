@@ -31,6 +31,7 @@ plot_dens <- function(inputs4plot) {
   h <- inputs4plot$h
   xlabs <- inputs4plot$xlabs
   xl <- inputs4plot$xl
+
   if (length(xl) == 2){
     xl <- matrix(c(xl, xl), ncol = 2)
   } else {
@@ -43,6 +44,7 @@ plot_dens <- function(inputs4plot) {
   figlabelon <- inputs4plot$figlabelon
   mods <- c("RM-AN", "LME")
   imm <- inputs4plot$imm
+  eps <- inputs4plot$eps
   
   palette_choice <- wes_palette("IsleofDogs1")[c(1, 2, 3, 5)]
   # ----------------------------------------------------
@@ -423,11 +425,19 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
   sig_lines <- mu_vs_meta_inputs$sig_lines
   sig_y <- mu_vs_meta_inputs$sig_y
   imm <- mu_vs_meta_inputs$imm
+  eps <- mu_vs_meta_inputs$eps
+  # ----------------------------------------------------
+  # load data
+  # ----------------------------------------------------
   # ----------------------------------------------------
   # load data
   # ----------------------------------------------------
   if (imm) {
-    load(paste(datpath, task, "/", "IMM", task, "stats.RData", sep = ""))
+    if (eps) {
+      load(paste(datpath, task, "/", "EPS", task, "stats.RData", sep = ""))
+    } else {
+      load(paste(datpath, task, "/", "IMM", task, "stats.RData", sep = ""))
+    }
   } else {
     load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
   }
@@ -687,7 +697,7 @@ plot_qq_med_vs_best <- function(qq_inputs){
        cex = 1,
        col = wes_palette("IsleofDogs1")[6],
        ylab = expression(italic("N"[313])),
-       xlab = expression(italic("N"[36])),
+       xlab = expression(italic("N"[25])),
        cex.lab = 1,
        cex.axis = 1)
   abline(0, 1, lty=2, col="grey48")
@@ -762,7 +772,7 @@ mean_med_mode <- function(plot_set){
   # now can begin plotting
   # ----------------------------------------------------
   # PLOT 1st FX
-  ylims <- c(.01, 1.0)
+  ylims <- c(.01, .05)
   plot(as.numeric(sel_n), modes$RM, 
        pch = 17, col = palette_choice,
        xaxt = "n", yaxt = "n", ylim = ylims,
@@ -781,7 +791,7 @@ mean_med_mode <- function(plot_set){
   fig_label("C", cex = 2)
   
   # PLOT 2nd FX
-  ylims <- c(.01, 1.0)
+  ylims <- c(.01, .4)
   plot(as.numeric(sel_n), modes$LME, 
        pch = 17, col = palette_choice,
        xaxt = "n", yaxt = "n", ylim = ylims,

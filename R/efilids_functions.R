@@ -1062,7 +1062,7 @@ compute_partial_epsilon_sq <- function(an){
   ## inputs:
   # -- an [output from get_anova_table(anova_test(...))]
   ## outputs:
-  # -- 
+  # -- partial epsilon sq [int]
   
   sapply(unique(an$Effect), function(x) (an$F[an$Effect == x] - 1) / 
            (an$F[an$Effect == x] + (an$DFd[an$Effect == x]/an$DFn[an$Effect == x])))
