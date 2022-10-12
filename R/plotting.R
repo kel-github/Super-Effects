@@ -63,7 +63,7 @@ plot_dens <- function(inputs4plot) {
   for (j in 1:jmax) {
     plot(res[sel_n[length(sel_n)], ][[dv]][[mods[j]]],
          col = adjustcolor(palette_choice[length(sel_n)], alpha.f = 0.75),
-         lwd = 2,
+         lwd = 3,
          ylim = c(0,
                   max(res[max_idx[j], ][[dv]][[mods[j]]]["y"]$y)),
          xlim = xl[,j],
@@ -79,7 +79,7 @@ plot_dens <- function(inputs4plot) {
     for (i in c((length(sel_n)-1):1)) {
       lines(res[sel_n[i], ][[dv]][[mods[j]]],
             col = adjustcolor(palette_choice[i], alpha.f = 0.75),
-            lwd = 2)
+            lwd = 3)
       # polygon(res[sel_n[i], ][[dv]][[mods[j]]],
       #       col = adjustcolor(wes_palette("IsleofDogs1")[i],
       #       alpha.f = 0.5),

@@ -1,6 +1,6 @@
 rm(list=ls())
 
-task <- "EPSCC"
+task <- "EPSAB"
 datpath <- "../data/"
 medN <- "24"
 mods <- c("RM-AN", "LME") #c("t", "p")
@@ -8,7 +8,7 @@ imm = TRUE
 # ----------------------------------------------------
 # behavioural data
 # ----------------------------------------------------
-fname <- "../data/total_of_313_subs_CC_task_trial_level_data.csv"
+fname <- "../data/total_of_313_subs_AB_task_trial_level_data.csv"
 sub_Ns <- paste(round(exp(seq(log(13), log(313), length.out = 20))))
 # ----------------------------------------------------
 # density variables
