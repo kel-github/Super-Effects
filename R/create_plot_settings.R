@@ -169,7 +169,7 @@ qq_inputs <- list(datpath = datpath,
 if (imm){
   if (eps) {
     save(task, fname, fx, p, kl, meta_mu, model_mu_diff, model_rats, sig, p_rat,
-         qq_inputs,
+         qq_inputs, fxovrN, povrN,
          file = paste("../data/", task, "/", "EPS",
                       task, "_plot_settings.RData", sep = ""))
   } else {

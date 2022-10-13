@@ -3,7 +3,56 @@
 # ----------------------------------------------------
 # define functions
 # ----------------------------------------------------
-plot_dens <- function(inputs4plot) {
+plot_mus_n_quants <- function(inputs4plot, dv="stats_fx"){
+  # plot, across N, the mu, and the defined quantiles 
+  # kwargs
+  # inputs4plot is a list containing the following 
+  # -- datpath: e.g. "../data/"
+  # -- task: e.g. "AB"
+  # -- Ns: samples Ns
+  # -- yl: ylims e.g. c(0.3, 0.9)
+  #------------------ get settings ------------------------------ 
+  datpath <- inputs4plot$datpath
+  task <- inputs4plot$task
+  Ns <- inputs4plot$Ns
+  yl <- inputs4plot$yl 
+  ylabel <- inputs4plot$ylab
+  mod <- inputs4plot$mod # which fx to plot?
+  #------------------ load data ------------------------------
+  if (dv == "stats_p"){
+    load(paste(datpath, task, "/", task, "_pquants.RData", sep = ""))
+  } else {
+    load(paste(datpath, task, "/", "EPS", task, "stats.RData", sep = ""))
+  } 
+  #------------------ settings ------------------
+  pal <- wesanderson::wes_palette("IsleofDogs2")[c(4,3)]
+  names(pal) <- c("mu", "q")
+  pal["q"] <- adjustcolor(pal["q"], alpha.f = 0.5)
+  #------------------ get plotting variables ------------------
+
+  if (dv == "stats_p"){
+    mus <- sum$m[sum$mod == mod]
+    qs <- cbind(sum$lower[sum$mod == mod], sum$upper[sum$mod == mod])
+  } else {
+    mus <- do.call(rbind, lapply(1:nrow(res), function(x) res[x, dv][[1]][["mu", mod]]))
+    qs <- do.call(rbind, lapply(1:nrow(res), function(x) res[x, dv][[1]][["qs", mod]]))
+  }
+  plot(Ns, mus, ylim=yl, type="l", lwd = 3, 
+       col = pal["mu"],
+       bty = "n", xaxt="n",
+       ylab=" ")
+  axis(side=1, at=Ns, labels=TRUE)
+  title(ylab=ylabel, line=3)
+  points(Ns, qs[,1], type="l", lwd=3,
+         col = pal["q"])
+  points(Ns, qs[,2], type="l", lwd=3,
+         col = pal["q"])
+  
+}
+
+
+
+plot_dens <- function(inputs4plot, mods=c("RM-AN", "LME")) {
   # plot the density functions for select n
   # saves to a png file in the project image folder
   # kwargs
@@ -42,7 +91,8 @@ plot_dens <- function(inputs4plot) {
   leg_locs <- inputs4plot$leg_locs
   figlabel <- inputs4plot$figlabel
   figlabelon <- inputs4plot$figlabelon
-  mods <- c("RM-AN", "LME")
+#  mods <- c("LME") # manually hacking getting the distribution
+  # I want
   imm <- inputs4plot$imm
   eps <- inputs4plot$eps
   
