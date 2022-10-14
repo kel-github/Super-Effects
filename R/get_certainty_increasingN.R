@@ -15,7 +15,8 @@ extfnms_fx <- unzip(fnms_fx)
 Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
 task <- "CC"
 fx <- "b*c" # this is only necessary when selecting conditions
-bns <- c(15, 20, 25) # bin values to test
+bns <- c(20, 25, 30) # bin values to test
+vers <- "defrngon13"
 
 ##########  FUNCTIONS #####################
 get_dat_fx <- function(extfnms_fx, x){
@@ -62,7 +63,7 @@ compute_entropy <- function(esz, bn, min_esz, max_esz){
   # RETURNS
   # -- H = -sum(p*log(p))
   
-  # use the hist function to do the binning and counring
+  # use the hist function to do the binning and counting
   h <- hist(esz, breaks = seq(min_esz, max_esz, length.out=bn+1)) 
   counts <- h$counts
   counts[counts == 0] <- .00001/length(counts[counts==0]) # hacky way to get rid of the zeros
@@ -91,7 +92,10 @@ compute_entropy_N <- function(bn, min_esz, max_esz, task, extfnms_fx, N, fx = NA
   } else {
     esz <- dat$esz
   }
-  compute_entropy(esz, bn, min_esz, max_esz)
+  png(file = sprintf('../images/fx_hist_%s_N%d_bw%d.png', task, N, bn))
+  e = compute_entropy(esz, bn, min_esz, max_esz)
+  dev.off()
+  e
 }
 
 ######## RUNNING! #####################
@@ -101,8 +105,8 @@ tmp_min <- get_fx_dat4_n(task, Ns[1], extfnms_fx)
 
 tmp_min$esz <- tmp_min[,fx][[1]] #### this line is for dealing with models with ME and interactions
 
-min_esz <- min(tmp_min$esz) #- .9
-max_esz <- max(tmp_min$esz) #+ .9
+min_esz <- min(tmp_min$esz) - .9
+max_esz <- max(tmp_min$esz) + .9
 # get some reasonable bin values for this one
 
 hist(tmp_min$esz, breaks = seq(min_esz, max_esz, length.out=bns[1]+1))
@@ -110,6 +114,7 @@ hist(tmp_min$esz, breaks = seq(min_esz, max_esz, length.out=bns[2]+1))
 hist(tmp_min$esz, breaks = seq(min_esz, max_esz, length.out=bns[3]+1))
 
 rm(tmp_min)
+
 tmp_max <- get_fx_dat4_n(task, Ns[length(Ns)], extfnms_fx)
 
 tmp_max$esz <- tmp_max[,fx][[1]] # as above
@@ -129,29 +134,32 @@ CC_int <- 3
 ###### RUN AB ###### 
 AB_H <- unlist(lapply(Ns, compute_entropy_N, bn=bns[AB_bn], min_esz=min_esz, max_esz=max_esz,
                       task=task, extfnms_fx=extfnms_fx))
-save(AB_H, file="../data/AB/AB_H.RData")
+
+save(AB_H, file= sprintf("../data/AB/AB_H_bn%d_v%s.RData", bns[AB_bn], vers))
 
 ###### RUN SRT ###### 
 SRT_H <- unlist(lapply(Ns, compute_entropy_N, bn=bns[SRT_bn], min_esz=min_esz, max_esz=max_esz,
                       task=task, extfnms_fx=extfnms_fx))
-save(SRT_H, file="../data/SRT/SRT_H.RData")
+save(SRT_H, file=sprintf("../data/SRT/SRT_H_bn%d_v%s.RData", bns[SRT_bn], vers))
 
 ###### RUN SD ME ###### 
 SD_ME_H <- unlist(lapply(Ns, compute_entropy_N, bn=bns[SD_ME], min_esz=min_esz, max_esz=max_esz,
                        task=task, extfnms_fx=extfnms_fx, fx="tt"))
-save(SD_ME_H, file="../data/SD/SD_ME_H.RData")
+save(SD_ME_H, file=sprintf("../data/SD/SD_ME_H_bn%d_v%s.RData", bns[SD_ME], vers))
 
 ###### RUN SD INT ###### 
 SD_INT_H <- unlist(lapply(Ns, compute_entropy_N, bn=bns[SD_int], min_esz=min_esz, max_esz=max_esz,
                           task=task, extfnms_fx=extfnms_fx, fx="ta*tt"))
-save(SD_INT_H, file="../data/SD/SD_INT_H.RData")
+
+save(SD_INT_H, file=sprintf("../data/SD/SD_INT_H_bn%d_v%s.RData", bns[SD_int], vers))
 
 ###### RUN CC ME ########
 CC_ME_H <- unlist(lapply(Ns, compute_entropy_N, bn=bns[CC_ME], min_esz=min_esz, max_esz=max_esz,
                           task=task, extfnms_fx=extfnms_fx, fx="c"))
-save(CC_ME_H, file="../data/CC/CC_ME_H.RData")
+save(CC_ME_H, file=sprintf("../data/CC/CC_ME_H_bn%d_v%s.RData", bns[CC_ME], vers))
 
 ###### RUN CC INT ########
 CC_INT_H <- unlist(lapply(Ns, compute_entropy_N, bn=bns[CC_int], min_esz=min_esz, max_esz=max_esz,
                           task=task, extfnms_fx=extfnms_fx, fx="b*c"))
-save(CC_INT_H, file="../data/CC/CC_INT_H.RData")
+save(CC_INT_H, file=sprintf("../data/CC/CC_INT_H_bn%d_v%s.RData", bns[CC_int], vers))
+

@@ -12,13 +12,16 @@ Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
 tNs <- length(Ns)
 tfx <- 6 # how many fx are you plotting (across tasks)
 
+bw <- 30
+vers <- "defrngon13"
+
 ############ LOAD H'S AND TIDY ########################
-load(file="../data/AB/AB_H.RData")
-load(file="../data/SRT/SRT_H.RData")
-load(file="../data/SD/SD_ME_H.RData")
-load(file="../data/SD/SD_INT_H.RData")
-load(file="../data/CC/CC_ME_H.RData")
-load(file="../data/CC/CC_INT_H.RData")
+load(file= sprintf("../data/AB/AB_H_bn%d_v%s.RData", bw, vers))
+load(file=sprintf("../data/SRT/SRT_H_bn%d_v%s.RData", bw, vers))
+load(file=sprintf("../data/SD/SD_ME_H_bn%d_v%s.RData", bw, vers))
+load(file=sprintf("../data/SD/SD_INT_H_bn%d_v%s.RData", bw, vers))
+load(file=sprintf("../data/CC/CC_ME_H_bn%d_v%s.RData", bw, vers))
+load(file=sprintf("../data/CC/CC_INT_H_bn%d_v%s.RData", bw, vers))
 
 allH <- tibble(H = c(AB_H, SRT_H, SD_ME_H, SD_INT_H, CC_ME_H, CC_INT_H),
                cond = rep(c("AB", "SRT", "MT_me", "ME_int", "CC_ME", "CC_int"), each=tNs),
