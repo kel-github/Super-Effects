@@ -464,11 +464,7 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
   datpath <- mu_vs_meta_inputs$datpath
   task <- mu_vs_meta_inputs$task
   mods <- mu_vs_meta_inputs$mods
-<<<<<<< HEAD
-  sub_Ns <- mu_vs_meta_inputs$sub_Ns
-=======
   sub_Ns <- as.numeric(mu_vs_meta_inputs$sub_Ns)
->>>>>>> 5eba48bbd5111d47da51d7080efc5b555b78dc08
   yl <- mu_vs_meta_inputs$yl
   leg_locs <- mu_vs_meta_inputs$leg_locs
   leg_txt <- mu_vs_meta_inputs$leg_txt
@@ -480,20 +476,6 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
   # ----------------------------------------------------
   # load data
   # ----------------------------------------------------
-  # ----------------------------------------------------
-  # load data
-  # ----------------------------------------------------
-<<<<<<< HEAD
-  if (imm) {
-    if (eps) {
-      load(paste(datpath, task, "/", "EPS", task, "stats.RData", sep = ""))
-    } else {
-      load(paste(datpath, task, "/", "IMM", task, "stats.RData", sep = ""))
-    }
-  } else {
-    load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
-  }
-=======
   # if (imm) {
   #   if (eps) {
       load(paste(datpath, task, "/", "EPS", task, "stats.RData", sep = ""))
@@ -503,8 +485,6 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
   # } else {
   #   load(paste(datpath, task, "/", task, "stats.RData", sep = ""))
   # }
->>>>>>> 5eba48bbd5111d47da51d7080efc5b555b78dc08
-  
   # ----------------------------------------------------
   # get dvs
   # ----------------------------------------------------
@@ -517,17 +497,11 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
     mods <- c("RM-AN")
   }
   ys <- lapply(mods, function(y)
-<<<<<<< HEAD
     data.frame(a = do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][["mu", y]]))-
                    do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_sig"][[x]][["mu", y]])),
                se = get_pooled(do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][["sd", y]]^2)),
                                do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_sig"][[x]][["sd", y]]^2)))))
-=======
-    data.frame(a = do.call(rbind, lapply(1:length(sub_Ns), function(x) res[,"stats_sig"][[x]][["mu", y]]))-
-                   do.call(rbind, lapply(1:length(sub_Ns), function(x) res[,"stats_fx"][[x]][["mu", y]])),
-               se = get_pooled(do.call(rbind, lapply(1:length(sub_Ns), function(x) res[,"stats_fx"][[x]][["sd", y]]^2)),
-                               do.call(rbind, lapply(1:length(sub_Ns), function(x) res[,"stats_sig"][[x]][["sd", y]]^2)))))
->>>>>>> 5eba48bbd5111d47da51d7080efc5b555b78dc08
+
   
   if (task == "SRT" | task == "VSL") mods <- ol_mods
   names(ys) <- mods
@@ -535,66 +509,40 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
   # ----------------------------------------------------
   # do plot
   # ----------------------------------------------------
-<<<<<<< HEAD
-  plot(x = 1:length(sub_Ns),
-=======
   plot(x = sub_Ns,
->>>>>>> 5eba48bbd5111d47da51d7080efc5b555b78dc08
        y = t(ys[[mods[[1]]]]["a"]),
        xaxt = "n",
        bty = "n",
        pch = 20,
        cex = 1,
        col = wes_palette("IsleofDogs1")[6],
-<<<<<<< HEAD
+
        xlim = c(0, 21),
-=======
-       #xlim = c(0, 21),
->>>>>>> 5eba48bbd5111d47da51d7080efc5b555b78dc08
        ylim = yl,
        ylab = expression(italic(paste(mu, "diff", sep = " "))),
        xlab = expression(italic("N")),
        cex.lab = 1,
        cex.axis = 1)
-<<<<<<< HEAD
-  axis(side=1, at=1:length(sub_Ns), labels = sub_Ns)
-  
-  arrows(x0 = 1:length(sub_Ns),
-         y0 = t(ys[[mods[[1]]]]["a"]) - 1.96*(t(ys[[mods[[1]]]]["se"])),
-         x1 = 1:length(sub_Ns),
-=======
+
   axis(side=1, at=sub_Ns, labels = sub_Ns)
   
-  arrows(x0 = sub_Ns,
-         y0 = t(ys[[mods[[1]]]]["a"]) - 1.96*(t(ys[[mods[[1]]]]["se"])),
-         x1 = sub_Ns,
->>>>>>> 5eba48bbd5111d47da51d7080efc5b555b78dc08
-         y1 = t(ys[[mods[[1]]]]["a"]) + 1.96*(t(ys[[mods[[1]]]]["se"])),
-         code = 3,
-         col = wes_palette("IsleofDogs1")[6],
-         angle = 90,
-         length = .05)
-  
+         # y1 = t(ys[[mods[[1]]]]["a"]) + 1.96*(t(ys[[mods[[1]]]]["se"])),
+         # code = 3,
+         # col = wes_palette("IsleofDogs1")[6],
+         # angle = 90,
+         # length = .05)
+         # 
   if (length(mods) > 1){
-<<<<<<< HEAD
-  points(x = jitter(1:length(sub_Ns)),
-=======
+
   points(x = jitter(sub_Ns),
->>>>>>> 5eba48bbd5111d47da51d7080efc5b555b78dc08
          y = jitter(t(ys[[mods[[2]]]]["a"])),
          pch = 20,
          cex = 1,
          col = wes_palette("IsleofDogs1")[5])
 
-<<<<<<< HEAD
-  arrows(x0 = 1:length(sub_Ns),
-         y0 = t(ys[[mods[[2]]]]["a"]) - (1.96*t(ys[[mods[[2]]]]["se"])),
-         x1 = 1:length(sub_Ns),
-=======
   arrows(x0 = sub_Ns,
          y0 = t(ys[[mods[[2]]]]["a"]) - (1.96*t(ys[[mods[[2]]]]["se"])),
          x1 = sub_Ns,
->>>>>>> 5eba48bbd5111d47da51d7080efc5b555b78dc08
          y1 = t(ys[[mods[[2]]]]["a"]) + (1.96*t(ys[[mods[[2]]]]["se"])),
          code = 3,
          col = wes_palette("IsleofDogs1")[5],
