@@ -354,12 +354,12 @@ get_stats_4_fx <- function(dat, task, mod, meas, medN, ns){
   medN_UB <- dat$UB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == medN]
   
   LB_ratio <- do.call(rbind, lapply(ns, function(x) 
-    dat$LB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313]/
-    dat$LB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == x]))
+    sqrt(dat$LB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313]^2/
+         dat$LB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == x]^2)))
   
   UB_ratio <- do.call(rbind, lapply(ns, function(x) 
-    dat$UB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == x]/
-    dat$UB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313]))
+    sqrt(dat$UB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == x]^2/
+         dat$UB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313]^2)))
   
   out <- list(best_med, best_sd, best_LB, best_UB, medN_med, medN_sd, medN_LB, 
               medN_UB, LB_ratio, UB_ratio)
