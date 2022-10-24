@@ -74,7 +74,7 @@ plot_dens(fx)
 fig_label("A", cex = 2)
 plot_mus_n_quants(fxovrN)
 # add legend
-legend(189, 0.4, legend=c(expression(mu), "q"), col=pal, lty=1, bty = "n")
+legend(189, 0.4, legend=c(expression(mu), "LB/UB"), col=pal, lty=1, bty = "n")
 # add the median N line
 abline(v=AB_med, lty=2, lwd=2, col=med_line_col)
 fig_label("B", cex = 2)
@@ -113,7 +113,7 @@ load(sprintf(st_tmplt, "SRT", "SRT"))
 plot_dens(fx)
 fig_label("A", cex = 2)
 plot_mus_n_quants(fxovrN)
-legend(189, 5, legend=c(expression(mu), "q"), col=pal, lty=1, bty = "n")
+legend(189, 5, legend=c(expression(mu), "LB/UB"), col=pal, lty=1, bty = "n")
 abline(v=SRT_med, lty=2, lwd=2, col=med_line_col)
 fig_label("B", cex = 2)
 

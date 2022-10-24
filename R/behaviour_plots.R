@@ -94,7 +94,7 @@ plot_CC_results <- function(fname, type) {
                        bty = "n",
                        pch = 20,
                        cex = 1,
-                       col = wes_palette("IsleofDogs1")[3],
+                       col = wes_palette("IsleofDogs1")[4],
                        ylim = c(0.95, 1.3),
                        ylab = expression(italic(paste(mu, "RT", sep = " "))),
                        xlab = expression(italic("block")),
@@ -104,14 +104,14 @@ plot_CC_results <- function(fname, type) {
                           y = mu[type == "Repeated"],
                           pch = 20,
                           cex = 1,
-                          col = wes_palette("IsleofDogs1")[4]))
+                          col = wes_palette("IsleofDogs1")[3]))
    # now add error bars
      with(ffx_dat, arrows(x0 = block[type == "Novel"], 
                           y0 = mu[type == "Novel"] - se[type == "Novel"],
                           x1 = block[type == "Novel"],
                           y1 = mu[type == "Novel"] + se[type == "Novel"],
                           code = 3,
-                          col = wes_palette("IsleofDogs1")[3],
+                          col = wes_palette("IsleofDogs1")[4],
                           angle = 90,
                           length = .025))
      with(ffx_dat, arrows(x0 = block[type == "Repeated"], 
@@ -119,13 +119,13 @@ plot_CC_results <- function(fname, type) {
                           x1 = block[type == "Repeated"],
                           y1 = mu[type == "Repeated"] + se[type == "Repeated"],
                           code = 3,
-                          col = wes_palette("IsleofDogs1")[4],
+                          col = wes_palette("IsleofDogs1")[3],
                           angle = 90,
                           length = .025))
 
-    # leg_cols <- wes_palette("IsleofDogs1")[c(3, 4)]
-    # legend(2, 1000, legend = c("novel", "repeat"),
-    #        col = leg_cols, pch = 19, bty = "n", cex = 1)
+    leg_cols <- wes_palette("IsleofDogs1")[c(4, 3)]
+    legend(8, 1.3, legend = c("N", "R"),
+            col = leg_cols, pch = 19, bty = "n", cex = 1)
   }
 }
 

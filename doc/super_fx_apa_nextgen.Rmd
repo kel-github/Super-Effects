@@ -88,7 +88,7 @@ source('../R/R_rainclouds.R')
 source('../R/doc_functions.R') # some specific plotting functions for the document
 source('../R/plotting.R') # this has some stats functions we want to use in the document
 source('../R/do_infer_stats.R') # extra functions for inferential stats
-#source('../R/KL_linear_piecewise.R')
+source('../R/get_summary_stats_for_fx_distributions.R')
 
 ```
 
@@ -151,7 +151,7 @@ Experimental procedures were run on an Apple Mac Minicomputer (OS X Late 2014, 2
 Across all tasks, participants sat approximately 57 cm from the monitor. An overview of the task procedures is presented in Figure \@ref(fig:FigureParadigm). Details regarding each of the task protocols are presented within each section below. We first provide an overview of the experimental tasks, before detailing the specific simulation and statistical methods.
 
 
-```{r, FigureParadigm, out.width='70%', fig.cap='Task battery. A) Attentional Blink Paradigm (AB). Participants report the two letter targets from the rapid serial visual presentation of numbers and letters. B) Multitasking Paradigm (MT). Participants discriminate the colour of a disc, a complex tone, or both. C) Contextual Cueing Paradigm (CC). i) Participants perform an inefficient visual search task where they search for a rotated T among L distractors. ii) Unknown to participants, half of the search arrays are repeated throughout the course of the experiment. D) Serial reaction time task (SRT). Participants respond to one of four stimuli, each mapped to a spatially-compatible button press. Unknown to participants, for half of the experimental blocks, the stimulus follows a repeating sequence.'}
+```{r, FigureParadigm, out.width='70%', fig.cap='Task battery. A) Attentional Blink Paradigm (AB). Participants report the two letter targets from the rapid serial visual presentation of numbers and letters. B) Multitasking Paradigm (MT). Participants discriminate the colour of a disc, a complex tone, or both. C) Serial reaction time task (SRT). Participants respond to one of four stimuli, each mapped to a spatially-compatible button press. Unknown to participants, for half of the experimental blocks, the stimulus follows a repeating sequence. D) Contextual Cueing Paradigm (CC). i) Participants perform an inefficient visual search task where they search for a rotated T among L distractors. ii) Unknown to participants, half of the search arrays are repeated throughout the course of the experiment. '}
 
 paradigm.fig.pth <- '../images/FigXXXX_alltasks.pdf'
 knitr::include_graphics(paradigm.fig.pth)
@@ -177,15 +177,6 @@ MT paradigms tap the performance costs incurred when individuals attempt to perf
 
 The MT protocol was previously reported in  Bender et al [-@benderRelationshipResponseSelection2016]. Each trial began with a black fixation cross presented in the center of a gray screen [RGB: 128, 128, 128] for a variable interval of 200-600 ms. Next either one of two coloured circles [red, RGB: 237, 32, 36 or blue, RGB: 44, 71, 151] or one of two sounds (complex tones taken from [@duxIsolationCentralBottleneck2006]), or both (circle and sound) were presented for 200 ms. The coloured circle subtended 1.3$^\circ$ visual angle. Participants were instructed to respond to all presented tasks by using the appropriate key press ['A' or 'S' for left hand responses, 'J' or 'K' for right hand responses, with the task-hand mapping counterbalanced across participants]. The MT protocol consisted of 4 blocks of 36 trials, with each trial type (single-task [ST] visual, ST auditory or MT) randomly mixed within blocks. Participants completed the MT protocols after completing two ST blocks as practice, one for the visual task and one for the auditory task. Mean response times (RTs) to each task modality x condition were taken as the dependent variable of interest.
 
-### Contextual Cueing (CC)
-\label{sec:CCMeth}
-
-CC tasks tap how the visual system exploits statistical regularities to guide visual search (Sisk, Remington and Jiang, [-@siskMechanismsContextualCueing2019]; Jiang and Sisk [-@jiangContextualCueing2020]). Participants are typically asked to report the orientation of a rotated 'T' target presented among an array of distractor 'L's. Participants are not informed that a set of the displays are repeated throughout the course of the experiment, while the remaining displays are novel to each trial. Typically RTs to the repeat displays become faster than novel displays throughout the course of the experiment [e.g. @chunContextualCueingImplicit1998; @nydamCathodalElectricalStimulation2018]. Participants are typically poor at recognising repeat displays in a subsequent recognition test (Sisk, Remington and Jiang, [-@siskMechanismsContextualCueing2019]; Jiang and Sisk [-@jiangContextualCueing2020]), which has prompted the conclusion that CC reflects a process of implicit learning [but see @vadilloUnderpoweredSamplesFalse2016; @vadilloUnconsciousUnderpoweredProbabilistic2020; @vadilloRaisingAwarenessMeasurement2021].
-
-#### Protocol
-
-The CC protocol was the same as that reported by Nydam et al [-@nydamCathodalElectricalStimulation2018] which is modeled on Chun and Jiang [-@chunContextualCueingImplicit1998]. Each trial began with a white fixation cross presented on a grey screen [RGB: 80, 80, 80]. An array of 12 L's and a single T were then presented presented within an invisible 15 x 15 grid that subtended 10$^\circ$ x 10$^\circ$ of visual angle. Orientation of each L was determined randomly to be rotated 0$^\circ$, 90$^\circ$, 180$^\circ$ or 270$^\circ$ clockwise. The T was oriented to either 90$^\circ$ or 270$^\circ$. Participants reported whether the T was oriented to the left (using the 'z' key) or the right (using the 'm' key), as quickly and accurately as possible. The task consisted of 12 blocks of 24 trials. For half the trials in each block, the display was taken (without replacement) from 1 of 12 configurations that was uniquely generated for each participant, where the location of the distractors and target (but not the orientation of the target) was fixed. These trials were called 'repeats'. For the remaining trials, the display was randomly generated for each trial, making them 'novel'. Displays were generated with the constraint that equal items be placed in each quadrant and each eccentricity. Target positions were matched between the repeat and novel displays for both quadrant and eccentricity. The exact location of the item was jittered within each cell for each presentation, to prevent perceptual learning or adaptation to the specific position of the item. The order of display type (repeat vs novel), configuration (1:12) and target orientation (left or right) was randomised for each block. Mean RTs to each block (1:12) and display type (repeat vs novel) were taken as the dependent variable.
-
 ### Serial Response Task (SRT)
 \label{sec:SRTMeth}
 
@@ -194,6 +185,15 @@ In the SRT task, participants are required to make key presses in response to on
 #### Protocol
 The SRT was adapted from Nissen & Bullemer [-@nissenAttentionalRequirementsLearning1987]. Four square placeholders were presented across the horizontal meridian. A red circle [RGB: 255, 0, 0] appeared in one of the 4 squares for 500 ms. This served as the target stimulus. Participants responded by pressing the finger of their dominant hand that spatially aligned to the target circle, using the relevant 'j', 'k', 'l' or ';' keys. The next target stimulus would appear 500 ms after the correct response had been made. Participants completed 4 blocks of 100 trials. For blocks 1 and 4, the location of the target stimulus for each trial was randomly selected from a uniform distribution. These blocks are referred to as 'random'. For blocks 2 and 3, a repeating sequence of 10 elements was used to determine the target location. The sequence was repeated 10 times. The repeating sequence was 4-2-3-1-3-2-4-2-3-1, with 1 being the leftmost placeholder, and 4 being the rightmost placeholder. These blocks are referred to as 'Repeat' blocks. Learning in the SRT is tested by comparing mean RTs between Random and Repeat blocks in the latter half of the experiment (block 4 vs 3).
 <br>
+
+### Contextual Cueing (CC)
+\label{sec:CCMeth}
+
+CC tasks tap how the visual system exploits statistical regularities to guide visual search (Sisk, Remington and Jiang, [-@siskMechanismsContextualCueing2019]; Jiang and Sisk [-@jiangContextualCueing2020]). Participants are typically asked to report the orientation of a rotated 'T' target presented among an array of distractor 'L's. Participants are not informed that a set of the displays are repeated throughout the course of the experiment, while the remaining displays are novel to each trial. Typically RTs to the repeat displays become faster than novel displays throughout the course of the experiment [e.g. @chunContextualCueingImplicit1998; @nydamCathodalElectricalStimulation2018]. Participants are typically poor at recognising repeat displays in a subsequent recognition test (Sisk, Remington and Jiang, [-@siskMechanismsContextualCueing2019]; Jiang and Sisk [-@jiangContextualCueing2020]), which has prompted the conclusion that CC reflects a process of implicit learning [but see @vadilloUnderpoweredSamplesFalse2016; @vadilloUnconsciousUnderpoweredProbabilistic2020; @vadilloRaisingAwarenessMeasurement2021].
+
+#### Protocol
+
+The CC protocol was the same as that reported by Nydam et al [-@nydamCathodalElectricalStimulation2018] which is modeled on Chun and Jiang [-@chunContextualCueingImplicit1998]. Each trial began with a white fixation cross presented on a grey screen [RGB: 80, 80, 80]. An array of 12 L's and a single T were then presented presented within an invisible 15 x 15 grid that subtended 10$^\circ$ x 10$^\circ$ of visual angle. Orientation of each L was determined randomly to be rotated 0$^\circ$, 90$^\circ$, 180$^\circ$ or 270$^\circ$ clockwise. The T was oriented to either 90$^\circ$ or 270$^\circ$. Participants reported whether the T was oriented to the left (using the 'z' key) or the right (using the 'm' key), as quickly and accurately as possible. The task consisted of 12 blocks of 24 trials. For half the trials in each block, the display was taken (without replacement) from 1 of 12 configurations that was uniquely generated for each participant, where the location of the distractors and target (but not the orientation of the target) was fixed. These trials were called 'repeats'. For the remaining trials, the display was randomly generated for each trial, making them 'novel'. Displays were generated with the constraint that equal items be placed in each quadrant and each eccentricity. Target positions were matched between the repeat and novel displays for both quadrant and eccentricity. The exact location of the item was jittered within each cell for each presentation, to prevent perceptual learning or adaptation to the specific position of the item. The order of display type (repeat vs novel), configuration (1:12) and target orientation (left or right) was randomised for each block. Mean RTs to each block (1:12) and display type (repeat vs novel) were taken as the dependent variable.
 
 ## Statistical Approach
 
@@ -207,9 +207,9 @@ For each task, we simulated experiments across 20 different sample sizes ($N$s),
 ### Effect Sizes
 For each task, we report the following information from the effect size densities that were produced by simulating 1000 experiments at each level of $N$; first we used our highest $N$ ($N_{313}$) to identify our best estimate of the effect size distribution. We therefore report, for each task, the median (M), standard deviation (SD) and the .025 (lower bound, LB) and .975 (upper bound, UB) quantiles. These values can be used to define, _a priori_, the range of anticipated effect sizes for future experiments, and consequently, can motivate power calculations for future studies. 
 
-We next determined how effect size observations differ when experiments use an $N$ that is typical for the field. We report the same summary statistics as above, for the $N$ that is closest to the median sample size used in the field for that task ($N_{med}$). To identify the median $N$, we conducted a survey of the recent literature (see below). We computed _precision loss_ from using $N_{med}$ by taking the ratio between the UB or LB quantiles (e.g. $\frac{LB_{N_{med}} }{LB_{N_{313}}}$). We refer to these from now as the LB and UB ratios. We also present LB and UB ratios across all sampled $N$s, to provide an idea of how much may be gained in precision if the field were to increase the typical $N$. Note that although we expect these ratios to be some function of $\frac{1}{N}$ (given that variance is a function of this term), the exact relationship between $N$ and precision will be dependent on the population variance and measurement error. 
+We next determined how effect size observations differ when experiments use an $N$ that is typical for the field. We report the same summary statistics as above, for the $N$ that is closest to the median sample size used in the field for that task ($N_{med}$). To identify the median $N$, we conducted a survey of the recent literature (see below). We computed _precision loss_ from using $N_{med}$ by taking the ratio between the UB ($\frac{LB_{N_{med}} }{LB_{N_{313}}}$) or LB quantiles ($\frac{LB_{N_{313}} }{LB_{N_{med}}}$). We refer to these from now as the UB and LB ratios. Note that the numerator and denominator are switched between the LB and the UB ratios, so that a value larger than 1 indicates how much higher or lower the $N_{med}$ bound is, relative to the bound for $N_{313}$. We also present LB and UB ratios across all sampled $N$s, to provide an idea of how much may be gained in precision if the field were to increase the typical $N$. Note that although we expect these ratios to be some function of $\frac{1}{N}$ (given that variance is a function of this term), the exact relationship between $N$ and precision will be dependent on the population variance and measurement error. 
 
-Next we sought to provide empirical estimates regarding how missing literature and imprecision from low $N$ may lead a researcher awry during study planning. We determine for each task and $N$, the probability that an observation from one experiment will fall within the UB and LB quantiles from $N_{313}$. (As above, although we expect this to change as a function of $\frac{1}{N}$, the exact relationship is dependent on measurement noise). This provides an idea of how likely a researcher is to have picked a reasonable effect size estimate when basing power calculations on a similar study, and the extent to which this confidence changes with $N$. We also provided an estimate of how effect size estimates might be biased by aggregating only across experiments with statistically significant results (p<.05), under the assumption that the published literature is more likely to contain significant results and is not likely to contain null results. Therefore, this estimate would reflect what is likely to be obtained from aggregating across the existing published literature. We present the difference between the mean observed effect size and the mean estimate of this _biased_ effect size, for each level of $N$. Effectively, this analysis is assessing the severity of the file-drawer effect for different sizes of $N$.
+Next we sought to provide empirical estimates regarding how imprecision from low $N$ and missing literature may lead a researcher awry during study planning. We determine for each task and $N$, the probability that an observation from one experiment will fall within the UB and LB quantiles from $N_{313}$. (As above, although we expect this to change as a function of $\frac{1}{N}$, the exact relationship is dependent on measurement noise). This provides an idea of how likely a researcher is to have picked a reasonable effect size estimate when basing power calculations on a similar study, and the extent to which this confidence changes with $N$. We also provided an estimate of how effect size estimates might be biased by aggregating only across experiments with statistically significant results (p<.05), under the assumption that the published literature is more likely to contain significant results and is not likely to contain null results. Therefore, this estimate would reflect what is likely to be obtained from aggregating across the existing published literature. We present the difference between the mean observed effect size and the mean estimate of this _biased_ effect size, for each level of $N$. Effectively, this analysis is assessing the severity of the file-drawer effect for different sizes of $N$.
 
 #### Computing Effect Sizes
 
@@ -223,6 +223,8 @@ For the remaining task where a paired samples t-test is used to make the key com
 $$
 d_{z} = \frac{M_{diff}}{\sqrt{\frac{\sum(X_{diff} - M_{diff})^2}{N-1}}}
 $$
+
+To facilitate our interpretation of effect sizes as small, medium or large, we refer to Cohen [-@cohenPowerPrimer1992] for $\epsilon_{p}^2$ and to Gignac & Szodorai, [-@gignacEffectSizeGuidelines2016] for $d_z$.
 
 #### Representative N
 
@@ -238,7 +240,7 @@ knitr::kable(survey_dat, col.names = c("task", "n exp", "med N"), align = "lcc",
 
 ### p-values
 
-To determine the $N$ required to achieve 90% power to reject the null hypothesis, we report the $N$ for which over 90% of p-values pass the threshold for significance for the effects of interest ($\alpha$=.05). To assess how confidence in p-values, or certainty of the test outcome, changes with $N$, we present the same statistics for each $N$ (mean, standard deviation, UB, LB and UB/LB ratios). As p-values clustered close to 0 in many instances, this measure will be subject to some floor effects but should also determine where clear information gains are available by increasing $N$. Additionally, because p-values cluster close to 0, we applied the probit transform to rescale the values on the range [-$\infty$, $\infty$] for visualisation purposes only. 
+To determine the $N$ required to achieve 90% power to reject the null hypothesis, we report the $N$ for which over 90% of p-values pass the threshold for significance for the effects of interest ($\alpha$=.05). To assess how confidence in p-values, or certainty of the test outcome, changes with $N$, we present the same statistics for each $N$ (mean, standard deviation, UB, LB and qq-ratios). As p-values clustered close to 0 in many instances, this measure will be subject to some floor effects but should also determine where clear information gains are available by increasing $N$. Additionally, because p-values cluster close to 0, we applied the probit transform to rescale the values on the range [-$\infty$, $\infty$] for visualisation purposes only. 
 
 ### Analysis of Experimental Tasks
 
@@ -249,23 +251,30 @@ As is typical for the field, and to ascertain the effectiveness of the lag manip
 #### Multitasking
 To ascertain the effectiveness of the multitasking manipulation, the data were modelled using a 2 (task-modality: visual-manual vs auditory-manual) x 2 (task: ST vs MT) repeated-measures ANOVA. This analysis was also applied to each $k$ sample; $\epsilon_{p}^2$ and $p$ are reported for both the main effect of task and the task-modality x task interaction. 
 
+#### Serial Response Task
+
+To ascertain whether participants learned the repeating sequences, RTs in the final block of sequence trials (block 3) were compared to those in the final block of random trials (block 4) using a paired-samples t-test. This analysis was also applied to each $k$ sample, and we present the resulting Cohen's $d_{z}$, and $p$ value from each test. 
+
 #### Contextual Cueing
 
 To ascertain whether participants became faster for repeat relative to novel trials over the course of the experiment (i.e. whether participants learned the statistical regularities of the repeated displays), the data were subject to a block (1:12) x condition (repeat vs novel display) repeated measures ANOVA. Specifically, learning should be evidenced by a significant block x condition interaction. This analysis was applied to each $k$ sample, and we report $\epsilon_{p}^2$ and $p$ for the block x condition interaction.
 
 As some studies from the contextual cueing literature suggest that the effect is better characterised by a main effect of condition thereby implying rapid learning of the statistical regularities [e.g. @petersonAttentionalGuidanceEyes2001; @travisRoleWorkingMemory], we also report the $\epsilon_{p}^2$ and $p$ for the main effect of condition.
 
-
-#### Serial Response Task
-
-To ascertain whether participants learned the repeating sequences, RTs in the final block of sequence trials (block 3) were compared to those in the final block of random trials (block 4) using a paired-samples t-test. This analysis was also applied to each $k$ sample, and we present the resulting Cohen's $d_{z}$, and $p$ value from each test. 
-
 <br>
 
 # Results
 \label{sec:Results}
 
-We first present the results from the standard analyses used for each task, to show that we replicate the classic results from each task. The key findings from each task are presented in \@ref(fig:ADD THE BEHAV RESULTS). Next we present the effect size data, followed by p-values.
+We first present the results from the standard analyses used for each task, to show that we replicate the classic findings from each task. The key behavioural data are presented in Figure \@ref(fig:behavResults). 
+
+
+```{r, behavResults, out.width='70%', fig.cap='Behavioural Results. A) Attentional Blink Paradigm (AB). Accuracy (acc) for T2|T1 was lower at early lags, relative to later lags. Note that T1 accuracy is also plotted. B) Multitasking Paradigm (MT). RTs were slowed for multitask (M) conditions, relative to single-tasks (S). This difference was larger for sound tasks (So) than for visual (V) tasks. C) Serial Response Task (SRT). In the second half of the experiment, RTs were faster in the sequence (S) relative to the random (R) condition. D) Contextual Cueing (CC). RTs were faster for the repeat (R) than for the novel (N) displays, and this difference became larger throughout the course of the experiment.'}
+
+behav.results.fig.pth <- '../images/EPS_all_tasks_behav.pdf'
+knitr::include_graphics(behav.results.fig.pth)
+
+```
 
 ## Behavioural Results
 
@@ -277,7 +286,7 @@ abfname <- "../data/total_of_313_subs_AB_task_trial_level_data.csv"
 ab_res <- do.AB.analysis(abfname)
 ```
 
-An overview for the findings for the AB task are presented in Figure \@ref(fig:ABFX). T2|T1 performance suffered proportional to temporal proximity to T1; proportion accuracy for T2|T1 decreased (by around p = `r sprintf("%.2f", abs(ab_res[[2]][,3]$estimate))`) when T2 was presented at lag 2, relative to lag 7. A one-way ANOVA revealed that the effect of lag was statistically significant (F (`r sprintf("%.1f", ab_res[[1]]$DFn)`, `r sprintf("%.0f", ab_res[[1]]$DFd)`) = `r sprintf("%.0f", ab_res[[1]]$F)`, $\eta_{p}^2$ = `r sprintf("%.2f", ab_res[[1]]$pes)`, p = `r sprintf("%.2e", ab_res[[1]]$p)`). Post-hoc t-tests showed that accuracy at each lag differed statistically from accuracy at each of the other lags (all p's $\leq$ `r sprintf("%.2e", max(do.call(rbind, lapply(1:6, function(x) cbind(ab_res[[2]][,x]$p.value)))))`), with lower accuracy values at the shorter relative to the longer lags. Therefore, we see that our implementation of the AB paradigm yielded the typically observed effects.
+The AB data are presented in Figure \@ref(fig:behavResults)A. Accuracy for T2|T1 was lower for lags that occured closer in time to T1; accuracy for T2|T1 decreased (by around p = `r sprintf("%.2f", abs(ab_res[[2]][,3]$estimate))`) when T2 was presented at lag 2, relative to lag 7. A one-way ANOVA revealed that the effect of lag was statistically significant (F (`r sprintf("%.1f", ab_res[[1]]$DFn)`, `r sprintf("%.0f", ab_res[[1]]$DFd)`) = `r sprintf("%.0f", ab_res[[1]]$F)`, $\epsilon_{p}^2$ = `r sprintf("%.2f", ab_res[[3]][["lag"]])`, p = `r sprintf("%.2e", ab_res[[1]]$p)`). Post-hoc t-tests showed that accuracy at each lag differed statistically from accuracy at each of the other lags (all p's $\leq$ `r sprintf("%.2e", max(do.call(rbind, lapply(1:6, function(x) cbind(ab_res[[2]][,x]$p.value)))))`), with lower accuracy for the shorter relative to the longer lags. Therefore, the AB paradigm yielded the typically observed effects.
 
 ### Multitasking
 
@@ -286,7 +295,16 @@ mtfname <- "../data/total_of_313_subs_SingDual_task_trial_level_data.csv"
 mt_res <- do.MT.analysis(mtfname)
 ```
 
-As was anticipated, RTs were slowed for multitask relative to single task conditions (see Figure \@ref(fig:MTFX), panel A). Mean RTs were on average `r sprintf("%.2f", abs(mt_res[[2]]$me_MT$estimate[[1]]))` (95% CI[`r sprintf("%.2f", abs(mt_res[[2]]$me_MT$conf.int[2]))`, `r sprintf("%.2f", abs(mt_res[[2]]$me_MT$conf.int[1]))`]) seconds (s) slower on MT trials (F(`r sprintf("%1.0f", mt_res[[1]]$DFn[mt_res[[1]]$Effect == "trialtype"])`, `r sprintf("%3.0f", mt_res[[1]]$DFd[mt_res[[1]]$Effect == "trialtype"])`) = `r sprintf("%4.0f", mt_res[[1]]$F[mt_res[[1]]$Effect == "trialtype"])`,  $\eta_{p}^2$ = `r sprintf("%.2f", mt_res[[1]]$pes[mt_res[[1]]$Effect == "trialtype"])`, p<.0001). There was also a significant task modality (sound or visual) x task (ST vs MT) interaction  (F(`r sprintf("%1.0f", mt_res[[1]]$DFn[mt_res[[1]]$Effect == "task:trialtype"])`, `r sprintf("%3.0f", mt_res[[1]]$DFd[mt_res[[1]]$Effect == "task:trialtype"])`) = `r sprintf("%2.1f", mt_res[[1]]$F[mt_res[[1]]$Effect == "task:trialtype"])`,  $\eta_{p}^2$ = `r sprintf("%.2f", mt_res[[1]]$pes[mt_res[[1]]$Effect == "task:trialtype"])`, p<.0001), with the MT cost (MT RT - ST RT) being larger for  the sound task relative to the visual task by on average `r sprintf("%.2f", abs(mt_res[[2]]$interaction$estimate[[1]]))` s (95% CI[`r sprintf("%.2f", abs(mt_res[[2]]$interaction$conf.int[1]))`, `r sprintf(sprintf("%.2f", abs(mt_res[[2]]$interaction$conf.int[2])))`]). This latter finding has been previously reported in the multitasking literature [@hazeltineModalityPairingEffects2006], and we continue to interrogate it in the effect size results below, as it serves as an example of an interaction effect with a small effect size, to facilitate comparisons to interactions with small effect sizes in the implicit learning literature (see [REF] contextal cueing results below).
+As anticipated, RTs were slowed for multitask relative to single task conditions (see Figure \@ref(fig:behavResults)B). Mean RTs were on average `r sprintf("%.2f", abs(mt_res[[2]]$me_MT$estimate[[1]]))` (95% CI[`r sprintf("%.2f", abs(mt_res[[2]]$me_MT$conf.int[2]))`, `r sprintf("%.2f", abs(mt_res[[2]]$me_MT$conf.int[1]))`]) seconds (s) slower on MT trials (F(`r sprintf("%1.0f", mt_res[[1]]$DFn[mt_res[[1]]$Effect == "trialtype"])`, `r sprintf("%3.0f", mt_res[[1]]$DFd[mt_res[[1]]$Effect == "trialtype"])`) = `r sprintf("%4.0f", mt_res[[1]]$F[mt_res[[1]]$Effect == "trialtype"])`,  $\epsilon_{p}^2$ = `r sprintf("%.2f", mt_res[[3]][["trialtype"]])`, p<.0001). There was also a significant task modality (sound or visual) x task (ST vs MT) interaction  (F(`r sprintf("%1.0f", mt_res[[1]]$DFn[mt_res[[1]]$Effect == "task:trialtype"])`, `r sprintf("%3.0f", mt_res[[1]]$DFd[mt_res[[1]]$Effect == "task:trialtype"])`) = `r sprintf("%2.1f", mt_res[[1]]$F[mt_res[[1]]$Effect == "task:trialtype"])`,  $\epsilon_{p}^2$ = `r sprintf("%.2f", mt_res[[3]][["task:trialtype"]])`, p<.0001). The MT cost (MT RT - ST RT) was larger for  the sound task relative to the visual task by on average `r sprintf("%.2f", abs(mt_res[[2]]$interaction$estimate[[1]]))` s (95% CI[`r sprintf("%.2f", abs(mt_res[[2]]$interaction$conf.int[1]))`, `r sprintf(sprintf("%.2f", abs(mt_res[[2]]$interaction$conf.int[2])))`]). This latter finding has been reported previously [@hazeltineModalityPairingEffects2006]. We continue to interrogate this effect, as it serves as an example of an interaction with a small effect size. This facilitates comparisons to the contextual cueing task, as reported below.
+
+### SRT
+
+```{r, SRT_F, message=F}
+srtfname <- "../data/total_of_313_subs_SRT_task_trial_level_data.csv"
+srt_res <- do.SRT.analysis(srtfname)
+```
+
+The results from the SRT paradigm are presented in Figure \@ref(fig:behavResults)C. Participants learned the repeating sequence; RTs were on average `r sprintf("%.3f", srt_res[[1]]$estimate/1000)` s faster (95% CI [`r sprintf("%.3f", srt_res[[1]]$conf.int[[1]]/1000)`, `r sprintf("%.3f", srt_res[[1]]$conf.int[[2]]/1000)`]) for the sequence relative to the random condition (t(`r sprintf("%3.0f", srt_res[[1]]$parameter[[1]])`) = `r sprintf("%2.2f", srt_res[[1]]$statistic[[1]])`, $d_z$ = `r sprintf("%1.2f", srt_res[[3]])`, p = `r sprintf("%.2e", srt_res[[1]]$p.value)`). 
 
 ### Contextual Cueing
 \label{sec:CCRes}
@@ -296,18 +314,79 @@ ccfname <- "../data/total_of_313_subs_CC_task_trial_level_data.csv"
 cc_res <- do.CC.analysis(ccfname)
 ```
 
-Participants learned the repeat displays over the course of the experiment; the RT data showed a significant albeit small block x condition interaction (F (`r sprintf("%2.2f", cc_res[[1]]$DFn[3])`, `r sprintf("%4.1f", cc_res[[1]]$DFd[3])`) = `r sprintf("%1.2f", cc_res[[1]]$F[3])`, $\eta_{p}^2$ = `r sprintf("%.2f", cc_res[[1]]$pes[3])`, p = `r sprintf("%.2e", cc_res[[1]]$p[3])`). There was no statistically significant difference between RTs for repeat and novel displays at the beginning of the experiment (block 1: t (`r sprintf("%3.0f", cc_res[[2]][[1]]$parameter)`) = `r sprintf("%.2f", cc_res[[2]][[1]]$statistic)`, p = `r sprintf("%.2f", cc_res[[2]][[1]]$p.value)`, $\mu$ difference = `r sprintf("%.2f", cc_res[[2]][[1]]$estimate/1000)` s, sd: `r sprintf("%.2f", (cc_res[[2]][[1]]$stderr/1000)*sqrt(313))`). However, by block 12, RTs for repeat displays were on average `r sprintf("%.2f", cc_res[[2]][[2]]$estimate/1000)` s faster than novel displays (sd: `r sprintf("%.2f", (cc_res[[2]][[2]]$stderr/1000)*sqrt(313))`, t (`r sprintf("%3.0f", cc_res[[2]][[2]]$parameter)`) = `r sprintf("%.2f", cc_res[[2]][[2]]$statistic)`, p = `r sprintf("%.2e", cc_res[[2]][[2]]$p.value)`, see Figure \@ref(fig:CCbeh), panel A). There was also a significant and larger main effect of block (F(`r sprintf("%.2f", cc_res[[1]]$DFn[1])`, `r sprintf("%.2f", cc_res[[1]]$DFd[1])`) = `r sprintf("%1.2f", cc_res[[1]]$F[1])`, $\eta_{p}^2$ = `r sprintf("%.2f", cc_res[[1]]$pes[1])`, p = `r sprintf("%.2e", cc_res[[1]]$p[1])`). Of relevance for the subsequent discussion on the $\eta_{p}^2$ results, there was also a significant main effect of condition (F(`r sprintf("%.2f", cc_res[[1]]$DFn[2])`, `r sprintf("%.2f", cc_res[[1]]$DFd[2])`) = `r sprintf("%1.2f", cc_res[[1]]$F[2])`, $\eta_{p}^2$ = `r sprintf("%.2f", cc_res[[1]]$pes[2])`, p = `r sprintf("%.2e", cc_res[[1]]$p[2])`).
+Participants learned the repeat displays over blocks (see Figure \@ref(fig:behavResults)D); the RT data showed a significant albeit small block x condition interaction (F (`r sprintf("%2.2f", cc_res[[1]]$DFn[3])`, `r sprintf("%4.1f", cc_res[[1]]$DFd[3])`) = `r sprintf("%1.2f", cc_res[[1]]$F[3])`, $\epsilon_{p}^2$ = `r sprintf("%.2f", cc_res[[3]][["block:type"]])`, p = `r sprintf("%.2e", cc_res[[1]]$p[3])`). There was no statistically significant difference between RTs for repeat and novel displays for block 1: (t (`r sprintf("%3.0f", cc_res[[2]][[1]]$parameter)`) = `r sprintf("%.2f", cc_res[[2]][[1]]$statistic)`, p = `r sprintf("%.2f", cc_res[[2]][[1]]$p.value)`, $\mu$ difference = `r sprintf("%.2f", cc_res[[2]][[1]]$estimate/1000)` s, sd: `r sprintf("%.2f", (cc_res[[2]][[1]]$stderr/1000)*sqrt(313))`). However, by block 12, RTs for repeat displays were on average `r sprintf("%.2f", cc_res[[2]][[2]]$estimate/1000)` s faster than novel displays (sd: `r sprintf("%.2f", (cc_res[[2]][[2]]$stderr/1000)*sqrt(313))`, t (`r sprintf("%3.0f", cc_res[[2]][[2]]$parameter)`) = `r sprintf("%.2f", cc_res[[2]][[2]]$statistic)`, p = `r sprintf("%.2e", cc_res[[2]][[2]]$p.value)`. There was also a significant and larger main effect of block (F(`r sprintf("%.2f", cc_res[[1]]$DFn[1])`, `r sprintf("%.2f", cc_res[[1]]$DFd[1])`) = `r sprintf("%1.2f", cc_res[[1]]$F[1])`, $\epsilon_{p}^2$ = `r sprintf("%.2f", cc_res[[3]][["block"]])`, p = `r sprintf("%.2e", cc_res[[1]]$p[1])`). and a significant main effect of condition (F(`r sprintf("%.2f", cc_res[[1]]$DFn[2])`, `r sprintf("%.2f", cc_res[[1]]$DFd[2])`) = `r sprintf("%1.2f", cc_res[[1]]$F[2])`, $\epsilon_{p}^2$ = `r sprintf("%.2f", cc_res[[1]][["type"]])`, p = `r sprintf("%.2e", cc_res[[1]]$p[2])`).
 
-### SRT
-
-```{r, SRT_F, message=F}
-srtfname <- "../data/total_of_313_subs_SRT_task_trial_level_data.csv"
-srt_res <- do.SRT.analysis(srtfname)
-```
-
-The results from the SRT paradigm are presented in [REF]. Participants learned the repeating sequence; RTs were on average `r sprintf("%.3f", srt_res[[1]]$estimate/1000)` s faster (95% CI [`r sprintf("%.3f", srt_res[[1]]$conf.int[[1]]/1000)`, `r sprintf("%.3f", srt_res[[1]]$conf.int[[2]]/1000)`]) for the sequence relative to the random condition (t(`r sprintf("%3.0f", srt_res[[1]]$parameter[[1]])`) = `r sprintf("%2.2f", srt_res[[1]]$statistic[[1]])`, $d$ = `r sprintf("%1.2f", srt_res[[2]])`, p = `r sprintf("%.2e", srt_res[[1]]$p.value)`). 
 
 ## Effect Sizes
+
+The effect size distributions attained for the AB and MT are presented in Figure \@ref(fig:attEFfx).
+
+```{r, attEFfx, out.width='70%', fig.cap='Effect size distributions oserved for the AB and MT paradigms. A) AB: Partial epsilon sq distributions for selected N for the main effect of lag. B) Showing the mean partial epsilon squared, and the UB and LB quantiles [.025, .975], for the main effect of lag, across N. C) MT: Same as in A, but for the main effect of task condition. D) Same as in B, for the main effect of task condition (MT), E) As in A, but for the task x modality interaction, E) As A, but for the MT task x modality interaction'}
+
+attEF.fx.fig.pth <- '../images/EPS_EF_tasks_fx_sz.pdf'
+knitr::include_graphics(attEF.fx.fig.pth)
+
+```
+
+### Summary Statistics and Precision Loss
+
+```{r, get_sum_stats}
+sum_fx_p_dat <- get_summary_data_fx_p(FALSE)
+
+# note: interpret effect size estimates using Cohen's 1992 power primer
+# https://cran.r-project.org/web/packages/effectsize/vignettes/interpret.html
+```
+
+#### Attentional Blink
+
+```{r, set_AB_med}
+
+# get relevant stats
+get_stats_4_fx <- function(dat, task, mod, meas, medN, ns){
+  # get relevant stats for reporting
+  best_med <- dat$med[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313]
+  best_sd <- dat$sd[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313]
+  best_LB <- dat$LB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313]
+  best_UB <- dat$UB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313]
+  medN_med <- dat$med[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == medN]
+  medN_sd <- dat$sd[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == medN]
+  medN_LB <- dat$LB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == medN]
+  medN_UB <- dat$UB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == medN]
+  
+  LB_ratio <- do.call(rbind, lapply(ns, function(x) 
+    dat$LB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313]/
+    dat$LB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == x]))
+  
+  UB_ratio <- do.call(rbind, lapply(ns, function(x) 
+    dat$UB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == x]/
+    dat$UB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313]))
+  
+  out <- list(best_med, best_sd, best_LB, best_UB, medN_med, medN_sd, medN_LB, 
+              medN_UB, LB_ratio, UB_ratio)
+  names(out) <- c("best_med", "best_sd", "best_LB", "best_UB", "medN_med", "medN_sd",
+                  "medN_LB", "medN_UB", "LB_ratio", "UB_ratio")
+  out
+  
+}
+
+AB_med <- 25
+AB_fx_stats <- get_stats_4_fx(sum_fx_p_dat, task="AB", mod="RM-AN", meas="esz", medN=25, ns=unique(sum_fx_p_dat$n))
+
+```
+
+Overall, the AB effect was large and reducing $N$ to the $N_{med}$ had negligible impacts on effect size estimation; the median estimate of $\epsilon_{p}^2$ using $N_{313}$ was `r sprintf("%.2f", AB_fx_stats[["best_med"]])` (sd: `r sprintf('%.2f', AB_fx_stats[["best_sd"]] )`). For $N_{med}=25$ the median $\epsilon_{p}^2$ was identical (`r sprintf("%.2f", AB_fx_stats[["medN_med"]])`, sd: `r sprintf("%.2f", AB_fx_stats[["medN_sd"]])`). The LB and UB quantiles were broadly comparable between $N_{313}$ [LB: `r sprintf("%.2f", AB_fx_stats[["best_LB"]])`, UB: `r sprintf("%.2f", AB_fx_stats[["best_UB"]])`] and $N_{med}$ [LB: `r sprintf("%.2f", AB_fx_stats[["medN_LB"]])`, UB: `r sprintf("%.2f", AB_fx_stats[["medN_UB"]])`], with ratios of `r sprintf("%.2f", AB_fx_stats[["best_LB"]]/AB_fx_stats[["medN_LB"]])` and `r sprintf("%.2f", AB_fx_stats[["medN_UB"]]/AB_fx_stats[["best_UB"]])` respectively. The worst case LB and UB ratios were also fairly low; if the field used $N$=13, then the lowest effect size estimates would be up to `r sprintf("%.2f", AB_fx_stats[["LB_ratio"]][[1]])` times the lower bound, whereas the largest would be `r sprintf("%.2f", AB_fx_stats[["UB_ratio"]][[1]])` times the upper bound. The remaining LB and UB ratios are presented in Figure [].
+
+#### Multitasking
+
+```{r, get_MT_fxstats}
+
+MT_med <- 42
+MT_fx_stats_ME <- get_stats_4_fx(sum_fx_p_dat, task="SD", mod="tt", meas="esz", medN=MT_med, ns=unique(sum_fx_p_dat$n))
+MT_fx_stats_int <- get_stats_4_fx(sum_fx_p_dat, task="SD", mod="ta*tt", meas="esz", medN=MT_med, ns=unique(sum_fx_p_dat$n))
+```
+
+### Impacts of imprecision and missing literature
+
 
 ## p-Values
 

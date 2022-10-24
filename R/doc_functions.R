@@ -21,7 +21,8 @@ do.AB.analysis <- function(fname){
   # run anova
   # ----------------------------------------------------------------------------------------------------
   an <- get_anova_table(anova_test(data=ffx.dat, dv=T2gT1, wid=sub, within=lag, effect.size="pes", type=3))
-  
+  eps <- sapply(unique(an$Effect), function(x) (an$F[an$Effect == x] - 1) / 
+                                      (an$F[an$Effect == x] + (an$DFd[an$Effect == x]/an$DFn[an$Effect == x])))
   # ----------------------------------------------------------------------------------------------------
   # do post-hoc t - tests
   # ----------------------------------------------------------------------------------------------------
@@ -35,7 +36,7 @@ do.AB.analysis <- function(fname){
   # ----------------------------------------------------------------------------------------------------
   # return
   # ----------------------------------------------------------------------------------------------------
-  list(an, ts)
+  list(an, ts, eps)
   
 }
 
@@ -86,6 +87,8 @@ do.MT.analysis <- function(fname){
   # -----------------------------------------------------------------------------
   an <- rstatix::get_anova_table(rstatix::anova_test(data=ffx.dat %>% ungroup(), dv=RT, wid=sub, within=c(task,trialtype), effect.size="pes", type=3))
 
+  eps <- sapply(unique(an$Effect), function(x) (an$F[an$Effect == x] - 1) / 
+                  (an$F[an$Effect == x] + (an$DFd[an$Effect == x]/an$DFn[an$Effect == x])))
   # ----------------------------------------------------------------------------------------------------
   # do post-hoc t - tests
   # ----------------------------------------------------------------------------------------------------
@@ -107,7 +110,7 @@ do.MT.analysis <- function(fname){
   # ----------------------------------------------------------------------------------------------------
   # return
   # ----------------------------------------------------------------------------------------------------
-  list(an, ts)
+  list(an, ts, eps)
 }
 
 
@@ -136,6 +139,8 @@ do.CC.analysis <- function(fname){
   # run anova
   # ----------------------------------------------------------------------------------------------------
   an <- rstatix::get_anova_table(rstatix::anova_test(data=ffx.dat%>%ungroup(), dv=RT, wid=sub, within=c(block,type), effect.size="pes", type=3))
+  eps <- sapply(unique(an$Effect), function(x) (an$F[an$Effect == x] - 1) / 
+                  (an$F[an$Effect == x] + (an$DFd[an$Effect == x]/an$DFn[an$Effect == x])))
   
   # ----------------------------------------------------------------------------------------------------
   # do post-hoc t - tests on 1st block and 12th block
@@ -149,7 +154,7 @@ do.CC.analysis <- function(fname){
   # ----------------------------------------------------------------------------------------------------
   # return
   # ----------------------------------------------------------------------------------------------------
-  list(an, ts)
+  list(an, ts, eps)
   
 }
 
