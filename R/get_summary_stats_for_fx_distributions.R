@@ -68,7 +68,8 @@ get_summary_data_fx_p <- function(delete_files_after){
   dat %>% select(n, p, esz, mod, task) %>%
     pivot_longer(p:esz, names_to = "meas", values_to = "value") %>%
     group_by(n, mod, task, meas) %>% 
-    summarise(med=median(value),
+    summarise(mu=mean(value),
+              med=median(value),
               sd=sd(value),
               LB=quantile(value, .025),
               UB=quantile(value, .975))

@@ -197,7 +197,7 @@ The CC protocol was the same as that reported by Nydam et al [-@nydamCathodalEle
 
 ## Statistical Approach
 
-All the [data](https://doi.org/10.48610/1e6bf9a) and [code](https://github.com/kel-github/Super-Effects) used for the current analyses are available online. All data were analysed using R -@rcoreteamLanguageEnvironmentStatistical2015 and RStudio -@rstudiocitation. The analysis of the data from each task followed two steps; first, to ascertain that we observed the typical findings for each of the paradigms, we applied the relevant conventional statistical model to the full dataset ($N$=313). Next, we implemented a simulation procedure to determine the effect size and p-values that would be attained over many experiments conducted at multiple levels of sample size. 
+All the [data](https://doi.org/10.48610/1e6bf9a) and [code](https://github.com/kel-github/Super-Effects) used for the current analyses are available online. All data were analysed using R -@rcoreteamLanguageEnvironmentStatistical2015 and RStudio -@rstudiocitation. The analysis of the data from each task followed two steps; first, to ascertain that we observed the typical findings for each of the paradigms, we applied the relevant conventional statistical model to the full dataset ($N$=313). Next, we implemented a simulation procedure to determine the effect sizes and p-values that would be attained over many experiments conducted at multiple levels of sample size. 
 
 ### Sampling procedure
 \label{sec:SamplingProc}
@@ -205,15 +205,15 @@ All the [data](https://doi.org/10.48610/1e6bf9a) and [code](https://github.com/k
 For each task, we simulated experiments across 20 different sample sizes ($N$s), defined on a logarithmic interval between N=13 and N=313 ($N$ = [13, 15, 18, 21, 25, 30, 36, 42, 50, 59, 69, 82, 97, 115, 136, 160, 189. 224, 265, 313]). We opted for a logarithmic interval given the decreasing information gained at higher $N$ values. To simulate $k$=1000 experiments at each of our chosen $N$, we sampled $N$ participants from $N_{max}$ over $k$ iterations. The relevant analysis was applied to each of the samples. Details regarding which analyses were applied to each $k$ sample are listed below for each paradigm. Sampling with replacement ensured that the samples carried the Markov property. One potential concern is that any reductions in observed effect size variability may be attributable to saturation as the simulated $N$ approaches the maximum ($N_{max}$=313), rather than a genuine reduction in variance of the estimate of the effect. Specifically, it could be that as $N$ approaches 313, the overlap of participants between samples is greater than when $N$ equals a lower number such as 13. It follows then that any decreasing variability in effect size estimates at higher $N$s could be due to the decrease in variability of the samples, rather than the improved estimate of the population variance that should come with a larger $N$. We have run simulations that argue against this explanation and these can be found in appendix i.
 
 ### Effect Sizes
-For each task, we report the following information from the effect size densities that were produced by simulating 1000 experiments at each level of $N$; first we used our highest $N$ ($N_{313}$) to identify our best estimate of the effect size distribution. We therefore report, for each task, the median (M), standard deviation (SD) and the .025 (lower bound, LB) and .975 (upper bound, UB) quantiles. These values can be used to define, _a priori_, the range of anticipated effect sizes for future experiments, and consequently, can motivate power calculations for future studies. 
+For each task, we report the following information from the effect size densities that were produced by simulating 1000 experiments at each level of $N$; first we used our highest $N$ ($N_{313}$) to identify our best estimate of the effect size distribution. We therefore report, for each task, the mean (*M*), median (*Mdn*: when different to the *M*), standard deviation (*SD*) and the .025 (lower bound, *LB*) and .975 (upper bound, *UB*) quantiles. These values can be used to define, _a priori_, the range of anticipated effect sizes for future experiments, and consequently, can motivate power calculations for future studies. 
 
-We next determined how effect size observations differ when experiments use an $N$ that is typical for the field. We report the same summary statistics as above, for the $N$ that is closest to the median sample size used in the field for that task ($N_{med}$). To identify the median $N$, we conducted a survey of the recent literature (see below). We computed _precision loss_ from using $N_{med}$ by taking the ratio between the UB ($\frac{LB_{N_{med}} }{LB_{N_{313}}}$) or LB quantiles ($\frac{LB_{N_{313}} }{LB_{N_{med}}}$). We refer to these from now as the UB and LB ratios. Note that the numerator and denominator are switched between the LB and the UB ratios, so that a value larger than 1 indicates how much higher or lower the $N_{med}$ bound is, relative to the bound for $N_{313}$. We also present LB and UB ratios across all sampled $N$s, to provide an idea of how much may be gained in precision if the field were to increase the typical $N$. Note that although we expect these ratios to be some function of $\frac{1}{N}$ (given that variance is a function of this term), the exact relationship between $N$ and precision will be dependent on the population variance and measurement error. 
+We next determined how effect size observations differ when experiments use an $N$ that is typical for the field. We report the same summary statistics as above, for the $N$ that is closest to the median sample size used in the field for that task ($N_{med}$). To identify the median $N$, we conducted a survey of the recent literature (see below). We computed the _precision loss_ incurred from using $N_{med}$ by computing the absolute difference between the LB and UB quantiles for $N_{med}$ and $N_{313}$, and taking the ratio between the two. We refer to these from now as the qq-ratio. Note that this value quantifies the extent to which effect size estimates may be inflated (or underestimated) for a given $N$. We also present qq-ratios across all sampled $N$s, to provide an idea of potential precision gains. Note that although we expect qq-ratios to decrease as some function of $\frac{1}{N}$ (given that variance depends on this term), the exact relationship between $N$ and precision will be dependent on the extent of population variance and measurement error present for any given task. 
 
-Next we sought to provide empirical estimates regarding how imprecision from low $N$ and missing literature may lead a researcher awry during study planning. We determine for each task and $N$, the probability that an observation from one experiment will fall within the UB and LB quantiles from $N_{313}$. (As above, although we expect this to change as a function of $\frac{1}{N}$, the exact relationship is dependent on measurement noise). This provides an idea of how likely a researcher is to have picked a reasonable effect size estimate when basing power calculations on a similar study, and the extent to which this confidence changes with $N$. We also provided an estimate of how effect size estimates might be biased by aggregating only across experiments with statistically significant results (p<.05), under the assumption that the published literature is more likely to contain significant results and is not likely to contain null results. Therefore, this estimate would reflect what is likely to be obtained from aggregating across the existing published literature. We present the difference between the mean observed effect size and the mean estimate of this _biased_ effect size, for each level of $N$. Effectively, this analysis is assessing the severity of the file-drawer effect for different sizes of $N$.
+Next we sought to provide empirical estimates regarding how imprecision from low $N$ and missing literature may lead a researcher awry during study planning. We determine for each task and $N$, the probability that an observation from one experiment of any given $N$ will fall within the UB and LB quantiles from $N_{313}$. (As above, although we expect this to change as a function of $\frac{1}{N}$, the exact relationship is dependent on measurement noise). This provides an idea of how likely a researcher is to have picked a reasonable effect size estimate when basing power calculations on a similar study, and the extent to which this confidence changes with $N$. We also provided an estimate of how effect size estimates might be biased by aggregating only across experiments with statistically significant results (p<.05), under the assumption that the published literature is more likely to contain significant results and is not likely to contain null results. Therefore, this estimate would reflect what is likely to be obtained from aggregating across the existing published literature. We present the difference between the mean observed effect size and the mean estimate of this _biased_ effect size, for each level of $N$. Effectively, this analysis is assessing the severity of the file-drawer effect for different sizes of $N$.
 
 #### Computing Effect Sizes
 
-To compute effect sizes for the tasks analysed using a repeated-measures ANOVA (AB, MT and CC tasks), we computed partial epsilon squared ($\epsilon_{p}^2$), as this measure is less subject to bias than $\eta_{p}^2$ [@okadaOmegaSquaredLess2013]. Indeed, an earlier version of our manuscript showed that $\eta_{p}$ estimates are biased on average, even for sample sizes of $N$=313, see [] for Supplemental Figures documenting the analysis ^[Note: we thank a helpful reviewer for drawing our attention to this]). We use the formula for $\epsilon_{p}^2$ as defined in [@carrollSamplingCharacteristicsKelley1975, eq 11]:
+To compute effect sizes for the tasks analysed using a repeated-measures ANOVA (AB, MT and CC tasks), we computed partial epsilon squared ($\epsilon_{p}^2$), as this measure is unbiased, unlike $\eta_{p}^2$ [@okadaOmegaSquaredLess2013]. Indeed, an earlier version of our manuscript showed that $\eta_{p}$ estimates are biased on average, even for sample sizes of $N$=313, see [] for Supplemental Figures documenting the analysis ^[Note: we thank a helpful reviewer for drawing our attention to this]). We use the formula for $\epsilon_{p}^2$ as defined in [@carrollSamplingCharacteristicsKelley1975, eq 11]:
 
 $$
 \epsilon_{p}^{2} = \frac{F-1}{F + \frac{df_w}{df_b}}
@@ -240,7 +240,7 @@ knitr::kable(survey_dat, col.names = c("task", "n exp", "med N"), align = "lcc",
 
 ### p-values
 
-To determine the $N$ required to achieve 90% power to reject the null hypothesis, we report the $N$ for which over 90% of p-values pass the threshold for significance for the effects of interest ($\alpha$=.05). To assess how confidence in p-values, or certainty of the test outcome, changes with $N$, we present the same statistics for each $N$ (mean, standard deviation, UB, LB and qq-ratios). As p-values clustered close to 0 in many instances, this measure will be subject to some floor effects but should also determine where clear information gains are available by increasing $N$. Additionally, because p-values cluster close to 0, we applied the probit transform to rescale the values on the range [-$\infty$, $\infty$] for visualisation purposes only. 
+To determine the $N$ required to achieve 90% power to reject the null hypothesis, we report the $N$ for which over 90% of p-values pass the threshold for significance for the effects of interest ($\alpha$=.05). To assess how confidence in p-values, or certainty of the test outcome, changes with $N$, we present the same statistics for each $N$ (mean, standard deviation, UB, LB and qq-ratios across $N$). As p-values clustered close to 0 in many instances, this measure will be subject to some floor effects but should also determine where clear information gains are available by increasing $N$. Additionally, because p-values cluster close to 0, we applied the probit transform to rescale the values on the range [-$\infty$, $\infty$] for visualisation purposes only. 
 
 ### Analysis of Experimental Tasks
 
@@ -319,9 +319,9 @@ Participants learned the repeat displays over blocks (see Figure \@ref(fig:behav
 
 ## Effect Sizes
 
-The effect size distributions attained for the AB and MT are presented in Figure \@ref(fig:attEFfx).
+The effect size distributions attained for the AB and MT are presented in Figure \@ref(fig:attEFfx). 
 
-```{r, attEFfx, out.width='70%', fig.cap='Effect size distributions oserved for the AB and MT paradigms. A) AB: Partial epsilon sq distributions for selected N for the main effect of lag. B) Showing the mean partial epsilon squared, and the UB and LB quantiles [.025, .975], for the main effect of lag, across N. C) MT: Same as in A, but for the main effect of task condition. D) Same as in B, for the main effect of task condition (MT), E) As in A, but for the task x modality interaction, E) As A, but for the MT task x modality interaction'}
+```{r, attEFfx, out.width='70%', fig.cap='Effect size distributions oserved for the AB and MT paradigms. A) AB: Partial epsilon sq distributions for selected N for the main effect of lag. B) Showing the mean partial epsilon squared, and the UB and LB quantiles [.025, .975], for the main effect of lag, across N. C) MT: Same as in A, but for the main effect of task condition. D) Same as in B, for the main effect of task condition (MT), E) As in C, but for the task x modality interaction, E) As D, but for the MT task x modality interaction'}
 
 attEF.fx.fig.pth <- '../images/EPS_EF_tasks_fx_sz.pdf'
 knitr::include_graphics(attEF.fx.fig.pth)
@@ -330,7 +330,7 @@ knitr::include_graphics(attEF.fx.fig.pth)
 
 ### Summary Statistics and Precision Loss
 
-```{r, get_sum_stats}
+```{r, get_sum_stats, echo=F, message=F}
 sum_fx_p_dat <- get_summary_data_fx_p(FALSE)
 
 # note: interpret effect size estimates using Cohen's 1992 power primer
@@ -344,27 +344,30 @@ sum_fx_p_dat <- get_summary_data_fx_p(FALSE)
 # get relevant stats
 get_stats_4_fx <- function(dat, task, mod, meas, medN, ns){
   # get relevant stats for reporting
+  best_mu <-  dat$mu[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313]
   best_med <- dat$med[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313]
   best_sd <- dat$sd[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313]
   best_LB <- dat$LB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313]
   best_UB <- dat$UB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313]
+  medN_mu <- dat$mu[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == medN]
   medN_med <- dat$med[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == medN]
   medN_sd <- dat$sd[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == medN]
   medN_LB <- dat$LB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == medN]
   medN_UB <- dat$UB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == medN]
   
-  LB_ratio <- do.call(rbind, lapply(ns, function(x) 
-    sqrt(dat$LB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313]^2/
-         dat$LB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == x]^2)))
+  qq_ratio <- do.call(rbind, lapply(ns, function(x) 
+                abs(dat$LB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == x]-
+                    dat$UB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == x])/
+                abs(dat$LB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313]-
+                    dat$UB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313])))
   
-  UB_ratio <- do.call(rbind, lapply(ns, function(x) 
-    sqrt(dat$UB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == x]^2/
-         dat$UB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313]^2)))
-  
-  out <- list(best_med, best_sd, best_LB, best_UB, medN_med, medN_sd, medN_LB, 
-              medN_UB, LB_ratio, UB_ratio)
-  names(out) <- c("best_med", "best_sd", "best_LB", "best_UB", "medN_med", "medN_sd",
-                  "medN_LB", "medN_UB", "LB_ratio", "UB_ratio")
+  rownames(qq_ratio) <- ns
+   
+  out <- list(best_mu, best_med, best_sd, best_LB, best_UB, medN_mu, medN_med, medN_sd, medN_LB, 
+              medN_UB, qq_ratio)
+  names(out) <- c("best_mu", "best_med", "best_sd", "best_LB", "best_UB", 
+                  "medN_mu", "medN_med", "medN_sd", "medN_LB", "medN_UB", 
+                  "qq_ratio")
   out
   
 }
@@ -374,7 +377,8 @@ AB_fx_stats <- get_stats_4_fx(sum_fx_p_dat, task="AB", mod="RM-AN", meas="esz", 
 
 ```
 
-Overall, the AB effect was large and reducing $N$ to the $N_{med}$ had negligible impacts on effect size estimation; the median estimate of $\epsilon_{p}^2$ using $N_{313}$ was `r sprintf("%.2f", AB_fx_stats[["best_med"]])` (sd: `r sprintf('%.2f', AB_fx_stats[["best_sd"]] )`). For $N_{med}=25$ the median $\epsilon_{p}^2$ was identical (`r sprintf("%.2f", AB_fx_stats[["medN_med"]])`, sd: `r sprintf("%.2f", AB_fx_stats[["medN_sd"]])`). The LB and UB quantiles were broadly comparable between $N_{313}$ [LB: `r sprintf("%.2f", AB_fx_stats[["best_LB"]])`, UB: `r sprintf("%.2f", AB_fx_stats[["best_UB"]])`] and $N_{med}$ [LB: `r sprintf("%.2f", AB_fx_stats[["medN_LB"]])`, UB: `r sprintf("%.2f", AB_fx_stats[["medN_UB"]])`], with ratios of `r sprintf("%.2f", AB_fx_stats[["best_LB"]]/AB_fx_stats[["medN_LB"]])` and `r sprintf("%.2f", AB_fx_stats[["medN_UB"]]/AB_fx_stats[["best_UB"]])` respectively. The worst case LB and UB ratios were also fairly low; if the field used $N$=13, then the lowest effect size estimates would be up to `r sprintf("%.2f", AB_fx_stats[["LB_ratio"]][[1]])` times the lower bound, whereas the largest would be `r sprintf("%.2f", AB_fx_stats[["UB_ratio"]][[1]])` times the upper bound. The remaining LB and UB ratios are presented in Figure [].
+
+Overall, the AB effect was large and reducing $N$ to the $N_{med}$ ($N_{25}$) had negligible impacts on effect size estimation (see Figure \@ref(fig:attEFfx)A); the mean (*M*) estimate of $\epsilon_{p}^2$ using $N_{313}$ was `r sprintf("%.2f", AB_fx_stats[["best_mu"]])` (*SD*: `r sprintf('%.2f', AB_fx_stats[["best_sd"]])`, *LB*: `r sprintf("%.2f", AB_fx_stats[["best_LB"]])`, *UB*: `r sprintf("%.2f", AB_fx_stats[["best_UB"]])`). There was broad agreement from the effect sizes observed for $N_{med}$) (*M*: `r sprintf("%.2f", AB_fx_stats[["medN_mu"]])`, *SD*: `r sprintf("%.2f", AB_fx_stats[["medN_sd"]])`, *LB*: `r sprintf("%.2f", AB_fx_stats[["medN_LB"]])`, *UB*: `r sprintf("%.2f", AB_fx_stats[["medN_UB"]])`, see Figure \@ref(fig:attEFfx)B). The qq-ratio for $N_{25}$ was `r sprintf("%.2f", AB_fx_stats[["qq_ratio"]]["25", "2.5%"])`, suggesting that using the typical $N$ may result only in modest losses of precision. The remaining qq-ratios are presented in Figure [].
 
 #### Multitasking
 
@@ -385,7 +389,60 @@ MT_fx_stats_ME <- get_stats_4_fx(sum_fx_p_dat, task="SD", mod="tt", meas="esz", 
 MT_fx_stats_int <- get_stats_4_fx(sum_fx_p_dat, task="SD", mod="ta*tt", meas="esz", medN=MT_med, ns=unique(sum_fx_p_dat$n))
 ```
 
+##### Main effect of task condition
+
+Comparable to the AB, the main effect of task condition was large and reducing $N$ to the $N_{med}$ ($N_{42}$ had negligible impacts on effect size estimation (see Figure \@ref(fig:attEFfx)C); the mean (*M*) estimate of $\epsilon_{p}^2$ using $N_{313}$ was `r sprintf("%.2f", MT_fx_stats_ME[["best_mu"]])` (*SD*: `r sprintf('%.2f', MT_fx_stats_ME[["best_sd"]])`, *LB*: `r sprintf("%.2f", MT_fx_stats_ME[["best_LB"]])`, *UB*: `r sprintf("%.2f", MT_fx_stats_ME[["best_UB"]])`). There was broad agreement from the effect sizes observed for $N_{med}$ (*M*: `r sprintf("%.2f", MT_fx_stats_ME[["medN_mu"]])`, *SD*: `r sprintf("%.2f", MT_fx_stats_ME[["medN_sd"]])`, *LB*: `r sprintf("%.2f", MT_fx_stats_ME[["medN_LB"]])`, *UB*: `r sprintf("%.2f", MT_fx_stats_ME[["medN_UB"]])`, see Figure \@ref(fig:attEFfx)D). The qq-ratio for $N_{med}$ was `r sprintf("%.2f", MT_fx_stats_ME[["qq_ratio"]]["42", "2.5%"])`, suggesting that using the typical $N$ may result only in modest losses of precision. The remaining qq-ratios are presented in Figure [].
+
+##### Task condition x modality interaction
+
+The best estimate of the task condition x modality interaction suggested a medium effect size (see Figure \@ref(fig:attEFfx)E) ($N_{313}$ *M*: `r sprintf("%.2f", MT_fx_stats_ME[["best_mu"]])`, *SD*: `r sprintf('%.2f', MT_fx_stats_int[["best_sd"]])`, *LB*: `r sprintf("%.2f", MT_fx_stats_int[["best_LB"]])`, *UB*: `r sprintf("%.2f", MT_fx_stats_int[["best_UB"]])`). There was little discrepancy between the $N_{313}$ *M* and the estimate for $N_{42}$ (*M*: `r sprintf("%.2f", MT_fx_stats_int[["medN_mu"]])`, *Mdn*: `r sprintf("%.2f", MT_fx_stats_int[["medN_med"]])`, *SD*: `r sprintf('%.2f', MT_fx_stats_int[["medN_sd"]])`. However, interpretation of the *LB* and *UB* quantiles from $N_{med}$ may have resulted in differing conclusions than if using $N_{313}$, The latter distribution included zero (*LB*: `r sprintf("%.2f", MT_fx_stats_int[["medN_LB"]])`, *UB*: `r sprintf("%.2f", MT_fx_stats_int[["medN_UB"]])`, see Figure \@ref(fig:attEFfx)F), which suggests a null effect. The qq-ratio for $N_{med}$ was `r sprintf("%.2f", MT_fx_stats_int[["qq_ratio"]]["42", "2.5%"])`. If we assume a symmetrical distribution, this would suggest that $N_{med}$ may produce estimates that are over or under inflated up to `r sprintf("%.2f", ((MT_fx_stats_int[["qq_ratio"]]["42", "2.5%"]-1)/2))` times. The remaining qq-ratios are presented in Figure [].
+
+
+#### Serial Response Task
+
+```{r, get_SRT_fxstats}
+
+SRT_med <- 36
+SRT_fx_stats <- get_stats_4_fx(sum_fx_p_dat, task="SRT", mod="RM-AN", meas="esz", medN=SRT_med, ns=unique(sum_fx_p_dat$n))
+```
+
+
+For the SRT, the best estimate of $d_z$ using $N_{313}$ was large, (Figure \@ref(fig:ILfx)A, *M*: `r sprintf("%.2f", SRT_fx_stats[["best_mu"]])`, *SD*: `r sprintf('%.2f', SRT_fx_stats[["best_sd"]])`, *LB*: `r sprintf("%.2f", SRT_fx_stats[["best_LB"]])`, *UB*: `r sprintf("%.2f", SRT_fx_stats[["best_UB"]])`). Here, there was slightly less agreement from the effect sizes observed for $N_{med}$ = 36, relative to the AB and MT (*M*, `r sprintf("%.2f", SRT_fx_stats[["medN_mu"]])`, *SD*: `r sprintf("%.2f", SRT_fx_stats[["medN_sd"]])`, *LB*: `r sprintf("%.2f", SRT_fx_stats[["medN_LB"]])`, *UB*: `r sprintf("%.2f", SRT_fx_stats[["medN_UB"]])`, see Figure \@ref(fig:ILfx)B). The qq-ratio for $N_{med}$ was `r sprintf("%.2f", SRT_fx_stats[["qq_ratio"]]["36", "2.5%"])`, suggesting that using the typical $N$ may result in greater losses of precision than was observed for the AB and MT. The remaining qq-ratios are presented in Figure [].
+
+```{r, ILfx, out.width='70%', fig.cap='Effect size distributions oserved for the SRT and CC paradigms. A) SRT: Cohens dz for the effect of sequence learning, for selected N. B) Showing the mean dz, and the UB and LB quantiles [.025, .975], for the effect of sequence, across N. C) CC: Same as in A, but for the block x condition interaction. D) Same as in B, for the block x condition interaction (MT), E) As in C, but for the main effect of condition, E) As D, but for the main effect of condition (CC)'}
+
+IL.fx.fig.pth <- '../images/EPS_IL_tasks_fx_sz.pdf'
+knitr::include_graphics(IL.fx.fig.pth)
+
+```
+
+#### Contextual Cueing
+
+```{r, get_CC_fxstats}
+
+CC_med <- 25
+CC_fx_stats_int <- get_stats_4_fx(sum_fx_p_dat, task="CC", mod="b*c", meas="esz", medN=CC_med, ns=unique(sum_fx_p_dat$n))
+CC_fx_stats_ME <- get_stats_4_fx(sum_fx_p_dat, task="CC", mod="c", meas="esz", medN=CC_med, ns=unique(sum_fx_p_dat$n))
+```
+
+##### Block x Condition Interaction
+
+The best estimate of the block x condition interaction was on the boundary between very small and small (Figure \@ref(fig:ILfx)C, $N_{313}$ $\epsilon_{p}^2$ *M*: `r sprintf("%.2f", CC_fx_stats_int[["best_mu"]])`, *SD*: `r sprintf("%.2f", CC_fx_stats_int[["best_sd"]])`, *LB*: `r sprintf("%.2f", CC_fx_stats_int[["best_LB"]])`, *UB*: `r sprintf("%.2f", CC_fx_stats_int[["best_UB"]])`). There was a minor discrepancy between the $N_{313}$ and $N_{med}$ (25) *M*s, but not the *Mdn*s (*M*: `r sprintf("%.2f", CC_fx_stats_int[["medN_mu"]])`, *Mdn*: `r sprintf("%.2f", CC_fx_stats_int[["medN_med"]])`, *SD*: `r sprintf("%.2f", CC_fx_stats_int[["medN_sd"]])`). Similar to the SRT task, interpreting effect size distributions for $N_{med}$ would result in different conclusions to $N_{313}$ as the latter crossed zero ($N_{med}$ *LB*: `r sprintf("%.2f", CC_fx_stats_int[["medN_LB"]])`, *UB*: `r sprintf("%.2f", CC_fx_stats_int[["medN_UB"]])`). There was also a greater extent of precision loss at $N_{med}$ than was observed for other tasks (qq-ratio: `r sprintf("%.2f", CC_fx_stats_int[["qq_ratio"]]["25", "2.5%"])`)). The remaining qq-ratios are presented in Figure [].
+
+##### Main Effect of Condition
+
+The main effect of condition was large ($N_{313}$ $\epsilon_{p}^2$ *M*: `r sprintf("%.2f", CC_fx_stats_ME[["best_mu"]])`, *SD*: `r sprintf("%.2f", CC_fx_stats_ME[["best_sd"]])`, *LB*: `r sprintf("%.2f", CC_fx_stats_ME[["best_LB"]])`, *UB*: `r sprintf("%.2f", CC_fx_stats_ME[["best_UB"]])`, see Figure \@ref(fig:ILfx)E). There was a minor discrepancy between the $N_{313}$ and $N_{med}$ (25) *M*s, and *Mdn*s (*M*: `r sprintf("%.2f", CC_fx_stats_ME[["medN_mu"]])`, *Mdn*: `r sprintf("%.2f", CC_fx_stats_ME[["medN_med"]])`, *SD*: `r sprintf("%.2f", CC_fx_stats_ME[["medN_sd"]])`, *LB*: `r sprintf("%.2f", CC_fx_stats_ME[["medN_LB"]])`, *UB*: `r sprintf("%.2f", CC_fx_stats_ME[["medN_UB"]])`). There was comparable precision loss as was observed for the SRT (qq-ratio: `r sprintf("%.2f", CC_fx_stats_int[["qq_ratio"]]["25", "2.5%"])`). The remaining qq-ratios are presented in Figure [].
+
+```{r, QQratioplot}
+
+# first concatenate the qq-ratios
+
+```
+
+
 ### Impacts of imprecision and missing literature
+
+
 
 
 ## p-Values
