@@ -497,10 +497,10 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
     mods <- c("RM-AN")
   }
   ys <- lapply(mods, function(y)
-    data.frame(a = do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][["mu", y]]))-
-                   do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_sig"][[x]][["mu", y]])),
-               se = get_pooled(do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_fx"][[x]][["sd", y]]^2)),
-                               do.call(rbind, lapply(sub_Ns, function(x) res[,"stats_sig"][[x]][["sd", y]]^2)))))
+    data.frame(a = do.call(rbind, lapply(paste(sub_Ns), function(x) res[,"stats_sig"][[x]][["mu", y]]))-
+                   do.call(rbind, lapply(paste(sub_Ns), function(x) res[,"stats_fx"][[x]][["mu", y]])),
+               se = get_pooled(do.call(rbind, lapply(paste(sub_Ns), function(x) res[,"stats_fx"][[x]][["sd", y]]^2)),
+                               do.call(rbind, lapply(paste(sub_Ns), function(x) res[,"stats_sig"][[x]][["sd", y]]^2)))))
 
   
   if (task == "SRT" | task == "VSL") mods <- ol_mods
@@ -517,7 +517,7 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
        cex = 1,
        col = wes_palette("IsleofDogs1")[6],
 
-       xlim = c(0, 21),
+       #xlim = c(0, 21),
        ylim = yl,
        ylab = expression(italic(paste(mu, "diff", sep = " "))),
        xlab = expression(italic("N")),
@@ -847,3 +847,4 @@ mean_med_mode <- function(plot_set){
   axis(1, at=as.numeric(sel_n), labels = sel_n)
   axis(2, at=ylims, labels=as.character(ylims))
 }
+
