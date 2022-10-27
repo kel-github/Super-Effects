@@ -519,7 +519,7 @@ plot_mean_vs_meta <- function(mu_vs_meta_inputs){
 
        #xlim = c(0, 21),
        ylim = yl,
-       ylab = expression(italic(paste(mu, "diff", sep = " "))),
+       ylab = expression(italic("IB")),
        xlab = expression(italic("N")),
        cex.lab = 1,
        cex.axis = 1)

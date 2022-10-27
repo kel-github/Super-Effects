@@ -240,10 +240,11 @@ layout(plot.mat)
 par(las=1)
 load(sprintf(st_tmplt, "SD", "SD"))
 plot_mean_vs_meta(meta_mu)
-
+fig_label("A", cex=2)
 load(sprintf(st_tmplt, "CC", "CC"))
 meta_mu$eps <- TRUE
 plot_mean_vs_meta(meta_mu)
+fig_label("B", cex=2)
 dev.off()
 
 # ----------------------------------------------------
