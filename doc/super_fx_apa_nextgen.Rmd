@@ -128,7 +128,7 @@ Experimental procedures were run on an Apple Mac Minicomputer (OS X Late 2014, 2
 ## Procedures
 \label{sec:Procedures}
 
-Across all tasks, participants sat approximately 57 cm from the monitor. An overview of the task procedures is presented in Figure \@ref(fig:FigureParadigm). Details regarding each of the task protocols are presented within each section below. We first provide an overview of the experimental tasks, before detailing the specific simulation and statistical methods.
+Across all tasks, participants sat approximately 57 cm from the monitor. An overview of the task procedures is presented in Figure \@ref(fig:FigureParadigm). Details regarding each of the task protocols are presented within each section below. 
 
 
 ```{r, FigureParadigm, out.width='70%', fig.cap='Task battery. A) Attentional Blink Paradigm (AB). Participants report the two letter targets from the rapid serial visual presentation of numbers and letters. B) Multitasking Paradigm (MT). Participants discriminate the colour of a disc, a complex tone, or both. C) Serial reaction time task (SRT). Participants respond to one of four stimuli, each mapped to a spatially-compatible button press. Unknown to participants, for half of the experimental blocks, the stimulus follows a repeating sequence. D) Contextual Cueing Paradigm (CC). i) Participants perform an inefficient visual search task where they search for a rotated T among L distractors. ii) Unknown to participants, half of the search arrays are repeated throughout the course of the experiment. '}
@@ -146,7 +146,7 @@ The AB task taps limitations in the deployment of visual information processing 
 
 #### Protocol
 
-The AB protocol was the same as that reported in Bender et al [-@benderRelationshipResponseSelection2016]. Each trial began with a black fixation cross presented in the center of a gray screen [RGB: 128, 128, 128] for a variable interval of 200-600 ms. On each trial, letter targets and digit distractors were each presented centrally for 100 ms in rapid serial presentation. The eight distractors were drawn without replacement from the digits 2-9. The target letters were randomly selected from the English alphabet, excluding I, L, O, Q, U, V and X. The first target (T1) was the third item to be presented (serial position 3), and T2 was presented at either lag 2 (200 ms), 3 (300 ms), 5 (500 ms) or 7 (700 ms) relative to T1. All stimuli subtended 1.72 x 2.31 $^\circ$ (w x h) visual angle. Participants were instructed to make an unspeeded report of the identity of both targets at the end of each trial. Participants completed 24 practice trials and four test blocks of 24 trials. For the current analysis we calculated T2 accuracy, given that T1 was correctly reported (T2|T1), for each lag. 
+The AB protocol was the same as that reported in Bender et al [-@benderRelationshipResponseSelection2016]. Each trial began with a black fixation cross in the center of a gray screen [RGB: 128, 128, 128] for a variable interval of 200-600 ms. On each trial, letter targets and digit distractors were presented centrally for 100 ms in rapid serial presentation. The eight distractors were drawn without replacement from the digits 2-9. The target letters were randomly selected from the English alphabet, excluding I, L, O, Q, U, V and X. The first target (T1) was presented third in the series (serial position 3), and T2 was presented at either lag 2 (200 ms), 3 (300 ms), 5 (500 ms) or 7 (700 ms) relative to T1. All stimuli subtended 1.72 x 2.31 $^\circ$ (w x h) visual angle. Participants were instructed to make an unspeeded report of the identity of both targets at the end of each trial. Participants completed 24 practice trials and four test blocks of 24 trials. For the current analysis we calculated T2 accuracy, given that T1 was correctly reported (T2|T1), for each lag. 
 
 ### Multitasking (MT)
 \label{sec:MTMeth}
@@ -155,15 +155,15 @@ MT paradigms tap the performance costs incurred when individuals attempt to perf
 
 #### Protocol
 
-The MT protocol was previously reported in  Bender et al [-@benderRelationshipResponseSelection2016]. Each trial began with a black fixation cross presented in the center of a gray screen [RGB: 128, 128, 128] for a variable interval of 200-600 ms. Next either one of two coloured circles [red, RGB: 237, 32, 36 or blue, RGB: 44, 71, 151] or one of two sounds (complex tones taken from [@duxIsolationCentralBottleneck2006]), or both (circle and sound) were presented for 200 ms. The coloured circle subtended 1.3$^\circ$ visual angle. Participants were instructed to respond to all presented tasks by using the appropriate key press ['A' or 'S' for left hand responses, 'J' or 'K' for right hand responses, with the task-hand mapping counterbalanced across participants]. The MT protocol consisted of 4 blocks of 36 trials, with each trial type (single-task [ST] visual, ST auditory or MT) randomly mixed within blocks. Participants completed the MT protocols after completing two ST blocks as practice, one for the visual task and one for the auditory task. Mean response times (RTs) to each task modality x condition were taken as the dependent variable of interest.
+The MT protocol was previously reported in  Bender et al [-@benderRelationshipResponseSelection2016]. Each trial began with a black fixation cross presented in the center of a gray screen [RGB: 128, 128, 128] for a variable interval of 200-600 ms. Next either one of two coloured circles [red, RGB: 237, 32, 36 or blue, RGB: 44, 71, 151] or one of two sounds (complex tones taken from [@duxIsolationCentralBottleneck2006]), or both (circle and sound) were presented for 200 ms. The coloured circle subtended 1.3$^\circ$ visual angle. Participants were instructed to respond to all tasks by using the appropriate key presses ['A' or 'S' for left hand responses, 'J' or 'K' for right hand responses, with the task-hand mapping counterbalanced across participants]. The MT protocol consisted of 4 blocks of 36 trials, with each trial type (single-task [ST] visual, ST auditory or MT) randomly mixed within blocks. Participants completed the MT protocols after completing two ST blocks as practice, one for the visual task and one for the auditory task. We analysed mean response times (RTs) to each task x modality condition.
 
 ### Serial Response Task (SRT)
 \label{sec:SRTMeth}
 
-In the SRT task, participants are required to make key presses in response to one of four spatially compatible visual cues [@nissenAttentionalRequirementsLearning1987]. Participants are instructed to make the relevant key press as quickly and accurately as possible. Participants are not informed that for half of the experiment, visual cue presentation follows a repeating and reliable sequence, whereas for the remaining half of the experiment, cue presentation is random. RTs are typically faster for the final sequence block than for the final random block, even though the random block is presented subsequently to the sequence block. Comparable to the CC task, participant's lack of awareness of the sequence lends support to the notion that the SRT reflects an implicit process of procedural sequence learning.
+In the SRT task, participants make key presses to one of four spatially compatible visual cues [@nissenAttentionalRequirementsLearning1987]. Participants are instructed to make the relevant key press as quickly and accurately as possible. Participants are not informed that for half of the experiment, visual cue presentation follows a repeating and reliable sequence, whereas for the remaining half, cue presentation is random. Mean RTs are typically faster for the final sequence block than for the final random block, even though the random block is presented subsequently to the sequence block. 
 
 #### Protocol
-The SRT was adapted from Nissen & Bullemer [-@nissenAttentionalRequirementsLearning1987]. Four square placeholders were presented across the horizontal meridian. A red circle [RGB: 255, 0, 0] appeared in one of the 4 squares for 500 ms. This served as the target stimulus. Participants responded by pressing the finger of their dominant hand that spatially aligned to the target circle, using the relevant 'j', 'k', 'l' or ';' keys. The next target stimulus would appear 500 ms after the correct response had been made. Participants completed 4 blocks of 100 trials. For blocks 1 and 4, the location of the target stimulus for each trial was randomly selected from a uniform distribution. These blocks are referred to as 'random'. For blocks 2 and 3, a repeating sequence of 10 elements was used to determine the target location. The sequence was repeated 10 times. The repeating sequence was 4-2-3-1-3-2-4-2-3-1, with 1 being the leftmost placeholder, and 4 being the rightmost placeholder. These blocks are referred to as 'Repeat' blocks. Learning in the SRT is tested by comparing mean RTs between Random and Repeat blocks in the latter half of the experiment (block 4 vs 3).
+The SRT was adapted from Nissen & Bullemer [-@nissenAttentionalRequirementsLearning1987]. Four square placeholders were presented across the horizontal meridian. A red circle [RGB: 255, 0, 0] appeared in one of the 4 squares for 500 ms. This served as the target stimulus. Participants responded by pressing the finger of their dominant hand that spatially aligned to the target circle, using the relevant 'j', 'k', 'l' or ';' keys. The subsequent target stimulus appeared 500 ms after a correct response had been made. Participants completed 4 blocks of 100 trials. For blocks 1 and 4, the location of the target stimulus for each trial was randomly selected from a uniform distribution. These blocks are referred to as 'Random'. For blocks 2 and 3, a repeating sequence of 10 elements was used to determine the target location. The sequence was repeated 10 times. The repeating sequence was 4-2-3-1-3-2-4-2-3-1, with 1 being the leftmost placeholder, and 4 being the rightmost placeholder. These blocks are referred to as 'Sequence' blocks. Learning in the SRT is tested by comparing mean RTs between Sequence and Repeat blocks in the latter half of the experiment (block 4 vs 3).
 <br>
 
 ### Contextual Cueing (CC)
@@ -179,7 +179,7 @@ The CC protocol was the same as that reported by Nydam et al [-@nydamCathodalEle
 
 All the [data](https://doi.org/10.48610/1e6bf9a) and [code](https://github.com/kel-github/Super-Effects) used for the current analyses are available online. All data were analysed using R -@rcoreteamLanguageEnvironmentStatistical2015 and RStudio -@rstudiocitation. The analysis of the data from each task followed two steps; first, to ascertain that we observed the typical findings for each of the paradigms, we applied the relevant conventional statistical model to the full dataset ($N$=313). Next, we implemented a simulation procedure to determine the effect sizes and p-values that would be attained over many experiments conducted at multiple levels of sample size. 
 
-### Sampling procedure
+### Simulation procedure
 \label{sec:SamplingProc}
 
 For each paradigm, we simulated experiments across 20 different sample sizes ($N$s), defined on a logarithmic interval between $N_{13}$ and $N_{313}$ ($N$ = [13, 15, 18, 21, 25, 30, 36, 42, 50, 59, 69, 82, 97, 115, 136, 160, 189, 224, 265, 313]). We opted for a logarithmic interval given the decreasing information gained at higher $N$ values. To simulate $k$=1000 experiments at each of our chosen $N$, we sampled $N$ participants from $N_{max}$ ($N_{313}$) over $k$ iterations. The relevant analysis was applied to each of the samples. Details regarding which analyses were applied to each $k$ sample are listed below for each paradigm. Sampling with replacement ensured that the samples carried the Markov property. One potential concern is that any reductions in observed effect size variability may be attributable to saturation as the simulated $N$ approaches the maximum ($N_{313}$), rather than a genuine reduction in variance of the estimate of the effect. Specifically, it could be that as $N$ approaches 313, the overlap of participants between samples is greater than when $N$ equals a lower number such as 13. It follows then that any decreasing variability in effect size estimates at higher $N$s could be due to the decrease in variability of the samples, rather than the improved estimate of the population variance that should come with a larger $N$. We have run simulations that argue against this explanation and these can be found in appendix i.
@@ -527,7 +527,7 @@ Next we estimate the _inflation bias_ that is incurred by using a given $N$. Her
 ```{r, infbias, out.width='70%', fig.cap='Inflation bias scores plotted by N for the A) the task condition and task condition x modality interactions for the MT paradigm, and B) the block x condition interaction and main effect of condition from the CC paradigm. IB: Implicit Bias, tc: task condition, tc*m: task condition x modality, b*c: block x condition interaction, c: main effect of condition. Error bars reflect pooled standard error of the difference.'}
 
 infbias.fx.fig.pth <- '../images/EPS_meta_mu_CCSD.pdf'
-knitr::include_graphics(phit.fx.fig.pth)
+knitr::include_graphics(infbias.fx.fig.pth)
 
 ```
 
@@ -536,17 +536,35 @@ knitr::include_graphics(phit.fx.fig.pth)
 # Discussion
 \label{sec:Discussion}
 
+We simulated 1000 bootstrapped experiments across 20 $N$s ranging from 13 to 313. For each paradigm and from each set of simulations, we determined the impact of $N$ on error in effect size estimates. In doing so, we were able to provide a range of effect sizes that researchers can consider when performing power analyses for studies, particularly when using the AB, MT, SRT or CC paradigms. There were some common observations across tasks; apart from the block x condition interaction from the CC paradigm, we found that for the remaining effects that moving from $N_{max}$ to $N_{med}$ increased the imprecision of effect size estimates by a factor of ~2; thus the range of effect sizes that may be observed across replications more or less doubles when $N_{med}$ is used (and triples when lower $N$ such as 13 or 15 are used). This is the case for large (AB, MT tc, SRT, CC c) effects and for some small effects (MT tc x m). 
 
-CONVERGENCE AND COMMONALITIES
+This was not the case for all effects; the CC b x c interaction effect was found to be very small, and using $N_{med}$ increased the range of effect sizes that might be observed by a factor of over 4. Interestingly, for all effects, the standard deviations of the effect size distributions doubled or tripled as a function of going from $N_{max}$ to $N_{med}$, in a manner that did not disambiguate very small, small or large effects. This suggests that the expanded qq-ratio for CC b x c was not driven by a Gaussian process. NEXT: Then p(hit|N), and the inflated estimates. 
 
+Relate findings to other simulation work. MEASURMENT ERROR HELD CONSTANT HERE
 
-MEASURMENT ERROR HELD CONSTANT HERE
+Compare effect sizes to literature - any meta-analyses or check the r=.36 study - also impacts of missing literature data
 
+Study planning - how we have helped. Lower bounds, power calculations and diminishing returns, 
+Same paragraph - practicality of our findings, also, can go from effect size estimates from smaller N and divide the standrad deviation in half
+
+How the simulation approach is one way of addressing the issue of determining relevant effect sizes for a given field
+
+Sufficient power to produce a reasonable effect size estimates - what can we tell from what is common across the tasks in relation to this? A different way of thinking about what constitutes a well powered study. p(hit|N) - can talk about how implicit tasks are noisier here, and thus should err on larger numbers of subjects.
+
+**on this note bit about p-values**
+Just as knowing about the distributional qualities of effect sizes observed across many replications provides information about study design and interpretation, so too can considering the distributional qualities of observed p-values. The p-value is itself a random variable that will vary from experiment to experiment [e.g. @chenHandlingMultiplicityNeuroimaging2019], yet this variation is rarely considered when researchers report a single p-value for each reported effect. Understanding exactly how a p-value may vary across replications can help identify where there may be missing literature owing to publication bias, or uncertainty regarding the rejection of the null hypothesis [e.g. @nolanEvidenceDetectabilityHippocampal2018]. Moreover, although it is known that p-values are inversely and negatively related to effect size, the relationship is both non-linear and non-trivial to compute as it depends on other factors such as the sample size, the underlying data type (e.g. independent vs dependent) and the statistical test [@faulPowerFlexibleStatistical2007]. Here we consider what mapping the variability in p-values across experiment replications with differing $N$ can reveal about potential sources [POWER]
+
+Modelling effects - how this information has helped. M
+
+Limitations
+Upper limit - a ceiling for results, also hundreds is not many
+One sample - students and homogeneity
 CC PARAMS 
+
 ## Conclusions
 
 
-Just as knowing about the distributional qualities of effect sizes observed across many replications provides information about study design and interpretation, so too can considering the distributional qualities of observed p-values. The p-value is itself a random variable that will vary from experiment to experiment [e.g. @chenHandlingMultiplicityNeuroimaging2019], yet this variation is rarely considered when researchers report a single p-value for each reported effect. Understanding exactly how a p-value may vary across replications can help identify where there may be missing literature owing to publication bias, or uncertainty regarding the rejection of the null hypothesis [e.g. @nolanEvidenceDetectabilityHippocampal2018]. Moreover, although it is known that p-values are inversely and negatively related to effect size, the relationship is both non-linear and non-trivial to compute as it depends on other factors such as the sample size, the underlying data type (e.g. independent vs dependent) and the statistical test [@faulPowerFlexibleStatistical2007]. Here we consider what mapping the variability in p-values across experiment replications with differing $N$ can reveal about potential sources [POWER]
+
 
 
 
