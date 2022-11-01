@@ -83,6 +83,7 @@ library(ggridges)
 library(car)
 library(parallel)
 library(kableExtra)
+library(moments)
 source('../R/efilids_functions.R')
 source('../R/R_rainclouds.R')
 source('../R/doc_functions.R') # some specific plotting functions for the document
@@ -185,7 +186,7 @@ All the [data](https://doi.org/10.48610/1e6bf9a) and [code](https://github.com/k
 For each paradigm, we simulated experiments across 20 different sample sizes ($N$s), defined on a logarithmic interval between $N_{13}$ and $N_{313}$ ($N$ = [13, 15, 18, 21, 25, 30, 36, 42, 50, 59, 69, 82, 97, 115, 136, 160, 189, 224, 265, 313]). We opted for a logarithmic interval given the decreasing information gained at higher $N$ values. To simulate $k$=1000 experiments at each of our chosen $N$, we sampled $N$ participants from $N_{max}$ ($N_{313}$) over $k$ iterations. The relevant analysis was applied to each of the samples. Details regarding which analyses were applied to each $k$ sample are listed below for each paradigm. Sampling with replacement ensured that the samples carried the Markov property. One potential concern is that any reductions in observed effect size variability may be attributable to saturation as the simulated $N$ approaches the maximum ($N_{313}$), rather than a genuine reduction in variance of the estimate of the effect. Specifically, it could be that as $N$ approaches 313, the overlap of participants between samples is greater than when $N$ equals a lower number such as 13. It follows then that any decreasing variability in effect size estimates at higher $N$s could be due to the decrease in variability of the samples, rather than the improved estimate of the population variance that should come with a larger $N$. We have run simulations that argue against this explanation and these can be found in appendix i.
 
 ### Effect Sizes
-For each paradigm, we report the following information from the simulated effect size distributions; first we used simulations using $N_{313}$ to provide a best estimate of the effect size distribution. We therefore report, for each paradigm, the mean (*M*), median (*Mdn*: when different to the *M*), standard deviation (*SD*) and the .025 (lower bound, *LB*) and .975 (upper bound, *UB*) quantiles. These values can be used to define, _a priori_, the range of anticipated effect sizes for future experiments, and consequently, can be used to inform study design. 
+For each paradigm, we report the following information from the simulated effect size distributions; first we used simulations using $N_{313}$ to provide a best estimate of the effect size distribution. We therefore report, for each paradigm, the mean (*M*), median (*Mdn*: when different to the *M*), standard deviation (*SD*), the .025 (lower bound, *LB*) and .975 (upper bound, *UB*) quantiles. These values can be used to define, _a priori_, the range of anticipated effect sizes for future experiments, and consequently, can be used to inform study design.
 
 We next determined to what extent using an $N$ that is typical for the field impacts the effect size distribution. We report the same summary statistics as above, from the simulation using the $N$ that is closest to the typical $N$ for that task ($N_{med}$). To identify the typical $N$, we conducted a survey of the recent literature and computed the median $N$ for each paradigm (see below). We next computed the _precision loss_ incurred from using $N_{med}$ by taking the ratio of the difference between the LB and UB quantiles for $N_{med}$ and $N_{313}$:
 
@@ -201,14 +202,16 @@ Next we computed estimates regarding the extent to which precision loss in effec
 
 To compute effect sizes for the paradigms analysed using a repeated-measures ANOVA (AB, MT and CC), we computed partial epsilon squared ($\epsilon_{p}^2$), as this measure is unbiased, unlike $\eta_{p}^2$ [@okadaOmegaSquaredLess2013]. Indeed, an earlier version of our manuscript showed that $\eta_{p}^2$ estimates are biased on average, even for sample sizes of $N$=313, see [] for Supplemental Figures documenting the analysis ^[Note: we thank a helpful reviewer for drawing our attention to this]). We use the formula for $\epsilon_{p}^2$ as defined in [@carrollSamplingCharacteristicsKelley1975, eq 11]:
 
-$$
+
+\begin{equation}
 \epsilon_{p}^{2} = \frac{F-1}{F + \frac{df_w}{df_b}}
-$$
+\end{equation}
+
 where $F$ is the F statistic for the effect, $df_{w}$ is the degrees of freedom within groups, and $df_{b}$ is the degrees of freedom between groups. The SRT paradigm instead uses a paired-samples design. For this paradigm we computed Cohen's $d_{z}$ (see @lakensCalculatingReportingEffect2013, eq 6):
 
-$$
+\begin{equation}
 d_{z} = \frac{M_{diff}}{\sqrt{\frac{\sum(X_{diff} - M_{diff})^2}{N-1}}}
-$$
+\end{equation}
 
 where $M_{diff}$ is the mean difference between groups, and $X_{diff}$ is one paired difference score. 
 
@@ -331,11 +334,16 @@ get_stats_4_fx <- function(dat, task, mod, meas, medN, ns){
   best_sd <- dat$sd[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313]
   best_LB <- dat$LB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313]
   best_UB <- dat$UB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313]
+  best_sk <- dat$sk[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313]
+  best_ku <- dat$ku[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == 313]
+  
   medN_mu <- dat$mu[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == medN]
   medN_med <- dat$med[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == medN]
   medN_sd <- dat$sd[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == medN]
   medN_LB <- dat$LB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == medN]
   medN_UB <- dat$UB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == medN]
+  medN_sk <-  dat$sk[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == medN]
+  medN_ku <- dat$ku[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == medN]
   
   qq_ratio <- do.call(rbind, lapply(ns, function(x) 
                 abs(dat$LB[dat$task == task & dat$mod == mod & dat$meas == meas & dat$n == x]-
@@ -345,10 +353,10 @@ get_stats_4_fx <- function(dat, task, mod, meas, medN, ns){
   
   rownames(qq_ratio) <- ns
    
-  out <- list(best_mu, best_med, best_sd, best_LB, best_UB, medN_mu, medN_med, medN_sd, medN_LB, 
-              medN_UB, qq_ratio)
-  names(out) <- c("best_mu", "best_med", "best_sd", "best_LB", "best_UB", 
-                  "medN_mu", "medN_med", "medN_sd", "medN_LB", "medN_UB", 
+  out <- list(best_mu, best_med, best_sd, best_LB, best_UB, best_sk, best_ku, 
+              medN_mu, medN_med, medN_sd, medN_LB, medN_UB, medN_sk, medN_ku, qq_ratio)
+  names(out) <- c("best_mu", "best_med", "best_sd", "best_LB", "best_UB", "best_sk", "best_ku",
+                  "medN_mu", "medN_med", "medN_sd", "medN_LB", "medN_UB", "medN_sk", "medN_ku",
                   "qq_ratio")
   out
   
@@ -371,7 +379,7 @@ AB_ps <- get_p_data(res, "RM-AN", t_n)
 ```
 
 
-The AB effect was large (see Figure \@ref(fig:attEFfx)A); $N_{313}\ \epsilon_{p}^2\ M$ = `r sprintf("%.2f", AB_fx_stats[["best_mu"]])` (*SD*: `r sprintf('%.2f', AB_fx_stats[["best_sd"]])`, *LB*: `r sprintf("%.2f", AB_fx_stats[["best_LB"]])`, *UB*: `r sprintf("%.2f", AB_fx_stats[["best_UB"]])`), and the simulated effect sizes for $N_{med}$ ($N_{25}$) produced the same mean effect size estimate (*M*: `r sprintf("%.2f", AB_fx_stats[["medN_mu"]])`, *SD*: `r sprintf("%.2f", AB_fx_stats[["medN_sd"]])`, *LB*: `r sprintf("%.2f", AB_fx_stats[["medN_LB"]])`, *UB*: `r sprintf("%.2f", AB_fx_stats[["medN_UB"]])`, see Figure \@ref(fig:attEFfx)B). With regard to extent of precision loss; the qq-ratio for $N_{med}$ was `r sprintf("%.2f", AB_fx_stats[["qq_ratio"]]["25", "2.5%"])`. The qq-ratio for small $N$ was ~3 ($N_{13}$ = `r sprintf("%.2f", AB_fx_stats[["qq_ratio"]]["13", "2.5%"])`, $N_{15}$ = `r sprintf("%.2f", AB_fx_stats[["qq_ratio"]]["15", "2.5%"])`), and reached < 2 at $N_{42}$ ($N_{36}$ = `r sprintf("%.2f", AB_fx_stats[["qq_ratio"]]["36", "2.5%"])`, $N_{42}$ = `r sprintf("%.2f", AB_fx_stats[["qq_ratio"]]["42", "2.5%"])`). The remaining qq-ratios are presented in Figure \@ref(fig:fxqq). 
+The AB effect was large (see Figure \@ref(fig:attEFfx)A); $N_{313}\ \epsilon_{p}^2\ M$ = `r sprintf("%.2f", AB_fx_stats[["best_mu"]])` (*SD*: `r sprintf('%.2f', AB_fx_stats[["best_sd"]])`, *LB*: `r sprintf("%.2f", AB_fx_stats[["best_LB"]])`, *UB*: `r sprintf("%.2f", AB_fx_stats[["best_UB"]])`). The simulated effect sizes for $N_{med}$ ($N_{25}$) produced the same mean effect size estimate (*M*: `r sprintf("%.2f", AB_fx_stats[["medN_mu"]])`, *SD*: `r sprintf("%.2f", AB_fx_stats[["medN_sd"]])`, *LB*: `r sprintf("%.2f", AB_fx_stats[["medN_LB"]])`, *UB*: `r sprintf("%.2f", AB_fx_stats[["medN_UB"]])`, see Figure \@ref(fig:attEFfx)B). Measures of skewness ($N_{313}$: `r sprintf("%.2f", AB_fx_stats[["best_sk"]])`, $N_{med}$: `r sprintf("%.2f", AB_fx_stats[["medN_sk"]])`) and kurtosis ($N_{313}$: `r sprintf("%.2f", AB_fx_stats[["best_ku"]])`, $N_{med}$: `r sprintf("%.2f", AB_fx_stats[["medN_ku"]])`) were close to zero and therefore indicated that the simulated distributions were comparable to a normal distribution.  With regard to extent of precision loss; the qq-ratio for $N_{med}$ was `r sprintf("%.2f", AB_fx_stats[["qq_ratio"]]["25", "2.5%"])`. The qq-ratio for small $N$ was ~3 ($N_{13}$ = `r sprintf("%.2f", AB_fx_stats[["qq_ratio"]]["13", "2.5%"])`, $N_{15}$ = `r sprintf("%.2f", AB_fx_stats[["qq_ratio"]]["15", "2.5%"])`), and reached < 2 at $N_{42}$ ($N_{36}$ = `r sprintf("%.2f", AB_fx_stats[["qq_ratio"]]["36", "2.5%"])`, $N_{42}$ = `r sprintf("%.2f", AB_fx_stats[["qq_ratio"]]["42", "2.5%"])`). The remaining qq-ratios are presented in Figure \@ref(fig:fxqq). 
 
 Across all $N$, the probability of rejecting the null hypothesis was 1.
 
@@ -392,7 +400,7 @@ MT_ps_int <- get_p_data(res, "LME", t_n)
 
 ##### Main effect of task condition
 
-For the MT paradigm, the main effect of task condition was large ($N_{313}\ \epsilon_{p}^2\ M$ = `r sprintf("%.2f", MT_fx_stats_ME[["best_mu"]])`, *SD*: `r sprintf('%.2f', MT_fx_stats_ME[["best_sd"]])`, *LB*: `r sprintf("%.2f", MT_fx_stats_ME[["best_LB"]])`, *UB*: `r sprintf("%.2f", MT_fx_stats_ME[["best_UB"]])`), and the simulated effect sizes for $N_{med}$ ($N_{42}$) produced the same mean effect size estimate (*M*: `r sprintf("%.2f", MT_fx_stats_ME[["medN_mu"]])`, *SD*: `r sprintf("%.2f", MT_fx_stats_ME[["medN_sd"]])`, *LB*: `r sprintf("%.2f", MT_fx_stats_ME[["medN_LB"]])`, *UB*: `r sprintf("%.2f", MT_fx_stats_ME[["medN_UB"]])`, see Figure \@ref(fig:attEFfx)D). With regard to precision loss, the qq-ratio for $N_{med}$ was `r sprintf("%.2f", MT_fx_stats_ME[["qq_ratio"]]["42", "2.5%"])`.  Comparable to the AB, qq-ratio for small $N$ was ~3 ($N_{13}$ = `r sprintf("%.2f", MT_fx_stats_ME[["qq_ratio"]]["13", "2.5%"])`, $N_{15}$ = `r sprintf("%.2f", MT_fx_stats_ME[["qq_ratio"]]["15", "2.5%"])`), and was < 2 for $N_{36}$ ($N_{30}$ = `r sprintf("%.2f", AB_fx_stats[["qq_ratio"]]["30", "2.5%"])`, $N_{36}$ = `r sprintf("%.2f", MT_fx_stats_ME[["qq_ratio"]]["36", "2.5%"])`). The remaining qq-ratios are presented in Figure \@ref(fig:fxqq).
+For the MT paradigm, the main effect of task condition was large ($N_{313}\ \epsilon_{p}^2\ M$ = `r sprintf("%.2f", MT_fx_stats_ME[["best_mu"]])`, *SD*: `r sprintf('%.2f', MT_fx_stats_ME[["best_sd"]])`, *LB*: `r sprintf("%.2f", MT_fx_stats_ME[["best_LB"]])`, *UB*: `r sprintf("%.2f", MT_fx_stats_ME[["best_UB"]])`), and the simulated effect sizes for $N_{med}$ ($N_{42}$) produced the same mean effect size estimate (*M*: `r sprintf("%.2f", MT_fx_stats_ME[["medN_mu"]])`, *SD*: `r sprintf("%.2f", MT_fx_stats_ME[["medN_sd"]])`, *LB*: `r sprintf("%.2f", MT_fx_stats_ME[["medN_LB"]])`, *UB*: `r sprintf("%.2f", MT_fx_stats_ME[["medN_UB"]])`, see Figure \@ref(fig:attEFfx)D). Skewness increased, With regard to precision loss, the qq-ratio for $N_{med}$ was `r sprintf("%.2f", MT_fx_stats_ME[["qq_ratio"]]["42", "2.5%"])`.  Comparable to the AB, qq-ratio for small $N$ was ~3 ($N_{13}$ = `r sprintf("%.2f", MT_fx_stats_ME[["qq_ratio"]]["13", "2.5%"])`, $N_{15}$ = `r sprintf("%.2f", MT_fx_stats_ME[["qq_ratio"]]["15", "2.5%"])`), and was < 2 for $N_{36}$ ($N_{30}$ = `r sprintf("%.2f", AB_fx_stats[["qq_ratio"]]["30", "2.5%"])`, $N_{36}$ = `r sprintf("%.2f", MT_fx_stats_ME[["qq_ratio"]]["36", "2.5%"])`). The remaining qq-ratios are presented in Figure \@ref(fig:fxqq).
 
 Across all $N$, the probability of rejecting the null hypothesis was 1.
 
@@ -491,7 +499,7 @@ phit_dat <- do.call(rbind, lapply(tasks, get_prct_dats, ftmplt=ftmplt))
 
 ```
 
-Next we computed p(hit|$N$); an estimate of the impact of imprecision in effect size estimates when basing power calculations on a similar study with $N_{med}$. For the AB, MT and SRT paradigms, the p(hit|$N_{med}$) was ~0.67 (AB: `r sprintf("%.2f", phit_dat$p_upper[phit_dat$mod == "AB" & phit_dat$n == AB_med])`, MT tc: `r sprintf("%.2f", phit_dat$p_upper[phit_dat$mod == "tt" & phit_dat$n == MT_med])`, MT tc x m: `r sprintf("%.2f", phit_dat$p_upper[phit_dat$mod == "ta*tt" & phit_dat$n == MT_med])`, SRT: `r sprintf("%.2f", phit_dat$p_upper[phit_dat$mod == "SRT" & phit_dat$n == SRT_med])`). This suggests that sampling a similar study will produce a reasonable _a priori_ effect size estimate 2/3 of the time (Note: it is interesting that the AB, MT and SRT fields appear to have converged on an $N_{med}$ that puts them on a comparable footing for hitting the best effect size. Indeed, if the MT and SRT fields used the same sample size as the AB field, the p(hit|$N_{25}$) ratios for the three effects would be < .6 (MT tc: `r sprintf("%.2f", phit_dat$p_upper[phit_dat$mod == "tt" & phit_dat$n == AB_med])`, MT tc x m: `r sprintf("%.2f", phit_dat$p_upper[phit_dat$mod == "ta*tt" & phit_dat$n == AB_med])`, SRT: `r sprintf("%.2f", phit_dat$p_upper[phit_dat$mod == "SRT" & phit_dat$n == AB_med])`). For the CC paradigm, the p(hit|$N_{med}$ = ~.5 (b x c: `r sprintf("%.2f", phit_dat$p_upper[phit_dat$mod == "b*c" & phit_dat$n == CC_med])`, c: `r sprintf("%.2f", phit_dat$p_upper[phit_dat$mod == "c" & phit_dat$n == CC_med])`). This suggests that basing effect size estimates on a similar CC study will result in an appropriately powered study 50% of the time. The remaining p(hit|$N_x$) are presented in Figure \@ref(fig:fxphit).
+Next we computed p(hit|$N$); an estimate of the impact of imprecision in effect size estimates when basing power calculations on a similar study with $N_{med}$. For the AB, MT and SRT paradigms, the p(hit|$N_{med}$) was ~0.66 (AB: `r sprintf("%.2f", phit_dat$p_upper[phit_dat$mod == "AB" & phit_dat$n == AB_med])`, MT tc: `r sprintf("%.2f", phit_dat$p_upper[phit_dat$mod == "tt" & phit_dat$n == MT_med])`, MT tc x m: `r sprintf("%.2f", phit_dat$p_upper[phit_dat$mod == "ta*tt" & phit_dat$n == MT_med])`, SRT: `r sprintf("%.2f", phit_dat$p_upper[phit_dat$mod == "SRT" & phit_dat$n == SRT_med])`). This suggests that sampling a similar study will produce a reasonable _a priori_ effect size estimate 2/3 of the time (Note: it is interesting that the AB, MT and SRT fields appear to have converged on an $N_{med}$ that puts them on a comparable footing for hitting the best effect size. Indeed, if the MT and SRT fields used the same sample size as the AB field, the p(hit|$N_{25}$) ratios for the three effects would be ~0.57 (MT tc: `r sprintf("%.2f", phit_dat$p_upper[phit_dat$mod == "tt" & phit_dat$n == AB_med])`, MT tc x m: `r sprintf("%.2f", phit_dat$p_upper[phit_dat$mod == "ta*tt" & phit_dat$n == AB_med])`, SRT: `r sprintf("%.2f", phit_dat$p_upper[phit_dat$mod == "SRT" & phit_dat$n == AB_med])`). For the CC paradigm, the p(hit|$N_{med}$ = ~.48 (b x c: `r sprintf("%.2f", phit_dat$p_upper[phit_dat$mod == "b*c" & phit_dat$n == CC_med])`, c: `r sprintf("%.2f", phit_dat$p_upper[phit_dat$mod == "c" & phit_dat$n == CC_med])`). This suggests that basing effect size estimates on a similar CC study will result in an appropriately powered study 50% of the time. The remaining p(hit|$N_x$) are presented in Figure \@ref(fig:fxphit).
 
 
 ```{r, fxphit, out.width='70%', fig.cap='probability of a single study producing an effect size estimates that are within the LB and UB for the best estimate (p(hit|N)), plotted by N for each task effect. AB: Attentional Blink, tc: main effct of task condition from the MT paradigm, tc*m: trial condition x modality interaction, SRT: Serial Response Task, b*c: block x condition interaction from the CC task, c: main effect of condition from the CC task.'}
@@ -536,13 +544,16 @@ knitr::include_graphics(infbias.fx.fig.pth)
 # Discussion
 \label{sec:Discussion}
 
-We simulated 1000 bootstrapped experiments across 20 $N$s ranging from 13 to 313. For each paradigm and from each set of simulations, we determined the impact of $N$ on error in effect size estimates. In doing so, we were able to provide a range of effect sizes that researchers can consider when performing power analyses for studies, particularly when using the AB, MT, SRT or CC paradigms. There were some common observations across tasks; apart from the block x condition interaction from the CC paradigm, we found that for the remaining effects that moving from $N_{max}$ to $N_{med}$ increased the imprecision of effect size estimates by a factor of ~2; thus the range of effect sizes that may be observed across replications more or less doubles when $N_{med}$ is used (and triples when lower $N$ such as 13 or 15 are used). This is the case for large (AB, MT tc, SRT, CC c) effects and for some small effects (MT tc x m). 
+We simulated 1000 bootstrapped experiments across 20 $N$s ranging from 13 to 313. For each paradigm and from each set of simulations, we determined the impact of $N$ on error in effect size estimates. In doing so, we were able to provide a range of effect sizes that researchers can consider when performing power analyses, particularly when using the AB, MT, SRT or CC paradigms. We also determined precision loss in effect size estimates as a function of $N$ and there were some common observations across tasks. Apart from the block x condition interaction from the CC paradigm, we found that moving from $N_{max}$ to $N_{med}$ increased the imprecision of effect size estimates by a qq-ratio of ~2; thus the range of effect sizes that may be observed across replications more or less doubles when $N_{med}$ is used (and triples when lower $N$ such as 13 or 15 are used). This observation does not depend on effect size, as this was the case for large (AB, MT tc, SRT, CC c) effects and for some small effects (MT tc x m).
 
-This was not the case for all effects; the CC b x c interaction effect was found to be very small, and using $N_{med}$ increased the range of effect sizes that might be observed by a factor of over 4. Interestingly, for all effects, the standard deviations of the effect size distributions doubled or tripled as a function of going from $N_{max}$ to $N_{med}$, in a manner that did not disambiguate very small, small or large effects. This suggests that the expanded qq-ratio for CC b x c was not driven by a Gaussian process. NEXT: Then p(hit|N), and the inflated estimates. 
+This was not the case for all effects; the CC b x c interaction effect was found to be very small, and using $N_{med}$ increased the range of effect sizes that might be observed by a factor of over 4. Interestingly, for all effects, the standard deviations of the effect size distributions doubled or tripled as a function of going from $N_{max}$ to $N_{med}$, in a manner that did not disambiguate very small, small or large effects. This suggests that the extended range of effect sizes observed for CC b x c was not driven by a Gaussian process. 
 
-Relate findings to other simulation work. MEASURMENT ERROR HELD CONSTANT HERE
+The likelihood that sampling a similar study would result in (our definition) of a reasonable effect size estimate also differed for the CC paradigm, relative to the other paradigms studied here. Sampling a similar study with $N_{med}$ would produce a reasonable effect size estimate around 2/3 of the time for the AB, MT and SRT paradigms, and only 1/2 of the time for CC. This suggests that in all cases, there is the potential for misinvestment of scientific resources during study planning. If the goal of a study is to have sufficient power to reject the null hypothesis, then this only appears to be of practical issue in the study of the smaller of the effects observed here (e.g. CC b, CC b x c, MT tc x m), as the null was rejected for all remaining simulations regardless of $N$. If the goal of a study is to instead provide a reasonable effect size estimate, then a consistent observation was that higher $N$ than $N_{med}$ is required, at least for the paradigms studied here. Indeed, our analysis of inflation biases showed that, for small effects, increasing sample size results in an exponential decrease in the potential for inflated effect size estimates in the published literature. 
+
+These findings complement previous simulation studies into the factors influencing effect size estimates. Previous simulation work has highlighted conditions that cause bias in effect size estimates [e.g. @laneEstimatingEffectSize1978; @troncososkidmoreBiasPrecisionClassical2013; @okadaOmegaSquaredLess2013] and the consequences for power calculations [@albersWhenPowerAnalyses2018; @andersonSampleSizePlanningMore2017] under simplifying conditions such as simulating between subjects experimental designs or using lower and fewer samples of $N$. By taking a step away from generality and simulating experiments based on data from specific paradigms with more complex designs, we demonstrate the utility of characterizing distributions of effect sizes. Specifically, researchers using the paradigms studied here can identify the extent to which an effect size produced from their own study may be under- or over-estimated, given we provide the means and standard deviations of the current best estimate. Furthermore, researchers can use the information presented here to evaluate findings from similar studies, by determining the likelihood that the study has produced a reasonable effect size estimate given the $N$ used by that study. These insights are unattainable from general simulation work. We hope that this study demonstrates the utility of researchers pooling data sets to improve effect size estimates for each field, consequently improving power calculations and study planning.
 
 Compare effect sizes to literature - any meta-analyses or check the r=.36 study - also impacts of missing literature data
+HERE I TALK ABOUT HOW IT'S GOOD NEWS FOR THE PARADIGMS STUDIED HERE  - largely.
 
 Study planning - how we have helped. Lower bounds, power calculations and diminishing returns, 
 Same paragraph - practicality of our findings, also, can go from effect size estimates from smaller N and divide the standrad deviation in half
@@ -559,6 +570,7 @@ Modelling effects - how this information has helped. M
 Limitations
 Upper limit - a ceiling for results, also hundreds is not many
 One sample - students and homogeneity
+Measurement error - don't know how it will generalise
 CC PARAMS 
 
 ## Conclusions

@@ -72,5 +72,7 @@ get_summary_data_fx_p <- function(delete_files_after){
               med=median(value),
               sd=sd(value),
               LB=quantile(value, .025),
-              UB=quantile(value, .975))
+              UB=quantile(value, .975),
+              sk=skewness(value),
+              ku=kurtosis(value)-3)
 }
