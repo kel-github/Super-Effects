@@ -33,7 +33,7 @@ n.inner <- 1000
 i.outer <- NA
 cores <- 10
 sub.Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
-
+sub.Ns <- sub.Ns[1]
 if (length(args) == 0) {
   fname <- "../data/total_of_313_subs_AB_task_trial_level_data.csv"
   outpath <- "../data/AB"
@@ -65,8 +65,19 @@ ffx.dat <- dat %>% group_by(Subj.No, Trial.Type.Name) %>%
                    summarise(T1=mean(T1.Accuracy),
                              T2gT1=mean(T2T1.Accuracy))
 
-
+# Create a table of within subject effects, specifically
+# variability across conditions - save it for plotting later
+sub_var <- dat %>% group_by(Subj.No) %>%
+                    summarise(p = mean(T2T1.Accuracy),
+                              q = mean(!T2T1.Accuracy),
+                              n = length(T2T1.Accuracy),
+                              sigma_sq = n*p*q, # see https://en.wikipedia.org/wiki/Binomial_distribution
+                              skew = (q-p)/sqrt(n*p*q),
+                              k = (1-(6*p*q))/(n*p*q))
+write_csv(sub_var, file = "../data/AB/AB_sub_var_stats.csv") # this will be loaded within the AB func
 subs  <- unique(ffx.dat$Subj.No)
+
+ffx.dat <- inner_join(ffx.dat, sub_var, by = "Subj.No")
 # ----------------------------------------------------------------------------------------------------
 # run simulations for ffx & rfx models, getting p values and partial
 # eta squares, and save results to a list, using immediate sampling
@@ -81,17 +92,4 @@ lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1,
                                      samp="imm",
                                      seeds=seeds))
 
-# ----------------------------------------------------------------------------------------------------
-# run simulations for ffx & rfx models, getting p values and partial
-# eta squares, and save results to a list, using intermediate sampling
-# approach
-# ----------------------------------------------------------------------------------------------------
-# fstem <- paste(outpath, "/AB_N-%d_parent-%d.RData", sep="")
-# lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x,
-#                                      k=n.inner, j=n.outer, outer_index=i.outer,
-#                                      cores=cores,
-#                                      f=get.ps.aov.AB,
-#                                      fstem=fstem,
-#                                      samp="int",
-#                                      seeds=seeds))
 quit()

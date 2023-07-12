@@ -524,22 +524,30 @@ get.ps.aov.AB <- function(data){
   # dv = name of dv (T1 or T2gT1)
   
   options(contrasts = c("contr.sum", "contr.poly")) # set options
-  names(data) <- c("sub", "Nsz", "perm", "lag", "T1", "T2gT1")
+  names(data) <- c("sub", "Nsz", "perm", "lag", "T1", "T2gT1", "p", "q", "n", "sigma_sq", "skew", "k")
   
   data$lag <- as.factor(data$lag)
   # get SS type - WARNING - HARD CODING!
   data$trial <- c(1:4)
   type <- set.SS.type(data)
   
+  # compute summary stats of subject info
+  sub_var_inf <- data %>% summarise(sigma_mu = mean(sigma_sq),
+                                    skew_mu = mean(skew),
+                                    k_mu = mean(k))
   # number subs
-  nsubs <- length(data$sub)/length(levels(data$lag))
+  nsubs <- length(data$sub)/length(levels(data$lag)) # you lose original sub numbers here
   data$sub <- as.factor(rep(1:nsubs, each=length(levels(data$lag))))
   
-  # GET DATA STATS
+  # GET MEAN OF KEY DIFF, PLUS SKEW, KUROSIS, AND SAVE DENSITY
   # -----------------------------------------------------------------------------
   stat_data <- data %>% select(sub, lag, T2gT1) %>% 
-                pivot_wider(id_cols = sub, names_from = lag, values_from = T2gT1)
-  stat_data <- get_RTdist_stats_dfs(stat_data)
+                pivot_wider(id_cols = sub, names_from = lag, values_from = T2gT1) %>%
+                mutate(A = (lag_7 + lag_5)/2,
+                       B = (lag_2 + lag_3)/2,
+                       Xdiff = (A - B)) 
+  stat_data <- get_dist_stats(stat_data)
+  names(stat_data) <- c("AB", "AB_density")
   
   
   # RUN RM ANOVA
@@ -555,14 +563,6 @@ get.ps.aov.AB <- function(data){
   # -----------------------------------------------------------------------------
   peps <- compute_partial_epsilon_sq(an)
 
-  # RUN LME VERSION
-  # -----------------------------------------------------------------------------
-  # mod <- lmer( T2gT1 ~ lag + (1|sub), data=data )
-  # lme.an <- Anova(mod)
-  # 
-  # # get effect size for random effects
-  # lme.peta <- summary(mod)$coefficients["lag1", "Estimate"]/sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
-  # 
   # COLLATE OUTPUT VARIABLES
   # -----------------------------------------------------------------------------
   out <- list()
@@ -582,7 +582,7 @@ get.ps.aov.AB <- function(data){
   
   # put the distribution data into the dataframe
   
-  list(out, stat_data)
+  list(out, stat_data, sub_var_inf)
 }
 
 
@@ -631,6 +631,9 @@ run.outer <- function(in.data, subs, N, k, j, outer_index, cores, fstem,  f, sam
   # select an idx of N unique if int, or with replacement if imm
   sub.idx = lapply(1:j, function(x) sample.N(subs, N, x, replace=replace))
   sub.idx = do.call(rbind, sub.idx) # index for all the outerloops
+  # save the sub.idx, in case you want to get more subject specific info later
+  tfol <- str_split(fstem, pattern = "/", simplify = TRUE)[1,3]
+  write_csv(sub.idx, paste("../data", tfol, sprintf("%s_subidx_N-%d.csv", tfol, N), sep="/"))
   # here I mclapply over each 'parent sample' to pass into run.inner
   names(in.data)[names(in.data)=="Subj.No"] <- "sub"
   
@@ -694,23 +697,16 @@ run.inner <- function(in.data, parent.subs, N, k, j, fstem, f, samp) {
   fname = sprintf(fstem, N, j)
   save(out, file=fname)
   
-  # now to get/save distributional data
-  dist_summary <- tmp[[1]][[2]][[1]] # this code is gross, sorry world
-  dist_out <- data.frame(dist_summary)
-  dist_out$n <- N
-  dist_out$k <- k
+  # now to get/save distributional data - it follows the format of
+  # list [[1]]$fx mu, sigma, skew and k of Xdiff, as well as r of A, B
+  #      [[1]]$fx_density the ecdf of the relevant Xdiff
+  #      [[2]] mean within sub variance, skew and k
+  #      [[3]] subject numbers from this go
+  dist_out <- tmp[[1]][[2]] # sorry for hardcoding!
   dist_fstem <- str_split(fstem, pattern = ".RD", simplify = TRUE)[1,1]
   dist_fstem <- paste(dist_fstem, "_diststats.RData", sep="")
   dist_fname = sprintf(dist_fstem, N, j)
   save(dist_out, file=dist_fname)
-  
-  # now get and save density function data
-  dens_func_dat <- tmp[[1]][[2]][2]
-  names(dens_func_dat) <- sprintf("N%d_k%d", N, k)
-  dens_fstem <- str_split(fstem, pattern = ".RD", simplify = TRUE)[1,1]
-  dens_fstem <- paste(dens_fstem, "_DV_dens_funcs.RData", sep="")
-  dens_fname <- sprintf(dens_fstem, N, j)
-  save(dens_func_dat, file=dens_fname)
 }
 
 run.models <- function(in.data, subs, N, f, samp){
@@ -729,14 +725,16 @@ run.models <- function(in.data, subs, N, f, samp){
   } else if (samp == "imm"){
     replace=FALSE
   }
-  
+
+# the commented out line idx = ... is a hangover from the imm sampling technique that is no longer 
+  # required
   idx = sample.N(subs=subs, N=N, k=1, replace=replace) # get the samples for this one permutation
   
   f <- eval(f) # get the function
   tmp.fx = f(inner_join(idx, in.data, by="sub"))
   tmp = tmp.fx # some re-labelling due to legacy issues
   
-  tmp.fx = tmp[[1]]
+  tmp.fx = tmp[[1]] # get the anova/effect size info
   
   if (length(tmp.fx) > 4){
     out = data.frame( n    = c(N, N),
@@ -755,7 +753,7 @@ run.models <- function(in.data, subs, N, f, samp){
                       mod = c("RM-AN", "LME") )
   }
   
-  list(out, tmp[[2]]) # now output the dataframe of effect results
+  list(out, tmp[2:length(tmp)]) # now output the dataframe of effect results
                       # and the data distribution results
 }
 
@@ -868,142 +866,6 @@ gen.dens <- function(min, max, spacer = 10000, data){
   apply(d, 1, sum)
 }
 
-
-# ----------------------------------------------------------------------------------------------------
-# Plotting
-# ----------------------------------------------------------------------------------------------------
-
-plot.d <- function(d, m, yl, sc, med){
-  # this function is for the mega sample
-  # inputs:
-  #--d: data
-  #--m: model - ffx or rfx
-  #--yl: ylim - c(0,3) - for example
-  #--sc: how much to scale
-  #--med: median sample size
-  
-  total_p <- d %>% group_by(mod, Nsz) %>% summarise(sum=sum(d)) 
-  p <- d %>% inner_join(total_p, by=c("mod", "Nsz")) %>% mutate(dp = d/sum) %>% 
-        filter(mod == eval(m)) %>% 
-        ggplot(aes(x=x, y=Nsz, height=dp, group=Nsz)) +
-        geom_density_ridges(stat="identity", scale=sc, rel_min_height=.01, fill=wes_palette("IsleofDogs1")[1], color=wes_palette("IsleofDogs1")[5]) +
-        theme_ridges() +
-        geom_hline(yintercept=which(abs(as.numeric(levels(d$Nsz))-med) == min(abs(as.numeric(levels(d$Nsz))-med)))[1],
-                    linetype="dashed", color=wes_palette("IsleofDogs1")[3]) +
-        ylab('N') + theme_cowplot() + xlim(yl) +
-        guides(fill = FALSE, colour = FALSE) +
-        ggtitle(eval(m)) 
-  if (m == "RM-AN") {
-    p + xlab(expression(paste(eta[p]^{2}))) +
-          theme(axis.title.x = element_text(face = "italic"))
-  } else if (m=="LME"){
-    p + xlab(expression(tilde(paste(eta[p]^{2})))) +
-          theme(axis.title.x = element_text(face = "italic"))
-  } else if (m == "t") {
-    p + xlab("d") +
-          theme(axis.title.x = element_text(face = "italic"))
- } else if (m=="p") {
-  p + xlab(bquote(gamma)) +
-    theme(axis.title.x = element_text(face = "italic"))
- }
-}
-
-calc.crit.d <- function(df, N){
-  max(qt(c(.025, .975), df))/sqrt(N)
-}
-
-
-plot.d.by.samp <- function(d, yl, sc, m){
-  # this function is to plot the distributions
-  # attained from a select few N, by sampling strategy
-  # inputs:
-  #--d: data
-  #--yl: ylim - c(0,3) - for example
-  #--sc: how much to scale
-  total_p <- d %>% group_by(samp, mod, Nsz) %>% summarise(sum=sum(d)) 
-  d %>% inner_join(total_p, by=c("mod", "Nsz", "samp")) %>% mutate(dp = d) %>% # amend if want to make a normalised distribution
-    filter(mod == eval(m)) %>% 
-    ggplot(aes(x=x, y=as.factor(Nsz), height=dp, group=as.factor(Nsz), fill=as.factor(samp))) +
-    geom_density_ridges(stat="identity", scale=sc, rel_min_height=.0001, fill=wes_palette("IsleofDogs1")[1], color=wes_palette("IsleofDogs1")[1]) +
-    theme_ridges() + facet_wrap(~as.factor(samp)) +
-    xlab('effect') + ylab('N') + theme_cowplot() + xlim(yl) +
-    scale_color_manual(values="white") +
-    scale_fill_manual(values=wes_palette("IsleofDogs1")[1]) +
-    theme(axis.title.x = element_text(face = "italic"))
-}
-
-plot.p <- function(d, m, yl, sc, med){
-  # inputs:
-  #--d: data
-  #--m: model - ffx or rfx
-  #--yl: ylim - c(0,3) - for example
-  #--sc: how much to scale
-  total_p <- d %>% group_by(mod, Nsz) %>% summarise(sum=sum(d)) 
-  d %>% inner_join(total_p, by=c("mod", "Nsz")) %>% mutate(dp = d/sum) %>% 
-    filter(mod == eval(m)) %>% 
-    ggplot(aes(x=x, y=Nsz, height=dp, group=Nsz)) +
-    geom_density_ridges(stat="identity", scale=sc, rel_min_height=.01, fill=wes_palette("IsleofDogs1")[1], color=wes_palette("IsleofDogs1")[5]) +
-    theme_ridges()  +
-    geom_hline(yintercept=which(abs(as.numeric(levels(d$Nsz))-med) == min(abs(as.numeric(levels(d$Nsz))-med)))[1],
-               linetype="dashed", color=wes_palette("IsleofDogs1")[3]) +
-    xlab('p') + ylab('N') + theme_cowplot() + xlim(yl) +
-    guides(fill = FALSE, colour = FALSE) +
-    ggtitle(eval(m)) +
-    theme(axis.title.x = element_text(face = "italic")) +
-    geom_vline(aes(xintercept=log(.05)), linetype="dashed", colour="black")
-}
-
-
-plt.fx.sz <- function(data, ylims){
-  # plot effect size, given dataframe of 'n', 'measure', and 'value'
-  data %>% filter(measure=="d") %>%
-    ggplot(mapping=aes(x=value, y=n)) + #, fill=stat(x))) +
-    geom_density_ridges(scale=2, rel_min_height=.01, fill=wes_palette("IsleofDogs1")[1], color=wes_palette("IsleofDogs1")[5]) +
-    #    geom_density_ridges_gradient(scale = 2, rel_min_height = 0.01, gradient_lwd = 1.) +
-    theme_ridges() +
-    #    scale_fill_viridis_c(name = "value", option = "C") +
-    xlab('d') + ylab('N') + theme_cowplot() + xlim(ylims) +
-    #   scale_y_discrete(breaks = seq(23, 303, by = 20), labels=as.character(seq(23, 303, by = 20))) +
-    guides(fill = FALSE, colour = FALSE) +
-    ggtitle(paste(data$model[1])) +
-    theme(axis.title.x = element_text(face = "italic"))
-}
-
-
-plt.ps <- function(data, xlims, rel_min_height){
-  # same as plt.fx.sz but for p values.
-  data %>% filter(measure=="p") %>%
-    ggplot(mapping=aes(x=value, y=n)) + #, fill=stat(x))) +
-    geom_density_ridges(scale=2, rel_min_height=rel_min_height, fill=wes_palette("IsleofDogs1")[1], color=wes_palette("IsleofDogs1")[5]) + # 
-    theme_ridges() +
-    xlab('p') + ylab('N') + theme_cowplot() + xlim(xlims) +
-    geom_vline(aes(xintercept=log(.05)), linetype="dashed") +
-    guides(fill = FALSE, colour = FALSE) +
-    ggtitle(paste(data$model[1])) +
-    theme(axis.title.x = element_text(face = "italic"))
-}
-
-
-RmType <- function(string) { # remove 1st label from facet_wrap
-  sub("._", "", string)
-}
-
-plt.rfx <- function(data, xlims){
-  # same as plt.fx.sz but for p values.
-  data %>% pivot_longer(names(data)[!names(data) %in% c("n","model")], names_to = "rfx", values_to="var") %>%
-    drop_na() %>%
-    ggplot(mapping=aes(x=var, y=n)) + #, fill=stat(x))) +
-    geom_density_ridges(scale=2, rel_min_height=.01, fill=wes_palette("IsleofDogs1")[5], color=wes_palette("IsleofDogs1")[4]) +
-    #    geom_density_ridges_gradient(scale = 2, rel_min_height = 0.01, gradient_lwd = 1.) +
-    theme_ridges() +
-    #    scale_fill_viridis_c(name = "value", option = "C") +
-    xlab(expression(sigma)) + ylab('N') + theme_cowplot() + xlim(xlims) + 
-    #    scale_y_discrete(breaks = seq(23, 303, by = 20), labels=as.character(seq(23, 303, by = 20))) +
-    facet_wrap(~model*rfx) +
-    guides(fill = FALSE, colour = FALSE) +
-    theme(axis.title.x = element_text(face = "italic"))
-}
-
 # ----------------------------------------------------------------------------------------------------
 # More data wrangles
 # ----------------------------------------------------------------------------------------------------
@@ -1072,31 +934,39 @@ compute_partial_epsilon_sq <- function(an){
 ###### functions to get distributional info of RT/accuracy data
 #### -------------------------------------------------------------------------------------------------
 
-get_RTdist_stats <- function(x, cond){
-  # given a vector x, return distribution
-  # moments
-  # Kwargs:
-  #   -- x : a vector of real values
-  #   -- cond : str, condition name e.g. "lag2"
-
-  mu <- mean(x)
-  med <- median(x)
-  sigma <- var(x)
+get_dist_stats <- function(stat_data){
+  # given dataframe stat_data, compute
+  #  the mean of Xdiff, and the correlation between conditions A & B
+  #  before using this function, take the dataframe of participant means (stat_data)
+  #  and do the necessary permutes to get conditions A & B (rho), and the Xdiff, to return the
+  #  following stats (mean, skew, kurtosis, rho)
+  # -- output - data frame of the above stats
+  
+  # assign
+  Xdiff <- stat_data$Xdiff
+  A <- stat_data$A
+  B <- stat_data$B
+  
+  mu <- mean(Xdiff)
+  med <- median(Xdiff)
+  sigma <- var(Xdiff)
+  
   skew <- (mu - med)/sqrt(sigma) # see https://en.wikipedia.org/wiki/Skewness
-  
   # now kurtosis - see https://en.wikipedia.org/wiki/Kurtosis - Moore's interpretation
-  Z <- (x - mu) / sqrt(sigma)[1]
+  Z <- (Xdiff - mu) / sqrt(sigma)
   k <- var(Z^2)+1 # excessive kurtosis < -3 ok 3 > excessive 
+
+  # now make the ecdf in case we need to recreate the distribution later
+  d <- density(Xdiff)
   
-  # now make the ecdf so we can recreate the distribution later
-  d <- density(x)
+  # now get the correlation between the key variables
+  r <- with(stat_data, cor(A, B))
   
-  list(data.frame(cond = cond,
-                  mu = mu,
-                  med = med, 
+  list(data.frame(mu = mu,
                   sigma = sigma,
                   skew = skew,
-                  k = k),
+                  k = k,
+                  r = r),
                   d = d)
 }
 

@@ -13,7 +13,8 @@ library(gridExtra)
 
 ########### DEFINE VARIABLES ################
 Ns <- c(18, 25, 30, 36, 50)
-samps <- c(50, 36, 30, 25, 18)
+samps <- c(50, 36, 30, 25, 50)
+#samps <- c(50, 36, 30, 25, 100)
 tasks <- c("AB", "SD", "SRT", "CC")
 
 
@@ -114,4 +115,9 @@ ent <- do.call(rbind, mapply(get_entropy_per_mod, task=unique(baldat$mod),
                                            MoreArgs=list(Ns=Ns),
                                            SIMPLIFY=FALSE))
 
-ent %>% ggplot(aes(x=n, y=e, group=task, colour=task)) + geom_line()
+ent %>% ggplot(aes(x=n, y=e, group=task, colour=task)) + geom_line() + ylim(1.25, 3)
+
+# compute variance per N and plot
+baldat %>% group_by(mod, samp) %>%
+             summarise(s=sd(esz)) %>%
+             ggplot(aes(x=samp, y=s, group=mod, colour=mod)) + geom_line()
