@@ -7,12 +7,6 @@ rm(list=ls())
 ### run analysis of sample size x effect size variability on the SRT data
 # ----------------------------------------------------------------------------------------------------
 # load packages and source function files
-
-# setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) # set working directory to the location of this file
-# uncomment the below and run if you need to install the packages
-# install.packages("tidyverse")
-# install.packages("wesanderson")
-# install.packages("cowplot")
 library(tidyverse) # for data wrangling
 library(wesanderson) # palette for some sweet figure colours
 library(cowplot)
@@ -21,6 +15,7 @@ library(ggridges)
 library(car)
 library(parallel)
 library(rstatix)
+library(moments)
 source("efilids_functions.R") # custom functions written for this project
 source("R_rainclouds.R") # functions for plotting
 
@@ -86,7 +81,19 @@ ffx.dat <- rfx.dat %>% select(-c("Trial.Type.Name", "Task.1.Response", "Task.2.R
                         filter(RT > min.RT) %>%
                         filter(RT < (mean(RT)+sd.crit*sd(RT))) %>%
                         summarise(RT = mean(RT))
+
+sub_var <- rfx.dat %>% select(-c("Trial.Type.Name", "Task.1.Response", "Task.2.Response")) %>%
+                        group_by(Subj.No, task, trialtype) %>%
+                        filter(RT > min.RT) %>%
+                        filter(RT < (mean(RT)+sd.crit*sd(RT))) %>%
+                        group_by(Subj.No) %>%
+                        summarise(sigma_sq = var(RT),
+                                  skew = skewness(RT),
+                                  k = kurtosis(RT))
+write_csv(sub_var, file = "../data/SD/SD_sub_var_stats.csv")
 subs  <- unique(ffx.dat$Subj.No)
+
+ffx.dat <- inner_join(ffx.dat, sub_var, by = "Subj.No")
 
 # ----------------------------------------------------------------------------------------------------
 # run simulations, getting p values from linear models, and cohen's d values, and save results to a list, using immediate sampling
@@ -98,19 +105,6 @@ lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1,
                                      f=get.ps.SD, 
                                      fstem=fstem, 
                                      samp="imm",
-                                     seeds=seeds))
-
-
-# ----------------------------------------------------------------------------------------------------
-# run simulations, getting p values from linear models, and cohen's d values, and save results to a list, using intermediate sampling
-# ----------------------------------------------------------------------------------------------------
-fstem <- paste(outpath, "/SD_N-%d_parent-%d.RData", sep="")
-lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, 
-                                     k=n.inner, j=n.outer, outer_index=i.outer,
-                                     cores=cores, 
-                                     f=get.ps.SD, 
-                                     fstem=fstem, 
-                                     samp="int",
                                      seeds=seeds))
 
 # # ----------------------------------------------------------------------------------------------------

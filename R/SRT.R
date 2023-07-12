@@ -9,9 +9,6 @@ rm(list=ls())
 
 # setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) # set working directory to the location of this file
 # uncomment the below and run if you need to install the packages
-# install.packages("tidyverse")
-# install.packages("wesanderson")
-# install.packages("cowplot")
 library(tidyverse) # for data wrangling
 library(wesanderson) # palette for some sweet figure colours
 library(cowplot)
@@ -22,6 +19,7 @@ library(parallel)
 library(rstatix)
 source("efilids_functions.R") # custom functions written for this project
 source("R_rainclouds.R") # functions for plotting
+library(moments)
 
 args <- commandArgs(trailingOnly=TRUE)
 
@@ -61,7 +59,7 @@ dat <- read.csv(fname,
 # ----------------------------------------------------------------------------------------------------
 
 # Create a summary of the data for fixed fx modelling
-min.RT <- 200 # in msec
+min.RT <- .200 # in sec
 sd.crit <- 2.5
 
 ffx.dat <- dat %>% filter(Block.No > 2) %>%
@@ -70,8 +68,23 @@ ffx.dat <- dat %>% filter(Block.No > 2) %>%
               filter(RT.ms > min.RT) %>%
               filter(RT.ms < (mean(RT.ms) + sd.crit*sd(RT.ms))) %>%
               summarise(RT=mean(RT.ms))
+
+ffx.dat$RT <- ffx.dat$RT/1000
+
+sub_var <- dat %>% filter(Block.No > 2) %>%
+                      group_by(Subj.No, Block.No.Names) %>%
+                      filter(Accuracy == 1) %>%
+                      filter(RT.ms > min.RT) %>%
+                      filter(RT.ms < (mean(RT.ms) + sd.crit*sd(RT.ms))) %>%
+                      mutate(RT = RT.ms/1000) %>%
+                      group_by(Subj.No) %>%
+                         summarise(sigma_sq = var(RT),
+                                   skew = skewness(RT),
+                                   k = kurtosis(RT))
+write_csv(sub_var, file = "../data/SRT/SRT_sub_var_stats.csv")
 subs  <- unique(ffx.dat$Subj.No)
 
+ffx.dat <- inner_join(ffx.dat, sub_var)
 
 # ----------------------------------------------------------------------------------------------------
 # run simulations, getting p values from linear models, and cohen's d values, and save results to a list, using intermediate sampling
@@ -84,18 +97,6 @@ lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1,
                                      fstem=fstem, 
                                      samp="imm",
                                      seeds=seeds))
-
-# ----------------------------------------------------------------------------------------------------
-# run simulations, getting p values from linear models, and cohen's d values, and save results to a list, using intermediate sampling
-# ----------------------------------------------------------------------------------------------------
-# fstem <- paste(outpath, "/SRT_N-%d_parent-%d.RData", sep="")
-# lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, 
-#                                      k=n.inner, j=n.outer, outer_index=i.outer,
-#                                      cores=cores, 
-#                                      f=get.ps.srt, 
-#                                      fstem=fstem, 
-#                                      samp="int",
-#                                      seeds=seeds))
 
 # ----------------------------------------------------------------------------------------------------
 # get outta here

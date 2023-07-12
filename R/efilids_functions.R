@@ -312,36 +312,37 @@ get.ps.vsl <- function(data) {
 ###### LME and sim functions for SRT data
 #### ---------------------------------------------------------------------------
 get.ps.srt <- function(data) {
-  # run t-test and linear mixed effects model on SRT data
+  # run t-test on SRT data
   
   options(contrasts = c("contr.sum", "contr.poly")) # set options   
+  names(data) <- c("sub", "Nsz", "perm", "trialtype", "RT", "sigma_sq", "skew", "k")  
+  data$trialtype <- as.factor(data$trialtype)
+  data$trial = 1:2
   
-  names(data) <- c("sub", "Nsz", "perm", "trialtype", "RT")  
+  # compute summary stats of subject info
+  sub_var_inf <- data %>% filter(trial == 1) %>%
+                    summarise(sigma_mu = mean(sigma_sq),
+                              skew_mu = mean(skew),
+                              k_mu = mean(k))
   
   # number subjects
-  data$trialtype <- as.factor(data$trialtype)
   nsubs = length(data$sub)/length(levels(data$trialtype))
   data$sub <- rep(1:nsubs, each = length(levels(data$trialtype)))
   
-  # GET DATA STATS
+  # GET MEAN OF KEY DIFFS, PLUS SKEW, KUROSIS, AND SAVE DENSITY
   # -----------------------------------------------------------------------------
   stat_data <- data %>% select(sub, trialtype, RT) %>% 
-    pivot_wider(id_cols = sub, names_from = trialtype, values_from = RT)
-  stat_data <- get_RTdist_stats_dfs(stat_data)
+                   pivot_wider(id_cols = sub, names_from = trialtype, values_from = RT) %>%
+                   mutate(A = `Random Block`, 
+                          B = `Sequence Block`,
+                          Xdiff = A - B)
+  stat_data <- get_dist_stats(stat_data)
+  names(stat_data) <- c("SRT", "SRT_density")
   
   # RUN t-test
   # ----------------------------------------------------------------------------
   t <- run.t.test.sim(data, subs = unique(data$sub))
-  
-  # RUN LME VERSION
-  # ----------------------------------------------------------------------------
-  # mod <- lmer(RT ~ trialtype + (1|sub), data=data)
-  # lme.an <- Anova(mod)
-  # 
-  # # get effect size for random effects
-  # lme.peta <- summary(mod)$coefficients["trialtype1", "Estimate"]/
-  #   sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
-  # 
+
   # COLLATE OUTPUT VARIABLES
   # -----------------------------------------------------------------------------
   out <- list()
@@ -361,7 +362,7 @@ get.ps.srt <- function(data) {
   out$eRes = c(NA, NA)
   
   # put the distribution data into the dataframe
-  list(out, stat_data)
+  list(out, stat_data, sub_var_inf)
 }
 
 # ----------------------------------------------------------------------------------------------------
@@ -375,9 +376,7 @@ get.ps.CC <- function(data){
   # dv = name of dv (typically RT)
   
   options(contrasts = c("contr.sum", "contr.poly")) # set options  
-  
-  names(data) <- c("sub", "Nsz", "perm", "block", "trialtype", "RT")
-  
+  names(data) <- c("sub", "Nsz", "perm", "block", "trialtype", "RT", "sigma_sq", "skew", "k")
   data$block <- as.factor(data$block)
   data$trialtype <- as.factor(data$trialtype)
   
@@ -386,16 +385,40 @@ get.ps.CC <- function(data){
   data$trial = 1:ntrials
   type = set.SS.type(data)
   
+  # compute summary stats of subject info
+  sub_var_inf <- data %>% filter(trial == 1) %>%
+                    summarise(sigma_mu = mean(sigma_sq),
+                              skew_mu = mean(skew),
+                              k_mu = mean(k))
+  
   # now get n subs
   nsubs <- length(data$sub)/(length(levels(data$block)) * length(levels(data$trialtype)))
   # set subject identifiers as unique
   data$sub <- as.factor(rep(1:nsubs, each=length(levels(data$block)) * length(levels(data$trialtype))))
 
-  # GET DATA STATS
+  # GET MEAN OF KEY DIFFS, PLUS SKEW, KUROSIS, AND SAVE DENSITY
   # -----------------------------------------------------------------------------
-  stat_data <- data %>% select(sub, block, trialtype, RT) %>% 
-    pivot_wider(id_cols = sub, names_from = c(block, trialtype), values_from = RT)
-  stat_data <- get_RTdist_stats_dfs(stat_data)
+  me_condition <- data %>% select(sub, block, trialtype, RT) %>% 
+                    group_by(sub, trialtype) %>%
+                      summarise(mu = mean(RT)) %>%
+                   pivot_wider(id_cols = sub, names_from = trialtype, values_from = mu) %>%
+                      mutate(A = Novel, 
+                             B = Repeated,
+                             Xdiff = A - B)
+  me_condition <- get_dist_stats(me_condition)
+  names(me_condition) <- c("ME", "ME_density")
+  
+  int <- data %>% select(sub, block, trialtype, RT) %>%
+            filter(block == 1 | block == 2 | block == 11 | block == 12) %>%
+              group_by(sub) %>%
+                pivot_wider(id_cols = sub, names_from = c(block, trialtype), values_from = RT) %>%
+                mutate(A = (`1_Novel`+`2_Novel`)/2 - (`1_Repeated` + `2_Repeated`)/2,
+                       B = (`11_Novel`+`12_Novel`)/2 - (`11_Repeated` + `12_Repeated`)/2,
+                       Xdiff = A - B)
+  int <- get_dist_stats(int)
+  names(int) <- c("int", "int_density")
+  # now put the two together
+  stat_data <- c(me_condition, int)
   
   # RUN RM ANOVA (see anova function notes for choice)
   # -----------------------------------------------------------------------------
@@ -412,20 +435,9 @@ get.ps.CC <- function(data){
   # compute partial epsilon sq:
   peps <- compute_partial_epsilon_sq(an)
   peps <- peps[names(peps) %in% c("block:trialtype", "block")]
-  # RUN LME VERSION 
-  # Notes: this is commented out as I wound up ditching the LME side of the analyses
-  # However, I kept the infrastructure so that I could send the main effect of 
-  # trial type to the 'lme' structure, to save both for the analyses
-  # -----------------------------------------------------------------------------
-  # mod <- lmer( RT ~ block*trialtype + (1|sub), data=data )
-  # lme.an <- Anova(mod)
-  # 
-  # # get effect size for random effects
-  # lme.peta <- (summary(mod)$coefficients["block11:trialtype1", "Estimate"]-summary(mod)$coefficients["block1:trialtype1", "Estimate"])/
-  #   sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
-  
-  # COLLATE OUTPUT VARIABLES
-  # -----------------------------------------------------------------------------
+
+  # COLLATE
+  # ---------------------------------------------------------------
   out <- list()
   
   # p 
@@ -443,35 +455,56 @@ get.ps.CC <- function(data){
   out$eRes = c(NA, NA)
   out
   
-  list(out, stat_data)
+  list(out, stat_data, sub_var_inf)
 }
 
 # ----------------------------------------------------------------------------------------------------
 ###### aov and LME functions for SD data
 #### -------------------------------------------------------------------------------------------------
 get.ps.SD <- function(data){
-  # run aov on the contextual cueing data
+  # run aov on the multitasking data
   # return the p value, and the conversion of peta to d
   # data = dataframe for testing
   
   options(contrasts = c("contr.sum", "contr.poly")) # set options  
-  
-  names(data) <- c("sub", "Nsz", "perm", "task", "trialtype", "RT")
-  
+  names(data) <- c("sub", "Nsz", "perm", "task", "trialtype", "RT", "sigma_sq", "skew", "k")
   # org factors, number subjects and set SS type
   data$task <- as.factor(data$task)
   data$trialtype <- as.factor(data$trialtype)
   data$trial <- c(1:4)
   type <- set.SS.type(data)
   
+  # compute summary stats of subject info
+  sub_var_inf <- data %>% filter(trial == 1) %>%
+    summarise(sigma_mu = mean(sigma_sq),
+              skew_mu = mean(skew),
+              k_mu = mean(k))
+  
   nsubs <- length(data$sub)/(length(levels(data$task)) * length(levels(data$trialtype)))
   data$sub <- as.factor(rep(1:nsubs, each=length(levels(data$task)) * length(levels(data$trialtype))))
   
-  # GET DATA STATS
+  # GET MEAN OF KEY DIFFS, PLUS SKEW, KUROSIS, AND SAVE DENSITY
   # -----------------------------------------------------------------------------
-  stat_data <- data %>% select(sub, task, trialtype, RT) %>% 
-    pivot_wider(id_cols = sub, names_from = c(task, trialtype), values_from = RT)
-  stat_data <- get_RTdist_stats_dfs(stat_data)
+  me_trialtype <- data %>% select(sub, task, trialtype, RT) %>% 
+                      group_by(sub, trialtype) %>%
+                      summarise(mu = mean(RT)) %>%
+                    pivot_wider(id_cols = sub, names_from = trialtype, values_from = mu) %>%
+                      mutate(A = single, 
+                             B = dual,
+                             Xdiff = B - A)
+  me_trialtype <- get_dist_stats(me_trialtype)
+  names(me_trialtype) <- c("ME", "ME_density")
+  
+  int <- data %>% select(sub, task, trialtype, RT) %>%
+            group_by(sub) %>%
+            pivot_wider(id_cols = sub, names_from = c(task, trialtype), values_from = RT) %>%
+         mutate(A = sound_dual - sound_single,
+                B = vis_dual - vis_single,
+                Xdiff = A - B)
+  int <- get_dist_stats(int)
+  names(int) <- c("int", "int_density")
+  # now put the two together
+  stat_data <- c(me_trialtype, int)
   
   # RUN RM ANOVA
   # -----------------------------------------------------------------------------
@@ -485,14 +518,6 @@ get.ps.SD <- function(data){
   peps <- compute_partial_epsilon_sq(an)
   peps <- peps[names(peps) %in% c("trialtype", "task:trialtype")]
 
-  # RUN LME VERSION
-  # -----------------------------------------------------------------------------
-#  mod <- lmer( RT ~ task*trialtype + (1|sub), data=data )
-#  lme.an <- Anova(mod)
-  
-  # get effect size for random effects
-#  lme.peta <- summary(mod)$coefficients["trialtype1", "Estimate"]/sqrt(sum(as.data.frame(VarCorr(mod))$sdcor^2)) # get the variance of the random effects
-  
   # COLLATE OUTPUT VARIABLES
   # -----------------------------------------------------------------------------
   out <- list()
@@ -510,7 +535,7 @@ get.ps.SD <- function(data){
   out$esub = c(NA, NA)
   out$eRes = c(NA, NA)
   
-  list(out, stat_data)
+  list(out, stat_data, sub_var_inf)
 }
 
 # ----------------------------------------------------------------------------------------------------
@@ -532,7 +557,8 @@ get.ps.aov.AB <- function(data){
   type <- set.SS.type(data)
   
   # compute summary stats of subject info
-  sub_var_inf <- data %>% summarise(sigma_mu = mean(sigma_sq),
+  sub_var_inf <- data %>% filter(trial == 1) %>%
+                          summarise(sigma_mu = mean(sigma_sq),
                                     skew_mu = mean(skew),
                                     k_mu = mean(k))
   # number subs
@@ -634,7 +660,6 @@ run.outer <- function(in.data, subs, N, k, j, outer_index, cores, fstem,  f, sam
   # save the sub.idx, in case you want to get more subject specific info later
   tfol <- str_split(fstem, pattern = "/", simplify = TRUE)[1,3]
   write_csv(sub.idx, paste("../data", tfol, sprintf("%s_subidx_N-%d.csv", tfol, N), sep="/"))
-  # here I mclapply over each 'parent sample' to pass into run.inner
   names(in.data)[names(in.data)=="Subj.No"] <- "sub"
   
   # so pass in all the data that will be used only on this outer loop
@@ -726,8 +751,6 @@ run.models <- function(in.data, subs, N, f, samp){
     replace=FALSE
   }
 
-# the commented out line idx = ... is a hangover from the imm sampling technique that is no longer 
-  # required
   idx = sample.N(subs=subs, N=N, k=1, replace=replace) # get the samples for this one permutation
   
   f <- eval(f) # get the function
@@ -951,10 +974,9 @@ get_dist_stats <- function(stat_data){
   med <- median(Xdiff)
   sigma <- var(Xdiff)
   
-  skew <- (mu - med)/sqrt(sigma) # see https://en.wikipedia.org/wiki/Skewness
-  # now kurtosis - see https://en.wikipedia.org/wiki/Kurtosis - Moore's interpretation
-  Z <- (Xdiff - mu) / sqrt(sigma)
-  k <- var(Z^2)+1 # excessive kurtosis < -3 ok 3 > excessive 
+  skew <- skewness(Xdiff) # see https://en.wikipedia.org/wiki/Skewness (Pearson's coeff)
+  # now kurtosis - see https://en.wikipedia.org/wiki/Kurtosis 
+  k <- kurtosis(Xdiff) # excessive kurtosis < -3 ok 3 > excessive 
 
   # now make the ecdf in case we need to recreate the distribution later
   d <- density(Xdiff)

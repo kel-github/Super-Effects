@@ -23,6 +23,7 @@ library(ggridges)
 library(car)
 library(parallel)
 library(rstatix)
+library(moments)
 source("efilids_functions.R") # custom functions written for this project
 source("R_rainclouds.R") # functions for plotting
 
@@ -33,7 +34,7 @@ n.inner <- 1000
 i.outer <- NA
 cores <- 10
 sub.Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
-sub.Ns <- sub.Ns[1]
+
 if (length(args) == 0) {
   fname <- "../data/total_of_313_subs_AB_task_trial_level_data.csv"
   outpath <- "../data/AB"
@@ -74,7 +75,7 @@ sub_var <- dat %>% group_by(Subj.No) %>%
                               sigma_sq = n*p*q, # see https://en.wikipedia.org/wiki/Binomial_distribution
                               skew = (q-p)/sqrt(n*p*q),
                               k = (1-(6*p*q))/(n*p*q))
-write_csv(sub_var, file = "../data/AB/AB_sub_var_stats.csv") # this will be loaded within the AB func
+write_csv(sub_var, file = "../data/AB/AB_sub_var_stats.csv")
 subs  <- unique(ffx.dat$Subj.No)
 
 ffx.dat <- inner_join(ffx.dat, sub_var, by = "Subj.No")

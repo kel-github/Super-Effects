@@ -22,6 +22,7 @@ library(ggridges)
 library(car)
 library(parallel)
 library(rstatix)
+library(moments)
 source("efilids_functions.R") # custom functions written for this project
 source("R_rainclouds.R") # functions for plotting
 
@@ -49,17 +50,19 @@ if (length(args) == 3) {
 
 set.seed(42) 
 seeds <- sample(1:n.outer, n.outer, replace=FALSE)
+
 # ----------------------------------------------------------------------------------------------------
 # load data and wrangle into tidy form (see https://r4ds.had.co.nz/tidy-data.html), plus relabel to make
 # labels a little simpler
 dat <- read.csv(fname, header=TRUE)
+dat$RT.ms <- dat$RT.ms/1000 # make into s
 
 # ----------------------------------------------------------------------------------------------------
 # Create dataframes 
 # ----------------------------------------------------------------------------------------------------
 
 # Create a summary of the data for fixed fx modelling
-min.RT <- 200 # in msec
+min.RT <- .200 # in sec
 sd.crit <- 2.5
 
 ffx.dat <- dat %>% mutate(Block.No = rep(c(1:12), each = 24, length(unique(dat$Subj.No)))) %>%
@@ -68,7 +71,22 @@ ffx.dat <- dat %>% mutate(Block.No = rep(c(1:12), each = 24, length(unique(dat$S
             filter(RT.ms > min.RT) %>%
             filter(RT.ms < (mean(RT.ms) + sd.crit*sd(RT.ms))) %>%
             summarise(RT=mean(RT.ms))
+
+# create dataframe of within subject effects, specifically
+# variability across conditions - save it for plotting later
+sub_var <- dat %>% mutate(Block.No = rep(c(1:12), each = 24, length(unique(dat$Subj.No)))) %>%
+              group_by(Subj.No, Block.No, Trial.Type.Name) %>%
+              filter(Accuracy == 1) %>%
+              filter(RT.ms > min.RT) %>%
+              filter(RT.ms < (mean(RT.ms) + sd.crit*sd(RT.ms))) %>%
+              group_by(Subj.No) %>%
+              summarise(sigma_sq = var(RT.ms),
+                        skew = skewness(RT.ms),
+                        k = kurtosis(RT.ms))
+write_csv(sub_var, file = "../data/CC/CC_sub_var_stats.csv")
 subs  <- unique(ffx.dat$Subj.No)
+
+ffx.dat <- inner_join(ffx.dat, sub_var, by = "Subj.No")
 
 # ----------------------------------------------------------------------------------------------------
 # run simulations, and save results to a list, using immediate sampling
@@ -81,16 +99,6 @@ lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, k=1,
                                      fstem=fstem,
                                      samp="imm",
                                      seeds=seeds))
-
-# # ----------------------------------------------------------------------------------------------------
-# # run simulations, getting p values from t.tests, and cohen's d values, and save results to a list, using intermediate sampling
-# # ----------------------------------------------------------------------------------------------------
-# fstem <- paste(outpath, "/CC_N-%d_parent-%d.RData", sep="")
-# lapply(sub.Ns, function(x) run.outer(in.data=ffx.dat, subs=subs, N=x, 
-#                                      k=n.inner, j=n.outer, outer_index=i.outer,
-#                                      cores=cores, 
-#                                      f=get.ps.CC, 
-#                                      fstem=fstem, samp="int",
-#                                      seeds=seeds))
+quit()
 
 
