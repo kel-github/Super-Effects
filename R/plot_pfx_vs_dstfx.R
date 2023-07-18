@@ -9,23 +9,20 @@
 
 rm(list=ls())
 
+library(MASS)
 library(tidyverse) # for data wrangling
 library(wesanderson) # palette for some sweet figure colours
 library(cowplot)
-library(lme4) # for mixed effects modelling
-library(ggridges)
-library(car)
-library(parallel)
-library(rstatix)
 library(moments)
 library(stringr)
+library(car)
 source("efilids_functions.R") # custom functions written for this project
 source("R_rainclouds.R") # functions for plotting
 
 # define sub Ns
 datpath <- "../data"
 task <- "SD"
-zipnm <- "EPSSD_wv.zip"
+zipnm <- "SD_wv.zip"
 sub.Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
 
 ##############################################################################
@@ -118,55 +115,58 @@ unzp_mu_stats_n_spew <- function(datpath, task, zipnm, fnm){
   dst_dat
 }
 
-Ns <- c(21, 313)
+get_ev_non_norm <- function(x){
+  # given a random variable x, compute the expected value
+  # note, check with collaborators they're happy with this
+  d <- density(x)
+  mu <- sum(d$x*d$y)*diff(d$x)[1]
+  mu
+}
 
+# function to convert N_med fx sizes to distance from
+# the EV of N313
+
+Ns <- c(25, 313)
 dat <- do.call(rbind, lapply(Ns, 
                              get_dat_4corrs, 
                              datpath=datpath, 
                              task=task, 
                              zipnm=zipnm))
-
+##############
 # plan per task
-# convert each effect size to a probability (integrate)
-# for the median N, get the data for each task and perform 
-# a linear regression to see what accounts for p, after controlling
+maxN = 313
+# convert each effect size from N_med to distance from the EV of N313
+if(task == "SD"){
+  medN <- 21 # this may have to change
+  # first, do main effect of multitasking
+  mu <- get_ev_non_norm(dat$esz_ME[dat$n == maxN])
+  # now compute the distance of each value of the fx size
+  dat$esz_ME_dist <- dat$esz_ME - mu
+  
+  # now do the interaction effect
+  mu <- get_ev_non_norm(dat$esz_int[dat$n == maxN])
+  dat$esz_int_dist <- dat$esz_int - mu
+}
+
+df <- dat %>% filter(n == 25) %>% select(esz_int_dist, int_mu, int_sigma, int_skew, int_k, int_r, sigma_mu, skew_mu, k_mu )
+# first do pairs plot and save
+ggpairs(df)
+# perform linear regression and test the VIF factor
+full_model <- lm(esz_int_dist ~ ., data=df)
+vif_out <- vif(full_model)
+step_model <- stepAIC(full_model, direction = "both", 
+                      trace = FALSE)
+features <- summary(step_model)
+
+# perform 
+# a stepwise linear regression to see what accounts for p, after controlling 
 # for mu and sigma of Xdiff
+# apply this over tasks
+#############
+
 # perform the linear regression at each level of N, and take the
 # beta co-efficients for the key features for each task
 # do a correlation between N and beta, as well as plotting (each
 # feature is a panel, each line is a task)
 # what general/conclusive statements can be made?
 
-
-### plotting
-me_sml <- dat %>% filter(n == 21) %>% select("esz_ME", "ME_mu", "ME_sigma",
-                                             "ME_skew", "ME_k", "ME_r", "sigma_mu",
-                                             "skew_mu", "k_mu")
-me_lrg <- dat %>% filter(n == 313) %>% select("esz_ME", "ME_mu", "ME_sigma",
-                                             "ME_skew", "ME_k", "ME_r", "sigma_mu",
-                                             "skew_mu", "k_mu")
-int_sml <- dat %>% filter(n == 21) %>% select("esz_int", "int_mu", "int_sigma",
-                                              "int_skew", "int_k", "int_r", "sigma_mu",
-                                              "skew_mu", "k_mu")
-int_lrg <- dat %>% filter(n == 313) %>% select("esz_int", "int_mu", "int_sigma",
-                                              "int_skew", "int_k", "int_r", "sigma_mu",
-                                              "skew_mu", "k_mu")
-## compute the density function over each set of effect sizes, and get the 
-# probability of each value
-pairs(me_sml)
-pairs(me_lrg)
-
-pairs(int_sml)
-pairs(int_lrg)
-
-
-with(me_sml, summary(lm(esz_ME ~ ME_mu + ME_sigma + ME_skew + ME_k + ME_r + sigma_mu + skew_mu + k_mu)))
-with(me_lrg, summary(lm(esz_ME ~  ME_mu + ME_sigma + ME_skew + ME_k + ME_r + sigma_mu + skew_mu + k_mu)))
-with(int_sml, summary(lm(esz_int ~ int_mu + int_sigma + int_skew + int_k + int_r + sigma_mu + skew_mu + k_mu)))
-with(int_lrg, summary(lm(esz_int ~ int_mu + int_sigma + int_skew + int_k + int_r + sigma_mu + skew_mu + k_mu)))
-
-
-# 
-# with(sml, summary(lm(AB.sigma ~ AB.skew + AB.k + AB.r + sigma_mu + skew_mu + k_mu)))
-# with(lrg, summary(lm(AB.mu ~ AB.skew + AB.k + AB.r + sigma_mu + skew_mu + k_mu)))
-# with(lrg, summary(lm(AB.sigma ~ AB.skew + AB.k + AB.r + sigma_mu + skew_mu + k_mu)))
