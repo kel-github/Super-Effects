@@ -84,6 +84,12 @@ dat[["SRT"]]$esz_dist <- dat[["SRT"]]$esz - mu
 # a stepwise linear regression to get vif and residuals
 #############################################################
 # AB
+
+#############################################################
+# Things I can say so far:
+# for all tasks, skew, kurtosis, correlation between 
+# variables and subject variability predicted error in effect 
+# size estimates
 #############################################################
 AB_model <- do_stp_n_prs(df = dat[["AB"]] %>% filter(n == tstN) %>%
                                      select(esz_dist, AB.skew,
@@ -116,6 +122,7 @@ summary(AB_model[[2]])
 # Residual standard error: 0.02954 on 995 degrees of freedom
 # Multiple R-squared:  0.7725,	Adjusted R-squared:  0.7716
 # F-statistic: 844.5 on 4 and 995 DF,  p-value: < 2.2e-16
+#
 
 #############################################################
 # SRT
@@ -166,7 +173,7 @@ SRT_model[[1]]
 # 2.605319   2.354499   1.823450   1.706594   1.352451 # did w AB and much of a much
 summary(SRT_model[[2]])
 # Coefficients:
-#   Estimate Std. Error t value Pr(>|t|)    
+#                 Estimate Std. Error t value Pr(>|t|)    
 # (Intercept) -4.68609    0.23587 -19.867  < 2e-16 ***
 #   SRT.skew    -0.07786    0.02580  -3.017  0.00261 ** 
 #   SRT.k_t     -0.08978    0.04310  -2.083  0.03751 *  
@@ -178,7 +185,21 @@ summary(SRT_model[[2]])
 # Residual standard error: 0.3468 on 995 degrees of freedom
 # Multiple R-squared:  0.3415,	Adjusted R-squared:  0.3389 
 # F-statistic:   129 on 4 and 995 DF,  p-value: < 2.2e-16
-
+# SRT - if the distribution of participant effects is 
+# more left skewed, you're more likely to overestimate effect
+# size (Pearson's coefficient skewness = -ve therefore more left,
+# more error) - power relationship, the more N, the more
+# negative this relationship becomes
+# kurtosis: log kurtosis - the lower the kurtosis value
+# the more likely an inflated effect size estimates (I
+# guess less unlikely obs to affect things? this appears
+# to switch as you increase N
+# the more correlated the 2 measures, the more likely you
+# are to over-estimate the effect, N doesn't change this
+# sigma - clear negative relationship - the more variability,
+# the more likely you are to underestimate the effect
+# this negative relationship becomes stronger with more N
+# - suggesting that this is a main limiting factor?
 #############################################################
 # SD
 #############################################################
@@ -230,6 +251,11 @@ summary(SD_ME_mod[[2]])
 # Residual standard error: 0.02838 on 995 degrees of freedom
 # Multiple R-squared:  0.1398,	Adjusted R-squared:  0.1363 
 # F-statistic: 40.42 on 4 and 995 DF,  p-value: < 2.2e-16
+# again, left skew means over estimates - same as SRT
+# this time, more kurtosis means more inf estimates - diff to SRT
+# more correlation = more over estimate same as SRT
+# **more var, more over estimate but barely** opposite to SRT
+# however, the impact of correlated measures reduces
 ############################################################
 # SD INT
 ############################################################
@@ -274,9 +300,8 @@ summary(SD_int_mod[[2]])
 # Residual standard error: 0.8502 on 995 degrees of freedom
 # Multiple R-squared:  0.1158,	Adjusted R-squared:  0.1123 
 # F-statistic: 32.58 on 4 and 995 DF,  p-value: < 2.2e-16
-
-
-### result is that for all tasks, skew, kurtosis, correlation, and sigma_mu
-### predict error in effect size estimate
-### now I need to implement each process for each task and each N,
-### collecting the models in a list
+# right skew means over estimates - diff to SRT and SD ME
+# more kurtosis means more inf estimates - diff to SRT
+# more correlation = more over estimate same as SRT
+# higher sub variance = undershoot on effect size estimate, same as SRT
+# most consistently, 
