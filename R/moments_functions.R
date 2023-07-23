@@ -42,9 +42,14 @@ unzp_fx_n_spew <- function(datpath, task, zipnm, fnm){
   # each one, open, and add to dataframe
   # output the key variables from the 
   # dataframe
-  f <- unzip(paste(datpath, task, zipnm, sep="/"), 
-             file=fnm,
-             exdir=paste(datpath, task, sep="/"))
+  
+  if (file.exists(paste(datpath, task, fnm, sep="/"))){
+    f <- paste(datpath, task, fnm, sep="/")
+   } else {
+    f <- unzip(paste(datpath, task, zipnm, sep="/"), 
+               file=fnm,
+               exdir=paste(datpath, task, sep="/"))
+   }
   load(f)
   row_idx <- !is.na(out$p)
   out <- out[row_idx, ]
@@ -55,8 +60,6 @@ unzp_fx_n_spew <- function(datpath, task, zipnm, fnm){
   parent <- as.numeric(strsplit(nustr, split="R")[[1]][1])
   out$parent <- parent
   
-  # will need to pivot wider here for tasks with 2 fx
-  
   # output
   out %>% select(n, p, esz, mod, parent)
 }
@@ -66,9 +69,13 @@ unzp_mu_stats_n_spew <- function(datpath, task, zipnm, fnm){
   # each one, open, and add to dataframe
   # output the key variables from the 
   # dataframe
-  f <- unzip(paste(datpath, task, zipnm, sep="/"), 
-             file=fnm,
-             exdir=paste(datpath, task, sep="/"))
+  if (file.exists(paste(datpath, task, fnm, sep="/"))){
+    f <- paste(datpath, task, fnm, sep="/")
+  } else {
+    f <- unzip(paste(datpath, task, zipnm, sep="/"), 
+               file=fnm,
+               exdir=paste(datpath, task, sep="/"))
+  }
   load(f)
   
   if (task == "AB" | task == "SRT") {
@@ -79,8 +86,6 @@ unzp_mu_stats_n_spew <- function(datpath, task, zipnm, fnm){
                         "int_mu", "int_sigma", "int_skew", "int_k", "int_r",
                         "sigma_mu", "skew_mu", "k_mu")
   } 
-  # now get parent number
-  
   # add parent #
   pN <- strsplit(fnm, split = "-")
   pNidx <- !is.na(sapply(pN, str_extract, pattern = "_diststats"))
