@@ -21,8 +21,14 @@ get_dat_4corrs <- function(datpath, task, zipnm, N){
   fx_dat <- do.call(rbind, lapply(fnms, unzp_fx_n_spew, datpath=datpath, task=task, zipnm=zipnm))
   # and reshape/relabel it if it has 2 effects in it
   if(task == "SD"){
+    
     fx_dat$mod[fx_dat$mod == "RM-AN"] = "ME"
     fx_dat$mod[fx_dat$mod == "LME"] = "int"
+    fx_dat <- fx_dat %>% pivot_wider(id_expand = FALSE, names_from = mod, values_from = c(esz, p))
+  } else if(task == "CC"){
+    
+    fx_dat$mod[fx_dat$mod == "RM-AN"] = "int"
+    fx_dat$mod[fx_dat$mod == "LME"] = "ME"
     fx_dat <- fx_dat %>% pivot_wider(id_expand = FALSE, names_from = mod, values_from = c(esz, p))
   }
   # and the mu diff and var stats
@@ -80,12 +86,13 @@ unzp_mu_stats_n_spew <- function(datpath, task, zipnm, fnm){
   
   if (task == "AB" | task == "SRT") {
     dst_dat <- cbind(dist_out[[1]][1], dist_out[[2]])
-  } else if (task == "SD"){
+  } else if (task == "SD" | task == "CC"){
     dst_dat <- cbind(dist_out[[1]]$ME, dist_out[[1]]$int, dist_out[[2]])
     names(dst_dat) <- c("ME_mu", "ME_sigma", "ME_skew", "ME_k", "ME_r",
                         "int_mu", "int_sigma", "int_skew", "int_k", "int_r",
                         "sigma_mu", "skew_mu", "k_mu")
   } 
+  
   # add parent #
   pN <- strsplit(fnm, split = "-")
   pNidx <- !is.na(sapply(pN, str_extract, pattern = "_diststats"))

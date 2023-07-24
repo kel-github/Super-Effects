@@ -18,6 +18,7 @@ library(stringr)
 library(car)
 library(GGally)
 library(Hmisc)
+library(lme4)
 source("efilids_functions.R") # custom functions written for this project
 source("moments_functions.R")
 source("R_rainclouds.R") # functions for plotting
@@ -29,11 +30,11 @@ source("R_rainclouds.R") # functions for plotting
 not_new <- T
 # define sub Ns
 datpath <- "../data"
-tasks <- c("SD", "AB", "SRT")
-zipnms <- c("SD_wv.zip", "EPSAB_wv.zip", "SRT_wv.zip")
+tasks <- c("SD", "AB", "SRT", "CC")
+zipnms <- c("SD_wv.zip", "EPSAB_wv.zip", "SRT_wv.zip", "CC_wv.zip")
 sub.Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
 maxN = 313
-Ns <- list(c(42, 313), c(25, 313), c(36, 313)) 
+Ns <- list(c(42, 313), c(25, 313), c(36, 313), c(25, 313)) 
 
 # first get a list, where each element is the data from one task
 if (!not_new){ 
@@ -77,6 +78,15 @@ mu
 # now compute the distance of each value of the fx size
 dat[["SRT"]]$esz_dist <- dat[["SRT"]]$esz - mu
 
+##############################################################
+# SD
+##############################################################
+mu <- get_ev_non_norm(dat[["CC"]]$esz_ME[dat[["CC"]]$n == maxN])
+# now compute the distance of each value of the fx size
+dat[["CC"]]$esz_ME_dist <- dat[["CC"]]$esz_ME - mu
+# now do the interaction effect
+mu <- get_ev_non_norm(dat[["CC"]]$esz_int[dat[["CC"]]$n == maxN])
+dat[["CC"]]$esz_int_dist <- dat[["CC"]]$esz_int - mu
 
 #############################################################
 # per task, perform 1)
@@ -123,11 +133,11 @@ summary(AB_model[[2]])
 # Multiple R-squared:  0.3436,	Adjusted R-squared:  0.3409 
 # F-statistic: 130.2 on 4 and 995 DF,  p-value: < 2.2e-16
 #### now get standardised residuals for winning model
-tmp = dat[["AB"]] %>% filter(n == tstN) %>%
+AB_df = dat[["AB"]] %>% filter(n == tstN) %>%
                         select(esz_dist, AB.skew,
                         AB.k, sigma_mu, k_mu)
 summary(lm(scale(esz_dist) ~ scale(AB.skew) + scale(AB.k) + scale(sigma_mu) +
-                         scale(k_mu), data=tmp))
+                         scale(k_mu), data=AB_df))
 # Coefficients:
 #   Estimate Std. Error t value Pr(>|t|)    
 # (Intercept)      2.539e-17  2.567e-02   0.000        1    
@@ -310,7 +320,7 @@ SD_ME_grp_df <- dat[["SD"]] %>% select(esz_ME_dist, n, ME_skew,
 SD_ME_grp_int <- lm(esz_ME_dist ~ ME_skew + ME_k_t + ME_skew*n + ME_k_t*n,
                     data = SD_ME_grp_df)
 plot(SD_ME_grp_int, which=1)
-# summary(SD_ME_grp_int)
+summary(SD_ME_grp_int)
 # Call:
 #   lm(formula = esz_ME_dist ~ ME_skew + ME_k_t + ME_skew * n + ME_k_t * 
 #        n, data = SD_ME_grp_df)
@@ -356,7 +366,7 @@ SD_int_mod <- do_stp_n_prs(df = SD_int_mod_df,
 SD_int_mod[[1]]
 # int_skew  int_k_t    int_r sigma_mu   k_mu_t 
 # 1.205284 1.231812 1.028055 1.107811 1.112723 
-# summary(SD_int_mod[[2]])
+summary(SD_int_mod[[2]])
 # Call:
 #   lm(formula = esz_int_dist_t ~ int_skew + int_k_t + sigma_mu + 
 #        k_mu_t, data = df)
@@ -430,3 +440,183 @@ summary(SD_int_grp_int)
 # Residual standard error: 0.5822 on 1990 degrees of freedom
 # Multiple R-squared:  0.1353,	Adjusted R-squared:  0.1314 
 # F-statistic: 34.59 on 9 and 1990 DF,  p-value: < 2.2e-16
+
+
+#############################################################
+# CC
+#############################################################
+# first look at data for ME and int effects, transform variables
+# to make them behave well
+############################################################
+# CC ME
+############################################################
+tstN <- 25
+CC_ME_df <- dat[["CC"]] %>% filter(n == tstN) %>%
+                select(esz_ME_dist, ME_skew,
+                ME_k, sigma_mu, k_mu)
+ggpairs(CC_ME_df) # ME_k, sigma_mu & k_mu are most
+# skewed, gonna start by transforming those
+apply(CC_ME_df, 2, min)
+x = 0.01 - min(CC_ME_df$ME_k) 
+CC_ME_df <- CC_ME_df %>% mutate(ME_k_t = log(ME_k + x),
+                                sigma_mu_t = (sigma_mu),
+                                k_mu_t = log(k_mu)) %>%
+                         select(esz_ME_dist, ME_skew, ME_k_t, sigma_mu_t,
+                                k_mu_t)
+CC_ME_mod <- do_stp_n_prs(df = CC_ME_df,
+                           dv = "esz_ME_dist",
+                           task = "CC",
+                           prs_fnm = "CC_ME",
+                           rsd_fm = "CC_ME")
+CC_ME_mod[[1]]
+summary(CC_ME_mod[[2]])
+# Call:
+#   lm(formula = esz_ME_dist ~ ME_k_t + sigma_mu_t, data = df)
+# 
+# Residuals:
+#   Min        1Q    Median        3Q       Max 
+# -0.176729 -0.049252 -0.003272  0.048129  0.258072 
+# 
+# Coefficients:
+#   Estimate Std. Error t value Pr(>|t|)    
+# (Intercept) -0.518038   0.038638 -13.407   <2e-16 ***
+#   ME_k_t      -0.004128   0.002797  -1.476     0.14    
+# sigma_mu_t  -0.297726   0.021229 -14.024   <2e-16 ***
+#   ---
+#   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+# 
+# Residual standard error: 0.06854 on 997 degrees of freedom
+# Multiple R-squared:  0.1683,	Adjusted R-squared:  0.1666 
+# F-statistic: 100.8 on 2 and 997 DF,  p-value: < 2.2e-16
+
+summary(lm(scale(esz_ME_dist) ~ scale(ME_k_t) + scale(sigma_mu_t), data = CC_ME_df))
+# Coefficients:
+#   Estimate Std. Error t value Pr(>|t|)    
+# (Intercept)        3.261e-16  2.887e-02   0.000     1.00    
+# scale(ME_k_t)     -4.268e-02  2.893e-02  -1.476     0.14    
+# scale(sigma_mu_t) -4.057e-01  2.893e-02 -14.024   <2e-16 ***
+
+# now do group comparison
+CC_ME_grp_df <- dat[["CC"]] %>% select(esz_ME_dist, n, ME_k,
+                                       sigma_mu) %>% 
+                                mutate(ME_k_t = log(ME_k + x),
+                                       sigma_mu_t = log(sigma_mu)) %>%
+                               select(esz_ME_dist, n, ME_k_t, sigma_mu_t)
+CC_ME_grp_int <- lm(esz_ME_dist ~ ME_k_t + sigma_mu_t + ME_k_t*n + sigma_mu_t*n,
+                                data = CC_ME_grp_df) 
+plot(CC_ME_grp_int, which=1)
+summary(CC_ME_grp_int)
+# Estimate Std. Error t value Pr(>|t|)   # no effect of N 
+# (Intercept)  -5.136e-01  3.266e-02 -15.725   <2e-16 ***
+#   ME_k_t       -4.290e-03  2.394e-03  -1.792   0.0733 .  
+# sigma_mu_t   -2.961e-01  1.795e-02 -16.500   <2e-16 ***
+#   n            -1.774e-04  2.605e-04  -0.681   0.4960    
+# ME_k_t:n      6.478e-06  2.401e-05   0.270   0.7873    
+# sigma_mu_t:n -6.463e-05  1.431e-04  -0.452   0.6516 
+
+###############################################################################
+## CC Int
+##############################################################################
+CC_int_df <- dat[["CC"]] %>% filter(n == tstN) %>%
+                select(esz_int_dist, int_skew,
+                       int_k, sigma_mu, k_mu)
+ggpairs(CC_int_df) # esz_int_dist, int_k, sigma_mu & k_mu are most
+# skewed, gonna transform those
+apply(CC_int_df, 2, min)
+x = 0.01 - min(CC_int_df$esz_int_dist)
+CC_int_df <- CC_int_df %>% mutate(esz_int_dist_t = log(esz_int_dist + x),
+                                  int_k_t = log(int_k),
+                                  sigma_mu_t = log(sigma_mu),
+                                  k_mu_t = log(k_mu)) %>%
+                  select(esz_int_dist_t, int_skew, int_k_t, sigma_mu_t,
+                          k_mu_t)
+CC_int_mod <- do_stp_n_prs(df = CC_int_df,
+                           dv = "esz_int_dist_t",
+                           task = "CC",
+                           prs_fnm = "CC_int",
+                           rsd_fm = "CC_int")
+CC_int_mod[[1]]
+# int_skew    int_k_t sigma_mu_t     k_mu_t 
+# 1.023736   1.029640   1.021255   1.024896 
+summary(CC_int_mod[[2]])
+# Call:
+#   lm(formula = esz_int_dist ~ sigma_mu_t, data = df)
+# 
+# Residuals:
+#   Min       1Q   Median       3Q      Max 
+# -1.79740 -0.28199  0.00887  0.31224  1.29070 
+# 
+# Coefficients:
+#   Estimate Std. Error t value Pr(>|t|)    
+# (Intercept)  -2.2533     0.2555  -8.819   <2e-16 ***
+#   sigma_mu_t    0.3052     0.1407   2.169   0.0303 *  
+#   ---
+#   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+# 
+# Residual standard error: 0.455 on 998 degrees of freedom
+# Multiple R-squared:  0.004691,	Adjusted R-squared:  0.003693 
+# F-statistic: 4.703 on 1 and 998 DF,  p-value: 0.03034
+# get st dev
+summary(lm(scale(esz_int_dist_t) ~ scale(sigma_mu_t), data = CC_int_df))
+# Coefficients:
+#   Estimate Std. Error t value Pr(>|t|)  
+# (Intercept)       4.709e-17  3.156e-02   0.000   1.0000  
+# scale(sigma_mu_t) 6.849e-02  3.158e-02   2.169   0.0303 *
+
+# now do group comparison
+CC_int_grp_df <- dat[["CC"]] %>% select(esz_int_dist, n, sigma_mu) %>%
+                                  mutate(esz_int_dist_t = log(esz_int_dist + x),
+                                         sigma_mu_t = log(sigma_mu))
+CC_int_grp_int <- lm(esz_int_dist_t ~ sigma_mu_t + sigma_mu_t*n,
+                    data = CC_int_grp_df) 
+plot(CC_int_grp_int, which=1)
+summary(CC_int_grp_int) # no effect of N
+
+###############################################################################
+#### NOW OMNIBUS MODEL
+##############################################################################
+om_names <- c("esz_dist", "skew", "k", "sigma_mu", "k_mu", "fx")
+ABom <- dat[["AB"]] %>% filter(n == 25) %>% select(esz_dist, AB.skew, AB.k, sigma_mu, 
+                                           k_mu) %>%
+                                    mutate(sigma_mu = sqrt(sigma_mu),
+                                           fx = "AB")
+names(ABom) <- om_names
+
+SRTom <-  dat[["SRT"]] %>% filter(n == 36) %>% select(esz_dist, SRT.skew,
+                                          SRT.k, sigma_mu, k_mu) %>%
+                                    mutate(sigma_mu = sqrt(sigma_mu),
+                                           fx = "SRT")
+names(SRTom) <- om_names
+
+SDMEom <- dat[["SD"]] %>% filter(n == 42) %>% select(esz_ME_dist, ME_skew,
+                                                    ME_k, sigma_mu, k_mu) %>%
+                                    mutate(sigma_mu = sqrt(sigma_mu),
+                                          fx = "SDME")
+names(SDMEom) <- om_names
+
+SDintom <- dat[["SD"]] %>% filter(n == 42) %>% select(esz_int_dist, int_skew,
+                                                     int_k, sigma_mu, k_mu) %>%
+                                   mutate(sigma_mu = sqrt(sigma_mu),
+                                          fx = "SDint")
+names(SDintom) <- om_names
+
+CCMEom <- dat[["CC"]] %>% filter(n == 25) %>% select(esz_ME_dist, ME_skew,
+                                                     ME_k, sigma_mu, k_mu) %>%
+                                    mutate(sigma_mu = sqrt(sigma_mu),
+                                          fx = "CCME")
+names(CCMEom) <- om_names
+
+CCintom <- dat[["CC"]] %>% filter(n == 25) %>% select(esz_int_dist, int_skew,
+                                                      int_k, sigma_mu, k_mu) %>%
+                                                mutate(sigma_mu = sqrt(sigma_mu),
+                                                fx = "CCint")
+names(CCintom) <- om_names
+
+omdat <- do.call(rbind, list(SRTom, SDMEom, SDintom, CCMEom, CCintom))
+ggpairs(omdat)
+om_mod <- lm( esz_dist ~ skew + k + sigma_mu + k_mu + fx + skew:fx + 
+                            k:fx + sigma_mu:fx + k_mu:fx, data=omdat )                 
+plot(om_mod, which=1)
+summary(om_mod)
+
+### now write up what you have!
