@@ -1,11 +1,11 @@
 #########################################################################
 # plot fx size/p vs dist measures
 # K. Garner 
-# for the supfx project, plot (1) the probability of the effect size observation
-# vs the distributional stats for that observation (e.g. mu, skew and 
-# kurtosis of Xdiff) (2) the probability of the effect size observation and the 
-# individual distributional stats (mean var, skew and kurtosis across participants
-# in that sample)
+# for the supfx project, can we predict error in effect size estimates
+# using higher order moment data
+# note: If skewness is less than -1 or greater than 1, the distribution is highly skewed. 
+# If skewness is between -1 and -0.5 or between 0.5 and 1, the distribution is moderately skewed. 
+# If skewness is between -0.5 and 0.5, the distribution is approximately symmetric
 
 rm(list=ls())
 
@@ -109,15 +109,6 @@ AB_model <- train(esz_dist ~ AB.skew + AB.k + sigma_mu + skew_mu + k_mu,
 AB_model
 AB_model$finalModel
 
-
-AB_model <- do_stp_n_prs(df = dat[["AB"]] %>% filter(n == tstN) %>%
-                                     select(esz_dist, AB.skew,
-                                            AB.k, sigma_mu, k_mu),
-                              dv = "esz_dist",
-                              task = "AB",
-                              prs_fnm = "AB",
-                              rsd_fm = "AB_init")
-
 # now take the model and add group interaction terms
 AB_dat <- dat[["AB"]]
 AB_grp_int <- lm(esz_dist ~ AB.skew + AB.k + sigma_mu + k_mu +
@@ -126,6 +117,34 @@ AB_grp_int <- lm(esz_dist ~ AB.skew + AB.k + sigma_mu + k_mu +
 plot(AB_grp_int, which=1)
 summary(AB_grp_int)
 
+### now compute tthe correlation between effect size error
+# and skew
+AB_skew_cor <- lm(esz_dist ~ AB.skew, data = dat[["AB"]] %>% filter(n == tstN))
+summary(AB_skew_cor)
+
+# and kurtosis
+AB_k_cor <- lm(esz_dist ~ AB.k, data = dat[["AB"]] %>% filter(n == tstN))
+summary(AB_k_cor)
+
+# now predict danger for skew
+# the effect size for N=313
+AB_95 <- quantile(dat[["AB"]]$esz_dist[dat[["AB"]]$n == 313], c(.025, .975))
+AB_95 # this gives the y-values
+
+# the prediction is 
+# pred_y = int + beta*X
+# beta*X = pred_y - int
+# X = (pred_y - int)/beta
+ABX <- (AB_95 - AB_skew_cor$coefficients["(Intercept)"]) / 
+               AB_skew_cor$coefficients["AB.skew"]
+
+# now compute the standard error pf the estimate
+# sy.x = sy*sqrt(1-r^2)
+ABX_SE <- sd(dat[["AB"]]$esz_dist[dat[["AB"]]$n == tstN])*sqrt(1-0.09572)
+
+AB_pred_list <- list(full=full_model, cv=AB_model, grp=AB_grp_int, 
+                     skew=AB_skew_cor, k=AB_k_cor,
+                     X=ABX, SE=ABX_SE)
 #############################################################
 # SRT
 #############################################################
@@ -169,7 +188,6 @@ SRT_grp_df <- dat[["SRT"]] %>%
               SRT.k, sigma_mu, skew_mu, k_mu)
 apply(SRT_grp_df %>% select(SRT.k, sigma_mu, skew_mu, k_mu), 2, min) # all +ve 
 # first make all the values positive and log transform
-x = 0.01 - min(SRT_df$esz_dist)
 SRT_grp_df <- SRT_grp_df %>% mutate(esz_dist_t = log(esz_dist + x),
                                     SRT.k_t = log(SRT.k), # same
                                     sigma_mu_t = log(sigma_mu), # same
@@ -180,6 +198,37 @@ SRT_grp_int <- lm(esz_dist ~ SRT.skew + SRT.k_t + sigma_mu_t + k_mu_t +
                                         k_mu_t*n ,
                          data = SRT_grp_df) 
 summary(SRT_grp_int)
+
+### now compute tthe correlation between effect size error
+# and skew
+SRT_skew_cor <- lm(esz_dist_t ~ SRT.skew, data = SRT_df)
+summary(SRT_skew_cor)
+
+# and kurtosis
+SRT_k_cor <- lm(esz_dist_t ~ SRT.k_t, data = SRT_df)
+summary(SRT_k_cor)
+
+# now predict danger for skew
+# the effect size for N=313
+SRT_95 <- log(quantile(dat[["SRT"]]$esz_dist[dat[["SRT"]]$n == 313], c(.025, .975)) + x)
+# now SRT quantiles are on the same scale as the regression model
+SRT_95 # this gives the y-values
+
+# the prediction is 
+# pred_y = int + beta*X
+# beta*X = pred_y - int
+# X = (pred_y - int)/beta
+SRTX <- (SRT_95 - SRT_skew_cor$coefficients["(Intercept)"]) / 
+              SRT_skew_cor$coefficients["SRT.skew"]
+
+# now compute the standard error pf the estimate
+# sy.x = sy*sqrt(1-r^2)
+SRTX_SE <- sd(log(dat[["SRT"]]$esz_dist[dat[["SRT"]]$n == tstN]+x))*sqrt(1-0.04297) # make sure you've changed R^2
+
+SRT_pred_list <- list(full=SRT_full_model, cv=SRT_model, grp=SRT_grp_int,
+                      skew=SRT_skew_cor, k=SRT_k_cor,
+                      X=SRTX, SE=SRTX_SE)
+
 #############################################################
 # SD
 #############################################################
@@ -228,6 +277,36 @@ SD_ME_grp_int <- lm(esz_ME_dist ~ ME_skew + ME_k_t + sigma_mu + skew_mu + k_mu +
 plot(SD_ME_grp_int, which=1)
 summary(SD_ME_grp_int)
 
+### now compute tthe correlation between effect size error
+# and skew
+SD_ME_skew_cor <- lm(esz_ME_dist ~ ME_skew, data = SD_ME_mod_df)
+summary(SD_ME_skew_cor)
+
+# and kurtosis
+SD_ME_k_cor <- lm(esz_ME_dist ~ ME_k_t, data = SD_ME_mod_df)
+summary(SD_ME_k_cor)
+
+# now predict danger for skew
+# the effect size for N=313
+SD_ME_95 <- quantile(dat[["SD"]]$esz_ME_dist[dat[["SD"]]$n == 313], c(.025, .975))
+# now SRT quantiles are on the same scale as the regression model
+SD_ME_95 # this gives the y-values
+
+# the prediction is 
+# pred_y = int + beta*X
+# beta*X = pred_y - int
+# X = (pred_y - int)/beta
+SD_ME_X <- (SD_ME_95 - SD_ME_skew_cor$coefficients["(Intercept)"]) / 
+  SD_ME_skew_cor$coefficients["ME_skew"]
+
+# now compute the standard error pf the estimate
+# sy.x = sy*sqrt(1-r^2)
+SD_ME_SE <- sd(dat[["SD"]]$esz_ME_dist[dat[["SD"]]$n != 313])*sqrt(1-0.04726)
+
+SD_ME_pred_list <- list(full=SD_ME_full_model, cv=SD_ME_model, grp=SD_ME_grp_int,
+                        skew=SD_ME_skew_cor, k=SD_ME_k_cor, 
+                        X=SD_ME_X, SE=SD_ME_SE)
+
 ############################################################
 # SD INT
 ############################################################
@@ -269,6 +348,18 @@ SD_int_grp_int <- lm(esz_int_dist_t ~ int_skew + int_k_t + sigma_mu + skew_mu +
                                     k_mu_t*n, data=SD_int_grp_df)
 plot(SD_int_grp_int, which=1)
 summary(SD_int_grp_int)
+
+### now compute tthe correlation between effect size error
+# and skew
+SD_int_skew_cor <- lm(esz_int_dist_t ~ int_skew, data = SD_int_mod_df)
+summary(SD_int_skew_cor)
+
+# and kurtosis
+SD_int_k_cor <- lm(esz_int_dist_t ~ int_k_t, data = SD_int_mod_df)
+summary(SD_ME_k_cor)
+
+SD_int_pred_list <- list(full=SD_int_full_model, cv=SD_int_model, grp=SD_int_grp_int,
+                          skew=SD_int_skew_cor, k=SD_int_k_cor)
 
 #############################################################
 # CC
@@ -320,6 +411,9 @@ CC_ME_grp_int <- lm(esz_ME_dist ~ ME_skew + ME_k_t + sigma_mu_t + skew_mu +
 plot(CC_ME_grp_int, which=1)
 summary(CC_ME_grp_int)
 
+CC_ME_pred_list <- list(full=CC_ME_mod_full, cv=CC_ME_mod, grp=CC_ME_grp_int)
+
+
 ###############################################################################
 ## CC Int
 ##############################################################################
@@ -363,3 +457,12 @@ CC_int_grp_int <- lm(esz_int_dist_t ~ int_skew + int_k_t + sigma_mu_t + skew_mu 
                     data = CC_int_grp_df) 
 plot(CC_int_grp_int, which=1)
 summary(CC_int_grp_int) # no effect of N
+
+CC_int_pred_list <- list(full=CC_int_mod_full, cv=CC_int_mod, grp=CC_int_grp_int)
+##############################################################################
+# save a list for the manuscript
+predictions_all_tasks <- list(AB_pred_list, SRT_pred_list, SD_ME_pred_list,
+                              SD_int_pred_list, CC_ME_pred_list, 
+                              CC_int_pred_list)
+names(predictions_all_tasks) <- c("AB", "SRT", "SD_ME", "SD_int", "CC_ME", "CC_int")
+save(predictions_all_tasks, file="../data/predicted_error_by_task.RData")
