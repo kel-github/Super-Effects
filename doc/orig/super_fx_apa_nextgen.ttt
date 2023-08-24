@@ -1,0 +1,16 @@
+\begin{longtable}[]{@{}lcc@{}}
+\caption{\label{tab:survey}Typical N found from literature survey. n exp = number or experiments, med N = median N}\tabularnewline
+\toprule()
+task & n exp & med N \\
+\midrule()
+\endfirsthead
+\toprule()
+task & n exp & med N \\
+\midrule()
+\endhead
+AB & 60 & 24 \\
+MT & 60 & 40 \\
+CC & 49 & 24 \\
+SRT & 60 & 34 \\
+\bottomrule()
+\end{longtable}
