@@ -126,6 +126,9 @@ summary(AB_skew_cor)
 AB_k_cor <- lm(esz_dist ~ AB.k, data = dat[["AB"]] %>% filter(n == tstN))
 summary(AB_k_cor)
 
+# and within participant skew
+AB_musku <- lm(esz_dist ~ skew_mu, data = dat[["AB"]] %>% filter(n == tstN))
+
 # now predict danger for skew
 # the effect size for N=313
 AB_95 <- quantile(dat[["AB"]]$esz_dist[dat[["AB"]]$n == 313], c(.025, .975))
@@ -141,6 +144,11 @@ ABX <- (AB_95 - AB_skew_cor$coefficients["(Intercept)"]) /
 # now compute the standard error pf the estimate
 # sy.x = sy*sqrt(1-r^2)
 ABX_SE <- sd(dat[["AB"]]$esz_dist[dat[["AB"]]$n == tstN])*sqrt(1-0.09572)
+
+ABmuskewX <- (AB_95 - AB_musku$coefficients["(Intercept)"]) /
+                       AB_musku$coefficients["skew_mu"]
+
+ABmuskewX_SE <- sd(dat[["AB"]]$esz_dist[dat[["AB"]]$n == tstN])*sqrt(1-0.1822)
 
 AB_pred_list <- list(full=full_model, cv=AB_model, grp=AB_grp_int, 
                      skew=AB_skew_cor, k=AB_k_cor,
@@ -207,6 +215,8 @@ summary(SRT_skew_cor)
 # and kurtosis
 SRT_k_cor <- lm(esz_dist_t ~ SRT.k_t, data = SRT_df)
 summary(SRT_k_cor)
+
+SRT_mu_skew <- lm(esz_dist_t ~ skew_mu_t, data = SRT_df)
 
 # now predict danger for skew
 # the effect size for N=313
@@ -286,6 +296,9 @@ summary(SD_ME_skew_cor)
 SD_ME_k_cor <- lm(esz_ME_dist ~ ME_k_t, data = SD_ME_mod_df)
 summary(SD_ME_k_cor)
 
+SD_mu_skew <- lm(esz_ME_dist ~ skew_mu, data = SD_ME_mod_df)
+summary(SD_mu_skew)
+
 # now predict danger for skew
 # the effect size for N=313
 SD_ME_95 <- quantile(dat[["SD"]]$esz_ME_dist[dat[["SD"]]$n == 313], c(.025, .975))
@@ -358,6 +371,9 @@ summary(SD_int_skew_cor)
 SD_int_k_cor <- lm(esz_int_dist_t ~ int_k_t, data = SD_int_mod_df)
 summary(SD_ME_k_cor)
 
+SD_int_mu_skew <- lm(esz_int_dist_t ~ skew_mu, data = SD_int_mod_df)
+summary(SD_int_mu_skew)
+
 SD_int_pred_list <- list(full=SD_int_full_model, cv=SD_int_model, grp=SD_int_grp_int,
                           skew=SD_int_skew_cor, k=SD_int_k_cor)
 
@@ -411,6 +427,10 @@ CC_ME_grp_int <- lm(esz_ME_dist ~ ME_skew + ME_k_t + sigma_mu_t + skew_mu +
 plot(CC_ME_grp_int, which=1)
 summary(CC_ME_grp_int)
 
+#### 16%
+CC_ME_mu_skew <- lm(esz_ME_dist ~ sigma_mu_t, data = CC_ME_df)
+summary(CC_ME_mu_skew)
+
 CC_ME_pred_list <- list(full=CC_ME_mod_full, cv=CC_ME_mod, grp=CC_ME_grp_int)
 
 
@@ -457,6 +477,10 @@ CC_int_grp_int <- lm(esz_int_dist_t ~ int_skew + int_k_t + sigma_mu_t + skew_mu 
                     data = CC_int_grp_df) 
 plot(CC_int_grp_int, which=1)
 summary(CC_int_grp_int) # no effect of N
+
+# .004
+CC_int_mu_skew <- lm(esz_int_dist_t ~ sigma_mu_t, data = CC_int_df)
+summary(CC_int_mu_skew)
 
 CC_int_pred_list <- list(full=CC_int_mod_full, cv=CC_int_mod, grp=CC_int_grp_int)
 ##############################################################################
