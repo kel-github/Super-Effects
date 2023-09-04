@@ -151,7 +151,7 @@ ABmuskewX <- (AB_95 - AB_musku$coefficients["(Intercept)"]) /
 ABmuskewX_SE <- sd(dat[["AB"]]$esz_dist[dat[["AB"]]$n == tstN])*sqrt(1-0.1822)
 
 AB_pred_list <- list(full=full_model, cv=AB_model, grp=AB_grp_int, 
-                     skew=AB_skew_cor, k=AB_k_cor,
+                     skew=AB_skew_cor, k=AB_k_cor, mu_skew=AB_musku,
                      X=ABX, SE=ABX_SE)
 #############################################################
 # SRT
@@ -236,7 +236,7 @@ SRTX <- (SRT_95 - SRT_skew_cor$coefficients["(Intercept)"]) /
 SRTX_SE <- sd(log(dat[["SRT"]]$esz_dist[dat[["SRT"]]$n == tstN]+x))*sqrt(1-0.04297) # make sure you've changed R^2
 
 SRT_pred_list <- list(full=SRT_full_model, cv=SRT_model, grp=SRT_grp_int,
-                      skew=SRT_skew_cor, k=SRT_k_cor,
+                      skew=SRT_skew_cor, k=SRT_k_cor, mu_skew=SRT_mu_skew,
                       X=SRTX, SE=SRTX_SE)
 
 #############################################################
@@ -317,7 +317,7 @@ SD_ME_X <- (SD_ME_95 - SD_ME_skew_cor$coefficients["(Intercept)"]) /
 SD_ME_SE <- sd(dat[["SD"]]$esz_ME_dist[dat[["SD"]]$n != 313])*sqrt(1-0.04726)
 
 SD_ME_pred_list <- list(full=SD_ME_full_model, cv=SD_ME_model, grp=SD_ME_grp_int,
-                        skew=SD_ME_skew_cor, k=SD_ME_k_cor, 
+                        skew=SD_ME_skew_cor, k=SD_ME_k_cor, mu_skew=SD_mu_skew,
                         X=SD_ME_X, SE=SD_ME_SE)
 
 ############################################################
@@ -375,7 +375,7 @@ SD_int_mu_skew <- lm(esz_int_dist_t ~ skew_mu, data = SD_int_mod_df)
 summary(SD_int_mu_skew)
 
 SD_int_pred_list <- list(full=SD_int_full_model, cv=SD_int_model, grp=SD_int_grp_int,
-                          skew=SD_int_skew_cor, k=SD_int_k_cor)
+                          skew=SD_int_skew_cor, k=SD_int_k_cor, mu_skew=SD_int_mu_skew)
 
 #############################################################
 # CC
@@ -431,7 +431,8 @@ summary(CC_ME_grp_int)
 CC_ME_mu_skew <- lm(esz_ME_dist ~ sigma_mu_t, data = CC_ME_df)
 summary(CC_ME_mu_skew)
 
-CC_ME_pred_list <- list(full=CC_ME_mod_full, cv=CC_ME_mod, grp=CC_ME_grp_int)
+CC_ME_pred_list <- list(full=CC_ME_mod_full, cv=CC_ME_mod, grp=CC_ME_grp_int, 
+                        mu_skew=CC_ME_mu_skew)
 
 
 ###############################################################################
@@ -482,7 +483,8 @@ summary(CC_int_grp_int) # no effect of N
 CC_int_mu_skew <- lm(esz_int_dist_t ~ sigma_mu_t, data = CC_int_df)
 summary(CC_int_mu_skew)
 
-CC_int_pred_list <- list(full=CC_int_mod_full, cv=CC_int_mod, grp=CC_int_grp_int)
+CC_int_pred_list <- list(full=CC_int_mod_full, cv=CC_int_mod, grp=CC_int_grp_int,
+                         mu_skew=CC_int_mu_skew)
 ##############################################################################
 # save a list for the manuscript
 predictions_all_tasks <- list(AB_pred_list, SRT_pred_list, SD_ME_pred_list,
