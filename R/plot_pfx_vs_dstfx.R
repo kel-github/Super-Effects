@@ -122,9 +122,19 @@ summary(AB_grp_int)
 AB_skew_cor <- lm(esz_dist ~ AB.skew, data = dat[["AB"]] %>% filter(n == tstN))
 summary(AB_skew_cor)
 
+AB_skew_model <- train(esz_dist ~ AB.skew, 
+                      data = dat[['AB']] %>% filter(n == tstN),
+                      method = "lm",
+                      trControl = train)
+
 # and kurtosis
 AB_k_cor <- lm(esz_dist ~ AB.k, data = dat[["AB"]] %>% filter(n == tstN))
 summary(AB_k_cor)
+
+AB_k_model <- train(esz_dist ~ AB.k, 
+                    data = dat[['AB']] %>% filter(n == tstN),
+                    method = "lm",
+                    trControl = train)
 
 # and within participant skew
 AB_musku <- lm(esz_dist ~ skew_mu, data = dat[["AB"]] %>% filter(n == tstN))
