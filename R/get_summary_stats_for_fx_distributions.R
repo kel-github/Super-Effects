@@ -41,7 +41,7 @@ get_fx_dat4_n <- function(task, N, extfnms_fx){
 
 ############ EXTRACT DIRECTORY ##############
 get_summary_data_fx_p <- function(delete_files_after){
-  fnms_fx <- "../data/%s/EPS%s.zip"
+  fnms_fx <- "../../data/%s/EPS%s.zip"
   #extfnms_fx <- unzip(fnms_fx)
   Ns <- round(exp(seq(log(13), log(313), length.out = 20)))
   tasks <- c("AB", "SD", "SRT", "CC")
