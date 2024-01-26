@@ -49,8 +49,8 @@ classoption       : "man"
 output            : papaja::apa6_pdf
 ---
 
-Data: https://doi.org/10.48610/b63ecc2 Garner & Nolan [-@garnerQuantifyingErrorEffect2022a] <p>
-Code: https://github.com/kel-github/Super-Effects Garner, Knott & Nolan [-@garnerQuantifyingErrorEffect2022] <p>
+Data: https://doi.org/10.48610/b63ecc2 Garner & Nolan [-@garnerQuantifyingErrorEffect2023] <p>
+Code: https://github.com/kel-github/Super-Effects Garner, Knott & Nolan [-@garnerQuantifyingErrorEffect2023a] <p>
 
 \clearpage
 
@@ -178,7 +178,7 @@ The CC protocol was the same as that reported by Nydam et al [-@nydamCathodalEle
 
 ## Statistical Approach
 
-All the [data](https://doi.org/10.48610/b63ecc2) and [code](https://github.com/kel-github/Super-Effects) used for the current analyses are available online. All data were analysed using R [-@rcoreteamLanguageEnvironmentStatistical2015] and RStudio [@rstudiocitation]. The analysis of the data from each task followed two steps; first, to ascertain that we observed the typical findings for each of the paradigms, we applied the relevant conventional statistical model to the full dataset ($N$=313). Next, we implemented a simulation procedure to determine the effect sizes and p-values that would be attained over many experiments conducted at multiple levels of sample size. 
+All the [data](https://doi.org/10.48610/b63ecc2) and [code](https://github.com/kel-github/Super-Effects) used for the current analyses are available online. All data were analysed using R [-@rcoreteamLanguageEnvironmentStatistical2023] and RStudio [@rstudiocitation]. The analysis of the data from each task followed two steps; first, to ascertain that we observed the typical findings for each of the paradigms, we applied the relevant conventional statistical model to the full dataset ($N$=313). Next, we implemented a simulation procedure to determine the effect sizes and p-values that would be attained over many experiments conducted at multiple levels of sample size. 
 
 ### Simulation procedure
 \label{sec:SamplingProc}

@@ -49,7 +49,7 @@ classoption       : "man"
 output            : papaja::apa6_pdf
 ---
 
-Data: https://doi.org/10.48610/b63ecc2 Garner & Nolan [-@garnerQuantifyingErrorEffect2022a] <p>
+Data: https://doi.org/10.48610/b63ecc2 Garner & Nolan [-@garnerQuantifyingErrorEffect2023] <p>
 Code: https://github.com/kel-github/Super-Effects Garner, Knott & Nolan [-@garnerQuantifyingErrorEffect2022] <p>
 
 \clearpage
