@@ -1,0 +1,29 @@
+---
+output:
+  pdf_document:
+    keep_tex: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Appendix ii
+
+Here we show the beta coefficients from the regression analysis used to infer the extent to which data skewness and kurtosis might predict error in effect size estimates. The equations may be beneficial to those with similar data who wish to determine the extent to which their effect size estimate may be imprecise. 
+
+```{r, regs, message = FALSE, warning = FALSE, echo=FALSE}
+
+regs_out<- data.frame(effect = c("AB", "MT", "MT x mod", "SRT", "CC tt", "CC b x tt"),
+                         Intercept = c("-$0.83^{***}$", "0.04   ", "-1.47", "-$2.82^{***}$", "$0.14^{***}$", "-$2.59^{***}$"),
+                         Skewness = c("-$0.06^{***+}$", "-$0.02^{***+}$", "$0.20^{***+}$", "-$0.28^{***+}$", "0.00", "-0.03"),
+                         Kurtosis = c("$0.01^{***+}$", "$0.02^{***+}$", "$0.87^{***+}$", "$0.13^{**+}$", "-0.01", "-0.02"),
+                      IntraVariance = c("$0.04^{***}$", "-0.02", "-$24.03^{***}$", "-$0.71^{***}$", "-$1.64^{***}$", "$0.33^{***}$"),
+                      IntraSkewness = c("-$1.54^{***+}$", "$0.10^{***+}$", "1.88", "$0.24^{***+}$", "$0.11^{***}$", "0.35"),
+                      IntraKurtosis = c("-$1.87^{***}$", "-$0.04^{**}$", "-0.51", "-$0.33^{**}$", "0.02", "0.02"))
+knitr::kable(regs_out, col.names = c("Effect", "Intercept", "Skewness",
+                                     "Kurtosis", "Intra-variance", "Intra-skewness",
+                                     "Intra-kurtosis"), align = "lll", "simple", caption = "AB: attentional blink, MT: main effect of multitasking, MT x mod: multitasking x task-modalilty interaction, SRT: serial response task (novel – repeat RT), CC ME: contextual-cueing, main effect of trial type (tt: repeat vs novel), CC b x tt: contextual cueing, block x trial type), *** p < .001, **p < .008. +=significant across all tasks (for which the model was significant), after correction for multiple comparisons")
+```
+
+
